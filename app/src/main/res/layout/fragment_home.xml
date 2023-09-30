@@ -28,7 +28,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
-        android:text="SELECT A DATE"
+        android:text="@string/text_date_placeholder"
         android:textColor="@color/grey"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,18 +65,44 @@
         app:layout_constraintEnd_toStartOf="@+id/btnRight"
         app:layout_constraintTop_toTopOf="@+id/btnRight" />
 
+    <TextView
+        android:id="@+id/circleFillBackText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/text_percent"
+        android:textColor="@color/purple"
+        android:textSize="60sp"
+        app:layout_constraintBottom_toBottomOf="@+id/circleFillView"
+        app:layout_constraintEnd_toEndOf="@+id/circleFillView"
+        app:layout_constraintStart_toStartOf="@+id/circleFillView"
+        app:layout_constraintTop_toTopOf="@+id/circleFillView" />
+
     <com.streamside.periodtracker.views.CircleFillView
         android:id="@+id/circleFillView"
         android:layout_width="300dp"
         android:layout_height="300dp"
+        android:layout_marginTop="50dp"
         android:layout_weight="1"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar"
         custom:CircleFillColor="@color/purple"
-        custom:CircleFillStrokeColor="#75b0d0"
+        custom:CircleFillStrokeColor="@color/purple"
         custom:CircleFillStrokeWidth="20"
         custom:CircleFillValue="50" />
+
+    <TextView
+        android:id="@+id/circleFillForeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/text_percent"
+        android:textColor="#80242424"
+        android:textSize="60sp"
+        app:layout_constraintBottom_toBottomOf="@+id/circleFillView"
+        app:layout_constraintEnd_toEndOf="@+id/circleFillView"
+        app:layout_constraintStart_toStartOf="@+id/circleFillView"
+        app:layout_constraintTop_toTopOf="@+id/circleFillView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

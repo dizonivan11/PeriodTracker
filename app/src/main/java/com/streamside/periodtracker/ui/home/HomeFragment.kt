@@ -1,12 +1,9 @@
 package com.streamside.periodtracker.ui.home
 
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
@@ -20,7 +17,6 @@ import com.streamside.periodtracker.databinding.FragmentHomeBinding
 import com.streamside.periodtracker.views.CircleFillView
 import java.util.Calendar
 import java.util.Date
-
 
 class HomeFragment : Fragment() {
 
@@ -38,6 +34,8 @@ class HomeFragment : Fragment() {
     private lateinit var btnRight : View
     private lateinit var btnLeft : View
     private lateinit var circleFillView: CircleFillView
+    private lateinit var circleFillBackText : TextView
+    private lateinit var circleFillForeText : TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +51,10 @@ class HomeFragment : Fragment() {
         btnRight = root.findViewById(R.id.btnRight)
         btnLeft = root.findViewById(R.id.btnLeft)
         circleFillView = root.findViewById(R.id.circleFillView)
+        circleFillBackText = root.findViewById(R.id.circleFillBackText)
+        circleFillForeText = root.findViewById(R.id.circleFillForeText)
+        circleFillBackText.text = getString(R.string.text_percent, circleFillView.getValue())
+        circleFillForeText.text = getString(R.string.text_percent, circleFillView.getValue())
 
         // set current date to calendar and current month to currentMonth variable
         calendar.time = Date()
@@ -108,7 +110,7 @@ class HomeFragment : Fragment() {
         val smallCalendarChangesObserver = object : CalendarChangesObserver {
             // you can override more methods, in this example we need only this one
             override fun whenSelectionChanged(isSelected: Boolean, position: Int, date: Date) {
-                tvDate.text = "${DateUtils.getMonthName(date)}, ${DateUtils.getDayNumber(date)} "
+                tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthName(date), DateUtils.getDayNumber(date))
                 tvDay.text = DateUtils.getDayName(date)
                 super.whenSelectionChanged(isSelected, position, date)
             }

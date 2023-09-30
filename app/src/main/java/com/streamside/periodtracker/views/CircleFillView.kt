@@ -1,5 +1,6 @@
 package com.streamside.periodtracker.views
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -10,6 +11,9 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.streamside.periodtracker.R
+import kotlin.math.atan
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 class CircleFillView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
@@ -22,7 +26,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var fillColor = 0
     private var strokeColor = 0
     private var strokeWidth = 0f
-    private var value = 0
+    private var circleFillValue = 0
 
     init {
         val a = context.theme.obtainStyledAttributes(
@@ -34,8 +38,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
             fillColor = a.getColor(R.styleable.CircleFillView_CircleFillColor, Color.WHITE)
             strokeColor = a.getColor(R.styleable.CircleFillView_CircleFillStrokeColor, Color.BLACK)
             strokeWidth = a.getFloat(R.styleable.CircleFillView_CircleFillStrokeWidth, 1f)
-            value = a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0)
-            adjustValue(value)
+            setValue(a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0))
         } finally {
             a.recycle()
         }
@@ -76,38 +79,42 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun setValue(value: Int) {
-        adjustValue(value)
+        ObjectAnimator.ofInt(this, "CircleFillValue", value).apply {
+            duration = 1000
+            start()
+        }
+        setCircleFillValue(value)
+    }
+
+    private fun setCircleFillValue(value: Int) {
+        this.circleFillValue = MAX_VALUE.coerceAtMost(MIN_VALUE.coerceAtLeast(value))
         setPaths()
         invalidate()
     }
 
     fun getValue(): Int {
-        return value
-    }
-
-    private fun adjustValue(value: Int) {
-        this.value = Math.min(MAX_VALUE, Math.max(MIN_VALUE, value))
+        return circleFillValue
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         center.x = (width / 2).toFloat()
         center.y = (height / 2).toFloat()
-        radius = Math.min(width, height) / 2 - strokeWidth.toInt()
-        circleRect[center.x - radius, center.y - radius, center.x + radius] = center.y + radius
+        radius = width.coerceAtMost(height) / 2 - (strokeWidth.toInt() * 2)
+        circleRect[
+            center.x - radius + strokeWidth.toInt(),
+            center.y - radius + strokeWidth.toInt(),
+            center.x + radius - strokeWidth.toInt()] = center.y + radius - strokeWidth.toInt()
         setPaths()
     }
 
     private fun setPaths() {
-        var y = center.y + radius - (2 * radius * value / 100 - 1)
-        var x = center.x - Math.sqrt(
-            Math.pow(
-                radius.toDouble(),
-                2.0
-            ) - Math.pow((y - center.y).toDouble(), 2.0)
+        val y = center.y + radius - (2 * radius * circleFillValue / 100 - 1)
+        val x = center.x - sqrt(
+            radius.toDouble().pow(2.0) - (y - center.y).toDouble().pow(2.0)
         ).toFloat()
         val angle =
-            Math.toDegrees(Math.atan(((center.y - y) / (x - center.x)).toDouble())).toFloat()
+            Math.toDegrees(atan(((center.y - y) / (x - center.x)).toDouble())).toFloat()
         val startAngle = 180 - angle
         val sweepAngle = 2 * angle - 180
         segment.rewind()
