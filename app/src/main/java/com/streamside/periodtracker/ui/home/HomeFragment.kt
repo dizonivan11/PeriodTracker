@@ -53,8 +53,8 @@ class HomeFragment : Fragment() {
         circleFillView = root.findViewById(R.id.circleFillView)
         circleFillBackText = root.findViewById(R.id.circleFillBackText)
         circleFillForeText = root.findViewById(R.id.circleFillForeText)
-        circleFillBackText.text = getString(R.string.text_percent, circleFillView.getValue())
-        circleFillForeText.text = getString(R.string.text_percent, circleFillView.getValue())
+        circleFillBackText.text = getString(R.string.text_percent, circleFillView.getCircleFillValue())
+        circleFillForeText.text = getString(R.string.text_percent, circleFillView.getCircleFillValue())
 
         // set current date to calendar and current month to currentMonth variable
         calendar.time = Date()
