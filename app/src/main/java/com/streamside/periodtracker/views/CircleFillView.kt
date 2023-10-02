@@ -38,7 +38,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
             fillColor = a.getColor(R.styleable.CircleFillView_CircleFillColor, Color.WHITE)
             strokeColor = a.getColor(R.styleable.CircleFillView_CircleFillStrokeColor, Color.BLACK)
             strokeWidth = a.getFloat(R.styleable.CircleFillView_CircleFillStrokeWidth, 1f)
-            setValueAndAnimate(a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0))
+            setCircleFillValue(a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0), 1000)
         } finally {
             a.recycle()
         }
@@ -78,15 +78,15 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         return strokeWidth
     }
 
-    fun setValueAndAnimate(value: Int) {
+    fun setCircleFillValue(value: Int, duration: Long) {
         ObjectAnimator.ofInt(this, "CircleFillValue", value).apply {
-            duration = 1000
+            this.duration = duration
             start()
         }
         setCircleFillValue(value)
     }
 
-    private fun setCircleFillValue(value: Int) {
+    fun setCircleFillValue(value: Int) {
         this.circleFillValue = MAX_VALUE.coerceAtMost(MIN_VALUE.coerceAtLeast(value))
         setPaths()
         invalidate()

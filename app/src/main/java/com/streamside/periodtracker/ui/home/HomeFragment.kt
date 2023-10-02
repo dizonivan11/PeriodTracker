@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
@@ -15,6 +16,7 @@ import com.michalsvec.singlerowcalendar.utils.DateUtils
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.databinding.FragmentHomeBinding
 import com.streamside.periodtracker.views.CircleFillView
+import com.streamside.periodtracker.views.CounterView
 import java.util.Calendar
 import java.util.Date
 
@@ -34,8 +36,8 @@ class HomeFragment : Fragment() {
     private lateinit var btnRight : View
     private lateinit var btnLeft : View
     private lateinit var circleFillView: CircleFillView
-    private lateinit var circleFillBackText : TextView
-    private lateinit var circleFillForeText : TextView
+    private lateinit var circleFillBackText : CounterView
+    private lateinit var circleFillForeText : CounterView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,8 +55,15 @@ class HomeFragment : Fragment() {
         circleFillView = root.findViewById(R.id.circleFillView)
         circleFillBackText = root.findViewById(R.id.circleFillBackText)
         circleFillForeText = root.findViewById(R.id.circleFillForeText)
-        circleFillBackText.text = getString(R.string.text_percent, circleFillView.getCircleFillValue())
-        circleFillForeText.text = getString(R.string.text_percent, circleFillView.getCircleFillValue())
+        circleFillBackText.setCounterValue(requireActivity(), 0, circleFillView.getCircleFillValue(), 1000)
+        circleFillForeText.setCounterValue(requireActivity(), 0, circleFillView.getCircleFillValue(), 1000)
+
+        root.findViewById<Button>(R.id.btnFill).setOnClickListener {
+            val oldValue = circleFillView.getCircleFillValue()
+            circleFillView.setCircleFillValue((0..100).random(), 1000)
+            circleFillBackText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+            circleFillForeText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+        }
 
         // set current date to calendar and current month to currentMonth variable
         calendar.time = Date()

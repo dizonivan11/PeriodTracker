@@ -65,7 +65,7 @@
         app:layout_constraintEnd_toStartOf="@+id/btnRight"
         app:layout_constraintTop_toTopOf="@+id/btnRight" />
 
-    <TextView
+    <com.streamside.periodtracker.views.CounterView
         android:id="@+id/circleFillBackText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
         custom:CircleFillStrokeWidth="20"
         custom:CircleFillValue="50" />
 
-    <TextView
+    <com.streamside.periodtracker.views.CounterView
         android:id="@+id/circleFillForeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -104,5 +104,15 @@
         app:layout_constraintEnd_toEndOf="@+id/circleFillView"
         app:layout_constraintStart_toStartOf="@+id/circleFillView"
         app:layout_constraintTop_toTopOf="@+id/circleFillView" />
+
+    <Button
+        android:id="@+id/btnFill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Randomize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/circleFillView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
