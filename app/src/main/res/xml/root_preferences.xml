@@ -12,7 +12,7 @@
             android:defaultValue="false"
             android:title="Dark mode"
             app:icon="@drawable/baseline_dark_mode_24"
-            app:key="dark_mode"
+            app:key="@string/dark_mode_key"
             app:summaryOff="Dark theme disabled"
             app:summaryOn="Dark theme enabled" />
     </PreferenceCategory>
@@ -28,7 +28,7 @@
             android:defaultValue="true"
             android:title="Launch setup wizard next time"
             app:icon="@drawable/baseline_create_24"
-            app:key="first_time"
+            app:key="@string/first_time_key"
             app:summaryOff="Setup wizard will be disabled upon app launch"
             app:summaryOn="Setup wizard will run upon app launch" />
     </PreferenceCategory>
