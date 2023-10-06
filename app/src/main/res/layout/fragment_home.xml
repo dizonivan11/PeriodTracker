@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:fontFamily="sans-serif-medium"
-        android:textColor="@color/lightGrey"
+        android:textColor="?attr/colorPrimary"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/tvDate"
         app:layout_constraintStart_toEndOf="@+id/tvDate"
@@ -72,7 +72,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-medium"
         android:text="@string/text_percent"
-        android:textColor="@color/purple"
+        android:textColor="?attr/colorPrimary"
         android:textSize="60sp"
         app:layout_constraintBottom_toBottomOf="@+id/circleFillView"
         app:layout_constraintEnd_toEndOf="@+id/circleFillView"
@@ -88,8 +88,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar"
-        custom:CircleFillColor="@color/purple"
-        custom:CircleFillStrokeColor="@color/purple"
+        custom:CircleFillColor="?attr/colorPrimary"
+        custom:CircleFillStrokeColor="?attr/colorPrimary"
         custom:CircleFillStrokeWidth="20"
         custom:CircleFillValue="50" />
 
