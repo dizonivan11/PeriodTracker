@@ -34,9 +34,6 @@ class MainActivity : AppCompatActivity() {
             val viewPager : ViewPager2 = findViewById(R.id.setup_vp)
             val pagerAdapter = SetupPagerAdapter(this)
             viewPager.adapter = pagerAdapter
-
-            // Set First Time settings to false
-            // preferences.edit().putBoolean(getString(R.string.first_time_key), false).apply()
         } else {
             setContentView(binding.root)
             val navView: BottomNavigationView = binding.navView
