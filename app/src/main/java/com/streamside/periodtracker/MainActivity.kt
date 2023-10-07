@@ -1,7 +1,6 @@
 package com.streamside.periodtracker
 
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -12,10 +11,12 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.streamside.periodtracker.databinding.ActivityMainBinding
 import com.streamside.periodtracker.setup.IntroFragment
+import com.streamside.periodtracker.setup.MenstrualCycleFragment
 
-private const val SETUP_PAGES = 1
+private const val SETUP_PAGES = 2
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -59,9 +60,9 @@ class MainActivity : AppCompatActivity() {
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> IntroFragment()
+                1 -> MenstrualCycleFragment()
                 else -> IntroFragment()
             }
         }
-
     }
 }
