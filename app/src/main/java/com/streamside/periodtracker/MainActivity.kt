@@ -2,6 +2,7 @@ package com.streamside.periodtracker
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
@@ -26,8 +27,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode : Boolean = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         val firstTime : Boolean = preferences.getBoolean(getString(R.string.first_time_key), true)
 
+        if (darkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         if (firstTime) {
             // TODO: First time setup wizard viewpager
             setContentView(R.layout.activity_setup)
