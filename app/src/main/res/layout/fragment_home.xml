@@ -30,7 +30,6 @@
         android:fontFamily="sans-serif-medium"
         android:text="Select a date"
         android:textAllCaps="true"
-        android:textColor="@color/grey"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
