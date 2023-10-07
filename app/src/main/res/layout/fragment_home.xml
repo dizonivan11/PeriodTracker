@@ -5,6 +5,7 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context=".ui.home.HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -116,10 +117,45 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="Randomize"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/circleFillView" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnFill">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                tools:src="@drawable/baseline_water_drop_24"
+                app:srcCompat="@drawable/baseline_water_drop_24"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                tools:src="@drawable/baseline_water_drop_24"
+                app:srcCompat="@drawable/baseline_water_drop_24"
+                app:tint="?attr/colorPrimary"/>
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                tools:src="@drawable/baseline_water_drop_24"
+                app:srcCompat="@drawable/baseline_water_drop_24"
+                app:tint="?attr/colorPrimary"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
