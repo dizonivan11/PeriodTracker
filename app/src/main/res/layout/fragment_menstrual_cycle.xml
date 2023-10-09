@@ -1,54 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context=".setup.MenstrualCycleFragment">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="How is your menstrual cycle?"
-            android:textSize="20sp" />
+            android:padding="40dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <RadioGroup
-            android:id="@+id/radio_menstrual_cycle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="40dp">
-
-            <RadioButton
-                android:id="@+id/radio_regular"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Regular" />
+                android:text="How is your menstrual cycle?\n(Varies by no more than 7 days)"
+                android:textAlignment="center"
+                android:textSize="20sp" />
 
-            <RadioButton
-                android:id="@+id/radio_irregular"
+            <RadioGroup
+                android:id="@+id/radio_menstrual_cycle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="40dp">
+
+                <RadioButton
+                    android:id="@+id/radio_regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Regular" />
+
+                <RadioButton
+                    android:id="@+id/radio_irregular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Irregular" />
+
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/submit_menstrual_cycle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Irregular" />
+                android:text="@string/button_next"
+                android:layout_marginTop="40dp" />
 
-        </RadioGroup>
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/submit_menstrual_cycle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_next"
-            android:layout_marginTop="40dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
