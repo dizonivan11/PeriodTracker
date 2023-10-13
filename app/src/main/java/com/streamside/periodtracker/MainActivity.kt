@@ -17,9 +17,10 @@ import com.streamside.periodtracker.databinding.ActivityMainBinding
 import com.streamside.periodtracker.setup.DiscomfortsFragment
 import com.streamside.periodtracker.setup.IntroFragment
 import com.streamside.periodtracker.setup.MenstrualCycleFragment
+import com.streamside.periodtracker.setup.PeriodDateFragment
 
 lateinit var SETUP_PAGER : ViewPager2
-private const val SETUP_PAGES = 3
+private const val SETUP_PAGES = 4
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -65,8 +66,9 @@ class MainActivity : AppCompatActivity() {
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> IntroFragment()
-                1 -> MenstrualCycleFragment()
-                2 -> DiscomfortsFragment()
+                1 -> PeriodDateFragment()
+                2 -> MenstrualCycleFragment()
+                3 -> DiscomfortsFragment()
                 else -> IntroFragment()
             }
         }
