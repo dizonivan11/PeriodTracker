@@ -26,8 +26,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="true"
-            android:title="Launch setup wizard next time"
-            app:icon="@drawable/baseline_create_24"
+            android:title="Reset data"
+            app:icon="@drawable/baseline_restart_alt_24"
             app:key="@string/first_time_key"
             app:summaryOff="Setup wizard will be disabled upon app launch"
             app:summaryOn="Setup wizard will run upon app launch" />
