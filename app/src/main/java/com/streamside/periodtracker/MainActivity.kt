@@ -14,10 +14,12 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.streamside.periodtracker.databinding.ActivityMainBinding
+import com.streamside.periodtracker.setup.DiscomfortsFragment
 import com.streamside.periodtracker.setup.IntroFragment
 import com.streamside.periodtracker.setup.MenstrualCycleFragment
 
-private const val SETUP_PAGES = 2
+lateinit var SETUP_PAGER : ViewPager2
+private const val SETUP_PAGES = 3
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -35,9 +37,9 @@ class MainActivity : AppCompatActivity() {
             // TODO: First time setup wizard viewpager
             setContentView(R.layout.activity_setup)
 
-            val viewPager : ViewPager2 = findViewById(R.id.setup_vp)
+            SETUP_PAGER = findViewById(R.id.setup_vp)
             val pagerAdapter = SetupPagerAdapter(this)
-            viewPager.adapter = pagerAdapter
+            SETUP_PAGER.adapter = pagerAdapter
         } else {
             setContentView(binding.root)
             val navView: BottomNavigationView = binding.navView
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
             return when (position) {
                 0 -> IntroFragment()
                 1 -> MenstrualCycleFragment()
+                2 -> DiscomfortsFragment()
                 else -> IntroFragment()
             }
         }

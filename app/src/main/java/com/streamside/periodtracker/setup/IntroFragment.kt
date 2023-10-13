@@ -5,23 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.ViewPager2
 import com.streamside.periodtracker.R
 
-
-class IntroFragment : Fragment() {
+class IntroFragment : SetupFragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_intro, container, false)
 
         view.findViewById<Button>(R.id.submit_intro).setOnClickListener {
-            requireActivity().findViewById<ViewPager2>(R.id.setup_vp).setCurrentItem(1, true)
+            nextPage()
         }
 
         return view
