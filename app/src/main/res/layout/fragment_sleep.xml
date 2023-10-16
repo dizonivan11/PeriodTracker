@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".setup.DiscomfortsFragment">
+    tools:context=".setup.SleepFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,62 +25,61 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Any discomforts you are feeling these past few days?"
+                android:text="How's your sleep?"
                 android:textAlignment="center"
                 android:layout_marginBottom="40dp"
                 android:textSize="20sp" />
 
-            <LinearLayout
+            <RadioGroup
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_painful_menstrual_cramps"
+                <RadioButton
+                    android:id="@+id/radio_sleep_well"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Painful menstrual cramps" />
+                    android:text="I sleep well" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_pms_symptoms"
+                <RadioButton
+                    android:id="@+id/radio_sleep_difficulty_falling_sleep"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="PMS symptoms" />
+                    android:text="Difficulty falling sleep" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_unusual_discharge"
+                <RadioButton
+                    android:id="@+id/radio_sleep_waking_up_tired"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Unusual discharge" />
+                    android:text="Waking up tired" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_heavy_menstrual_flow"
+                <RadioButton
+                    android:id="@+id/radio_sleep_waking_up_during_night"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Heavy menstrual flow" />
+                    android:text="Waking up during night" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_mood_swings"
+                <RadioButton
+                    android:id="@+id/radio_sleep_lack_of_sleep_schedule"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mood swings" />
+                    android:text="Lack of sleep schedule" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_other"
+                <RadioButton
+                    android:id="@+id/radio_sleep_insomnia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Insomnia" />
+
+                <RadioButton
+                    android:id="@+id/radio_sleep_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other" />
 
-                <CheckBox
-                    android:id="@+id/check_discomforts_none"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No, nothing bothers me" />
-
-            </LinearLayout>
+            </RadioGroup>
 
             <Button
-                android:id="@+id/submit_discomforts"
+                android:id="@+id/submit_sleep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/button_next"

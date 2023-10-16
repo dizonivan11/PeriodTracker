@@ -18,9 +18,10 @@ import com.streamside.periodtracker.setup.DiscomfortsFragment
 import com.streamside.periodtracker.setup.IntroFragment
 import com.streamside.periodtracker.setup.MenstrualCycleFragment
 import com.streamside.periodtracker.setup.PeriodDateFragment
+import com.streamside.periodtracker.setup.SleepFragment
 
 lateinit var SETUP_PAGER : ViewPager2
-private const val SETUP_PAGES = 4
+private const val SETUP_PAGES = 5
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                 1 -> PeriodDateFragment()
                 2 -> MenstrualCycleFragment()
                 3 -> DiscomfortsFragment()
+                4 -> SleepFragment()
                 else -> IntroFragment()
             }
         }
