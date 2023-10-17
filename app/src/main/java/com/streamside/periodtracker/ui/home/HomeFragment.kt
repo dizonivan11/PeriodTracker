@@ -28,8 +28,9 @@ class HomeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val calendar = Calendar.getInstance()
-    private var currentMonth = 0
+    private val currentCalendar = Calendar.getInstance().apply { time = Date() }
+    private val selectedCalendar = Calendar.getInstance()
+    private var selectedMonth = 0
     private lateinit var smallCalendar : SingleRowCalendar
     private lateinit var tvDate : TextView
     private lateinit var tvDay : TextView
@@ -66,8 +67,8 @@ class HomeFragment : Fragment() {
         }
 
         // set current date to calendar and current month to currentMonth variable
-        calendar.time = Date()
-        currentMonth = calendar[Calendar.MONTH]
+        selectedCalendar.time = Date()
+        selectedMonth = selectedCalendar[Calendar.MONTH]
 
         // calendar view manager is responsible for our displaying logic
         val smallCalendarViewManager = object : CalendarViewManager {
@@ -149,14 +150,17 @@ class HomeFragment : Fragment() {
             setDates(getFutureDatesOfCurrentMonth())
             init()
         }
-        singleRowCalendar.select(calendar[Calendar.DAY_OF_MONTH] - 1)
+        singleRowCalendar.select(currentCalendar.get(Calendar.DAY_OF_MONTH) - 1)
+        singleRowCalendar.scrollToPosition(currentCalendar.get(Calendar.DAY_OF_MONTH) - 3)
 
         btnRight.setOnClickListener {
             singleRowCalendar.setDates(getDatesOfNextMonth())
+            singleRowCalendar.init()
         }
 
         btnLeft.setOnClickListener {
             singleRowCalendar.setDates(getDatesOfPreviousMonth())
+            singleRowCalendar.init()
         }
 
         return root
@@ -168,43 +172,42 @@ class HomeFragment : Fragment() {
     }
 
     private fun getDatesOfNextMonth(): List<Date> {
-        currentMonth++ // + because we want next month
-        if (currentMonth == 12) {
+        selectedMonth++ // + because we want next month
+        if (selectedMonth == 12) {
             // we will switch to january of next year, when we reach last month of year
-            calendar.set(Calendar.YEAR, calendar[Calendar.YEAR] + 1)
-            currentMonth = 0 // 0 == january
+            selectedCalendar.set(Calendar.YEAR, selectedCalendar[Calendar.YEAR] + 1)
+            selectedMonth = 0 // 0 == january
         }
         return getDates(mutableListOf())
     }
 
     private fun getDatesOfPreviousMonth(): List<Date> {
-        currentMonth-- // - because we want previous month
-        if (currentMonth == -1) {
+        selectedMonth-- // - because we want previous month
+        if (selectedMonth == -1) {
             // we will switch to december of previous year, when we reach first month of year
-            calendar.set(Calendar.YEAR, calendar[Calendar.YEAR] - 1)
-            currentMonth = 11 // 11 == december
+            selectedCalendar.set(Calendar.YEAR, selectedCalendar[Calendar.YEAR] - 1)
+            selectedMonth = 11 // 11 == december
         }
         return getDates(mutableListOf())
     }
 
     private fun getFutureDatesOfCurrentMonth(): List<Date> {
         // get all next dates of current month
-        currentMonth = calendar[Calendar.MONTH]
+        selectedMonth = selectedCalendar[Calendar.MONTH]
         return getDates(mutableListOf())
     }
 
-
     private fun getDates(list: MutableList<Date>): List<Date> {
         // load dates of whole month
-        calendar.set(Calendar.MONTH, currentMonth)
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        list.add(calendar.time)
-        while (currentMonth == calendar[Calendar.MONTH]) {
-            calendar.add(Calendar.DATE, +1)
-            if (calendar[Calendar.MONTH] == currentMonth)
-                list.add(calendar.time)
+        selectedCalendar.set(Calendar.MONTH, selectedMonth)
+        selectedCalendar.set(Calendar.DAY_OF_MONTH, 1)
+        list.add(selectedCalendar.time)
+        while (selectedMonth == selectedCalendar[Calendar.MONTH]) {
+            selectedCalendar.add(Calendar.DATE, +1)
+            if (selectedCalendar[Calendar.MONTH] == selectedMonth)
+                list.add(selectedCalendar.time)
         }
-        calendar.add(Calendar.DATE, -1)
+        selectedCalendar.add(Calendar.DATE, -1)
         return list
     }
 }
