@@ -14,14 +14,20 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.streamside.periodtracker.databinding.ActivityMainBinding
+import com.streamside.periodtracker.setup.DischargeFragment
 import com.streamside.periodtracker.setup.DiscomfortsFragment
+import com.streamside.periodtracker.setup.FitnessFragment
 import com.streamside.periodtracker.setup.IntroFragment
 import com.streamside.periodtracker.setup.MenstrualCycleFragment
+import com.streamside.periodtracker.setup.MentalHealthFragment
 import com.streamside.periodtracker.setup.PeriodDateFragment
+import com.streamside.periodtracker.setup.RHDFragment
+import com.streamside.periodtracker.setup.SexLifeFragment
+import com.streamside.periodtracker.setup.SkinFragment
 import com.streamside.periodtracker.setup.SleepFragment
 
 lateinit var SETUP_PAGER : ViewPager2
-private const val SETUP_PAGES = 5
+private const val SETUP_PAGES = 11
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -66,11 +72,19 @@ class MainActivity : AppCompatActivity() {
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
+                // Clean setup starts here
                 0 -> IntroFragment()
                 1 -> PeriodDateFragment()
                 2 -> MenstrualCycleFragment()
-                3 -> DiscomfortsFragment()
-                4 -> SleepFragment()
+                // Monthly setup starts here
+                3 -> DischargeFragment()
+                4 -> DiscomfortsFragment()
+                5 -> SleepFragment()
+                6 -> RHDFragment()
+                7 -> MentalHealthFragment()
+                8 -> SexLifeFragment()
+                9 -> FitnessFragment()
+                10 -> SkinFragment()
                 else -> IntroFragment()
             }
         }
