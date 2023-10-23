@@ -33,6 +33,15 @@
             app:persistent="true"
             app:summaryOff="Setup wizard will be disabled upon app launch"
             app:summaryOn="Setup wizard will run upon app launch" />
+
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="Log period"
+            app:isPreferenceVisible="false"
+            app:key="@string/log_period_key"
+            app:persistent="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

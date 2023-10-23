@@ -21,6 +21,9 @@ open class SetupFragment : Fragment() {
         // Set First Time settings to false
         preferences.edit().putBoolean(getString(R.string.first_time_key), false).apply()
 
+        // Set Log Period settings to false
+        preferences.edit().putBoolean(getString(R.string.log_period_key), false).apply()
+
         // Restart activity
         fa.recreate()
     }

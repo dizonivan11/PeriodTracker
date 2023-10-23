@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
 import com.michalsvec.singlerowcalendar.calendar.CalendarViewManager
 import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
@@ -20,8 +21,9 @@ import com.streamside.periodtracker.views.CounterView
 import java.util.Calendar
 import java.util.Date
 
-class HomeFragment : Fragment() {
+lateinit var SIMULATED_DATE : Date
 
+class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
 
     // This property is only valid between onCreateView and
@@ -47,6 +49,8 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        val preferences = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+        val prefEditor = preferences.edit()
 
         smallCalendar = root.findViewById(R.id.main_single_row_calendar)
         tvDate = root.findViewById(R.id.tvDate)
@@ -59,11 +63,17 @@ class HomeFragment : Fragment() {
         circleFillBackText.setCounterValue(requireActivity(), 0, circleFillView.getCircleFillValue(), 1000)
         circleFillForeText.setCounterValue(requireActivity(), 0, circleFillView.getCircleFillValue(), 1000)
 
-        root.findViewById<Button>(R.id.btnFill).setOnClickListener {
-            val oldValue = circleFillView.getCircleFillValue()
-            circleFillView.setCircleFillValue((0..100).random(), 1000)
-            circleFillBackText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
-            circleFillForeText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+        root.findViewById<Button>(R.id.btnLog).setOnClickListener {
+            // val oldValue = circleFillView.getCircleFillValue()
+            // circleFillView.setCircleFillValue((0..100).random(), 1000)
+            // circleFillBackText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+            // circleFillForeText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+
+            // Log period, collect cycle data and initialize new cycle setup
+            prefEditor.putBoolean(getString(R.string.log_period_key), true)
+            prefEditor.apply()
+
+            requireActivity().recreate()
         }
 
         // set current date to calendar and current month to currentMonth variable
@@ -150,17 +160,17 @@ class HomeFragment : Fragment() {
             setDates(getFutureDatesOfCurrentMonth())
             init()
         }
+        var scrollPos = currentCalendar.get(Calendar.DAY_OF_MONTH) - 3
+        if (scrollPos < 0) scrollPos = 0
         singleRowCalendar.select(currentCalendar.get(Calendar.DAY_OF_MONTH) - 1)
-        singleRowCalendar.scrollToPosition(currentCalendar.get(Calendar.DAY_OF_MONTH) - 3)
+        singleRowCalendar.scrollToPosition(scrollPos)
 
         btnRight.setOnClickListener {
             singleRowCalendar.setDates(getDatesOfNextMonth())
-            singleRowCalendar.init()
         }
 
         btnLeft.setOnClickListener {
             singleRowCalendar.setDates(getDatesOfPreviousMonth())
-            singleRowCalendar.init()
         }
 
         return root

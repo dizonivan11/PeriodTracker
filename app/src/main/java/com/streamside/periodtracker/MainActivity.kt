@@ -39,15 +39,20 @@ class MainActivity : AppCompatActivity() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         val darkMode : Boolean = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         val firstTime : Boolean = preferences.getBoolean(getString(R.string.first_time_key), true)
+        val logPeriod : Boolean = preferences.getBoolean(getString(R.string.log_period_key), false)
 
         if (darkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        if (firstTime) {
+        if (firstTime || logPeriod) {
             // TODO: First time setup wizard viewpager
             setContentView(R.layout.activity_setup)
 
             SETUP_PAGER = findViewById(R.id.setup_vp)
             val pagerAdapter = SetupPagerAdapter(this)
             SETUP_PAGER.adapter = pagerAdapter
+            SETUP_PAGER.isUserInputEnabled = false
+
+            if (logPeriod)
+                SETUP_PAGER.setCurrentItem(3, true)
         } else {
             setContentView(binding.root)
             val navView: BottomNavigationView = binding.navView
