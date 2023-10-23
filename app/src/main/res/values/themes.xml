@@ -12,6 +12,11 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
+        <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/grey</item>
+    </style>
+
+    <style name="PreferenceTheme" parent="@style/PreferenceThemeOverlay.v14.Material">
+        <item name="android:tint">?attr/colorSecondary</item>
     </style>
 </resources>
