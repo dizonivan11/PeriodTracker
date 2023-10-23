@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="40dp"
             android:gravity="center"
@@ -79,12 +79,28 @@
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/submit_skin"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/button_next"
-                android:layout_marginTop="40dp" />
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="40dp">
+
+                <Button
+                    android:id="@+id/back_skin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_back" />
+
+                <Button
+                    android:id="@+id/submit_skin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/button_next" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 

@@ -16,6 +16,10 @@ class RHDFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_rhd, container, false)
 
+        view.findViewById<Button>(R.id.back_rhd).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_rhd).setOnClickListener {
             nextPage()
         }

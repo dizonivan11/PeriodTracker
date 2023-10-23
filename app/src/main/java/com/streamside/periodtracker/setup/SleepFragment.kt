@@ -16,6 +16,10 @@ class SleepFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_sleep, container, false)
 
+        view.findViewById<Button>(R.id.back_sleep).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_sleep).setOnClickListener {
             nextPage()
         }

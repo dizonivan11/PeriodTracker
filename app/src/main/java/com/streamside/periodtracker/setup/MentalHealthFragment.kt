@@ -16,6 +16,10 @@ class MentalHealthFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_mental_health, container, false)
 
+        view.findViewById<Button>(R.id.back_mental_health).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_mental_health).setOnClickListener {
             nextPage()
         }

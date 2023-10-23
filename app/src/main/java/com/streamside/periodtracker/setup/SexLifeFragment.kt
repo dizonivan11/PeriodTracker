@@ -16,6 +16,10 @@ class SexLifeFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_sex_life, container, false)
 
+        view.findViewById<Button>(R.id.back_sex_life).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_sex_life).setOnClickListener {
             nextPage()
         }

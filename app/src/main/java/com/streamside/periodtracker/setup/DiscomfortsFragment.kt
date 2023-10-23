@@ -16,6 +16,10 @@ class DiscomfortsFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_discomforts, container, false)
 
+        view.findViewById<Button>(R.id.back_discomforts).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_discomforts).setOnClickListener {
             nextPage()
         }

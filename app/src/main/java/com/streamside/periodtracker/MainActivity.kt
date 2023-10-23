@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             SETUP_PAGER.adapter = pagerAdapter
             SETUP_PAGER.isUserInputEnabled = false
 
+            // Set 4th page as starting page for logging period
             if (logPeriod)
                 SETUP_PAGER.setCurrentItem(3, true)
         } else {
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
                 0 -> IntroFragment()
                 1 -> PeriodDateFragment()
                 2 -> MenstrualCycleFragment()
-                // Monthly setup starts here
+                // Log period starts here
                 3 -> DischargeFragment()
                 4 -> DiscomfortsFragment()
                 5 -> SleepFragment()

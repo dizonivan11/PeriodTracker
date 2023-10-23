@@ -59,6 +59,7 @@
             app:persistent="true"
             app:summaryOff="Currently using real world date and time"
             app:summaryOn="Currently simulating date and time" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

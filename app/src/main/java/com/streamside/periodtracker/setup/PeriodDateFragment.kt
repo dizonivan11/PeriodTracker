@@ -16,6 +16,10 @@ class PeriodDateFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_period_date, container, false)
 
+        view.findViewById<Button>(R.id.back_period_date).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_period_date).setOnClickListener {
             nextPage()
         }

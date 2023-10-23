@@ -16,6 +16,10 @@ class FitnessFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_fitness, container, false)
 
+        view.findViewById<Button>(R.id.back_fitness).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_fitness).setOnClickListener {
             nextPage()
         }

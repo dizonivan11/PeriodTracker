@@ -16,6 +16,10 @@ class SkinFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_skin, container, false)
 
+        view.findViewById<Button>(R.id.back_skin).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_skin).setOnClickListener {
             finalizeSetup(requireActivity())
         }

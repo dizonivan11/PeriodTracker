@@ -16,6 +16,10 @@ class MenstrualCycleFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_menstrual_cycle, container, false)
 
+        view.findViewById<Button>(R.id.back_menstrual_cycle).setOnClickListener {
+            previousPage()
+        }
+
         view.findViewById<Button>(R.id.submit_menstrual_cycle).setOnClickListener {
             nextPage()
         }
