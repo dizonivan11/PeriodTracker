@@ -1,5 +1,7 @@
 package com.streamside.periodtracker.ui.home
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +53,7 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
         val preferences = PreferenceManager.getDefaultSharedPreferences(requireActivity())
         val prefEditor = preferences.edit()
+        val simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
 
         smallCalendar = root.findViewById(R.id.main_single_row_calendar)
         tvDate = root.findViewById(R.id.tvDate)
@@ -70,10 +73,19 @@ class HomeFragment : Fragment() {
             // circleFillForeText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
 
             // Log period, collect cycle data and initialize new cycle setup
-            prefEditor.putBoolean(getString(R.string.log_period_key), true)
-            prefEditor.apply()
-
-            requireActivity().recreate()
+            val builder : AlertDialog.Builder = AlertDialog.Builder(requireActivity())
+            builder.setCancelable(true)
+            builder.setTitle("Continue Log Period")
+            builder.setMessage("This will end this month's cycle and collect cycle data for you")
+            builder.setPositiveButton("Confirm") { _: DialogInterface, _: Int ->
+                run {
+                    prefEditor.putBoolean(getString(R.string.log_period_key), true)
+                    prefEditor.apply()
+                    requireActivity().recreate()
+                }
+            }
+            val dialog : AlertDialog = builder.create()
+            dialog.show()
         }
 
         // set current date to calendar and current month to currentMonth variable
@@ -108,9 +120,6 @@ class HomeFragment : Fragment() {
                         Calendar.FRIDAY -> R.layout.third_special_calendar_item
                         else -> R.layout.calendar_item
                     }
-
-                // NOTE: if we don't want to do it this way, we can simply change color of background
-                // in bindDataToCalendarView method
             }
 
             override fun bindDataToCalendarView(
@@ -131,7 +140,7 @@ class HomeFragment : Fragment() {
             // you can override more methods, in this example we need only this one
             override fun whenSelectionChanged(isSelected: Boolean, position: Int, date: Date) {
                 tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthName(date), DateUtils.getDayNumber(date))
-                tvDay.text = DateUtils.getDayName(date)
+                tvDay.text = DateUtils.getDay3LettersName(date)
                 super.whenSelectionChanged(isSelected, position, date)
             }
         }
@@ -139,15 +148,6 @@ class HomeFragment : Fragment() {
         // selection manager is responsible for managing selection
         val smallSelectionManager = object : CalendarSelectionManager {
             override fun canBeItemSelected(position: Int, date: Date): Boolean {
-                // set date to calendar according to position
-                // val cal = Calendar.getInstance()
-                // cal.time = date
-                // in this example sunday and saturday can't be selected, other item can be selected
-                // return when (cal[Calendar.DAY_OF_WEEK]) {
-                //     Calendar.SATURDAY -> false
-                //     Calendar.SUNDAY -> false
-                //     else -> true
-                // }
                 return true
             }
         }
@@ -165,12 +165,13 @@ class HomeFragment : Fragment() {
         singleRowCalendar.select(currentCalendar.get(Calendar.DAY_OF_MONTH) - 1)
         singleRowCalendar.scrollToPosition(scrollPos)
 
-        btnRight.setOnClickListener {
-            singleRowCalendar.setDates(getDatesOfNextMonth())
-        }
-
-        btnLeft.setOnClickListener {
-            singleRowCalendar.setDates(getDatesOfPreviousMonth())
+        if (simulated) {
+            root.findViewById<Button>(R.id.btnSimulatedDate).visibility = View.VISIBLE
+            btnRight.visibility = View.GONE
+            btnLeft.visibility = View.GONE
+        } else {
+            btnRight.setOnClickListener { singleRowCalendar.setDates(getDatesOfNextMonth()) }
+            btnLeft.setOnClickListener { singleRowCalendar.setDates(getDatesOfPreviousMonth()) }
         }
 
         return root

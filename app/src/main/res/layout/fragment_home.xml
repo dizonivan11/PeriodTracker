@@ -50,6 +50,17 @@
             app:layout_constraintTop_toTopOf="@+id/tvDate" />
 
         <Button
+            android:id="@+id/btnSimulatedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="Select Date"
+            app:layout_constraintBottom_toBottomOf="@+id/tvDate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvDate"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/btnRight"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -121,7 +132,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My cycles"
+            android:text="My Cycles"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="16dp"
