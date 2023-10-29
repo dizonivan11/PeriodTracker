@@ -27,6 +27,7 @@ import com.streamside.periodtracker.setup.SkinFragment
 import com.streamside.periodtracker.setup.SleepFragment
 
 lateinit var SETUP_PAGER : ViewPager2
+var LOG_PERIOD : Boolean = false
 private const val SETUP_PAGES = 11
 
 class MainActivity : AppCompatActivity() {
@@ -39,21 +40,16 @@ class MainActivity : AppCompatActivity() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         val darkMode : Boolean = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         val firstTime : Boolean = preferences.getBoolean(getString(R.string.first_time_key), true)
-        val logPeriod : Boolean = preferences.getBoolean(getString(R.string.log_period_key), false)
+        LOG_PERIOD = preferences.getBoolean(getString(R.string.log_period_key), false)
 
         if (darkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        if (firstTime || logPeriod) {
-            // TODO: First time setup wizard viewpager
+        if (firstTime || LOG_PERIOD) {
             setContentView(R.layout.activity_setup)
 
             SETUP_PAGER = findViewById(R.id.setup_vp)
             val pagerAdapter = SetupPagerAdapter(this)
             SETUP_PAGER.adapter = pagerAdapter
             SETUP_PAGER.isUserInputEnabled = false
-
-            // Set 4th page as starting page for logging period
-            if (logPeriod)
-                SETUP_PAGER.setCurrentItem(3, true)
         } else {
             setContentView(binding.root)
             val navView: BottomNavigationView = binding.navView
@@ -73,25 +69,43 @@ class MainActivity : AppCompatActivity() {
 
     inner class SetupPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
         override fun getItemCount(): Int {
-            return SETUP_PAGES
+            return if (LOG_PERIOD)
+                SETUP_PAGES - 3
+            else
+                SETUP_PAGES
         }
 
         override fun createFragment(position: Int): Fragment {
-            return when (position) {
-                // Clean setup starts here
-                0 -> IntroFragment()
-                1 -> PeriodDateFragment()
-                2 -> MenstrualCycleFragment()
-                // Log period starts here
-                3 -> DischargeFragment()
-                4 -> DiscomfortsFragment()
-                5 -> SleepFragment()
-                6 -> RHDFragment()
-                7 -> MentalHealthFragment()
-                8 -> SexLifeFragment()
-                9 -> FitnessFragment()
-                10 -> SkinFragment()
-                else -> IntroFragment()
+            if (LOG_PERIOD) {
+                return when (position) {
+                    // Log period starts here
+                    0 -> DischargeFragment()
+                    1 -> DiscomfortsFragment()
+                    2 -> SleepFragment()
+                    3 -> RHDFragment()
+                    4 -> MentalHealthFragment()
+                    5 -> SexLifeFragment()
+                    6 -> FitnessFragment()
+                    7 -> SkinFragment()
+                    else -> IntroFragment()
+                }
+            } else {
+                return when (position) {
+                    // Clean setup starts here
+                    0 -> IntroFragment()
+                    1 -> PeriodDateFragment()
+                    2 -> MenstrualCycleFragment()
+                    // Log period starts here
+                    3 -> DischargeFragment()
+                    4 -> DiscomfortsFragment()
+                    5 -> SleepFragment()
+                    6 -> RHDFragment()
+                    7 -> MentalHealthFragment()
+                    8 -> SexLifeFragment()
+                    9 -> FitnessFragment()
+                    10 -> SkinFragment()
+                    else -> IntroFragment()
+                }
             }
         }
     }
