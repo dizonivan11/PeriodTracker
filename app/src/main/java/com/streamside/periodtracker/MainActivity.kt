@@ -27,6 +27,8 @@ import com.streamside.periodtracker.setup.SkinFragment
 import com.streamside.periodtracker.setup.SleepFragment
 
 lateinit var SETUP_PAGER : ViewPager2
+var DARK_MODE : Boolean = false
+var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
 private const val SETUP_PAGES = 11
 
@@ -38,12 +40,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val darkMode : Boolean = preferences.getBoolean(getString(R.string.dark_mode_key), false)
-        val firstTime : Boolean = preferences.getBoolean(getString(R.string.first_time_key), true)
+        DARK_MODE = preferences.getBoolean(getString(R.string.dark_mode_key), false)
+        FIRST_TIME = preferences.getBoolean(getString(R.string.first_time_key), true)
         LOG_PERIOD = preferences.getBoolean(getString(R.string.log_period_key), false)
 
-        if (darkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        if (firstTime || LOG_PERIOD) {
+        if (DARK_MODE) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        if (FIRST_TIME || LOG_PERIOD) {
             setContentView(R.layout.activity_setup)
 
             SETUP_PAGER = findViewById(R.id.setup_vp)
