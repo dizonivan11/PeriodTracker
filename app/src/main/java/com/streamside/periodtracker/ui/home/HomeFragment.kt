@@ -2,6 +2,7 @@ package com.streamside.periodtracker.ui.home
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.SharedPreferences.Editor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
@@ -48,6 +50,7 @@ class HomeFragment : Fragment() {
     private lateinit var circleFillView: CircleFillView
     private lateinit var circleFillBackText : CounterView
     private lateinit var circleFillForeText : CounterView
+    private lateinit var btnLog : Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,42 +77,33 @@ class HomeFragment : Fragment() {
             circleFillForeText = root.findViewById(R.id.circleFillForeText)
             circleFillBackText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+            btnLog = root.findViewById(R.id.btnLog)
 
-            root.findViewById<Button>(R.id.btnLog).setOnClickListener {
-                // Log period, collect cycle data and initialize new cycle setup
-                val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
-                builder.setCancelable(true)
-                builder.setTitle("Confirm Log Period")
-                builder.setMessage("This will end the current cycle!")
-                builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
-                    run {
-                        if (smallCalendar.getSelectedDates().isNotEmpty()) {
-                            val today = Calendar.getInstance().apply { smallCalendar.getSelectedDates()[0] }
+            periodViewModel.all.observe(viewLifecycleOwner) { periods ->
+                if (currentPeriod.lastPeriodId > -1) {
+                    // Get last period
+                    for (i in 0..periods.size) {
+                        if (periods[i].id == currentPeriod.lastPeriodId) {
+                            val lastPeriod = periods[i]
 
-                            // Prepare new period for next cycle
-                            periodViewModel.init(
-                                currentPeriod.id,
-                                today.get(Calendar.YEAR),
-                                today.get(Calendar.MONTH),
-                                today.get(Calendar.DAY_OF_MONTH)
-                            ).observe(viewLifecycleOwner) { newPeriodId ->
+                            // Check if the last cycle period is on going
+                            if (lastPeriod.periodEndYear == 0 &&
+                                lastPeriod.periodEndMonth == 0 &&
+                                lastPeriod.periodEndDay == 0) {
 
-                                // Update foreign keys of the current period to finalize it
-                                currentPeriod.nextPeriodId = newPeriodId
-                                periodViewModel.update(currentPeriod)
-
-                                // Set log period flag to true then restart app
-                                prefEditor.putBoolean(getString(R.string.log_period_key), true)
-                                prefEditor.apply()
-                                fa.recreate()
+                                // Make the button for ending period and starting setup
+                                addEndEvent(fa, prefEditor)
+                            } else {
+                                // Make the button for logging period
+                                addLogEvent(fa)
                             }
-                        } else {
-                            Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
+                            break
                         }
                     }
+                } else {
+                    // Make the button for logging period
+                    addLogEvent(fa)
                 }
-                val dialog : AlertDialog = builder.create()
-                dialog.show()
             }
 
             // set current date to calendar and current month to currentMonth variable
@@ -121,7 +115,6 @@ class HomeFragment : Fragment() {
             btnRight.setOnClickListener {
                 // initSmallCalendar(root, getDatesOfNextMonth())
                 initSmallCalendar(root, getDatesOfNextMonth(), false)
-
             }
             btnLeft.setOnClickListener {
                 // initSmallCalendar(root, getDatesOfPreviousMonth())
@@ -130,6 +123,85 @@ class HomeFragment : Fragment() {
         }
 
         return root
+    }
+
+    private fun addLogEvent(fa: FragmentActivity) {
+        btnLog.setOnClickListener {
+            // Log period and initialize new cycle while tracking period length
+            val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
+            builder.setCancelable(true)
+            builder.setTitle("Confirm Log Cycle")
+            builder.setMessage("This will start your period phase")
+            builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
+                run {
+                    if (smallCalendar.getSelectedDates().isNotEmpty()) {
+                        val today = Calendar.getInstance().apply { smallCalendar.getSelectedDates()[0] }
+
+                        // Prepare new cycle
+                        periodViewModel.init(
+                            currentPeriod.id,
+                            today.get(Calendar.YEAR),
+                            today.get(Calendar.MONTH),
+                            today.get(Calendar.DAY_OF_MONTH)
+                        ).observe(viewLifecycleOwner) { newPeriodId ->
+
+                            // Update foreign keys of the current cycle to finalize it
+                            currentPeriod.nextPeriodId = newPeriodId
+                            periodViewModel.update(currentPeriod)
+
+                            // Refresh app
+                            fa.recreate()
+                        }
+                    } else {
+                        Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            val dialog : AlertDialog = builder.create()
+            dialog.show()
+        }
+    }
+
+    private fun addEndEvent(fa: FragmentActivity, prefEditor: Editor) {
+        // Update button text to period phase
+        btnLog.text = "End Period"
+
+        btnLog.setOnClickListener {
+            // End period, collect cycle data and initialize new cycle setup
+            val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
+            builder.setCancelable(true)
+            builder.setTitle("Confirm End Cycle")
+            builder.setMessage("This will end your period phase")
+            builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
+                run {
+                    if (smallCalendar.getSelectedDates().isNotEmpty()) {
+                        periodViewModel.all.observe(viewLifecycleOwner) { periods ->
+                            // Update last cycle's period end date
+                            for (i in 0..periods.size) {
+                                if (periods[i].id == currentPeriod.lastPeriodId) {
+                                    val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
+                                    val lastPeriod = periods[i]
+                                    lastPeriod.periodEndYear = today.get(Calendar.YEAR)
+                                    lastPeriod.periodEndMonth = today.get(Calendar.MONTH)
+                                    lastPeriod.periodEndDay = today.get(Calendar.DAY_OF_MONTH)
+                                    periodViewModel.update(lastPeriod)
+                                    break
+                                }
+                            }
+
+                            // Set log period flag to true then restart app
+                            prefEditor.putBoolean(getString(R.string.log_period_key), true)
+                            prefEditor.apply()
+                            fa.recreate()
+                        }
+                    } else {
+                        Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            val dialog : AlertDialog = builder.create()
+            dialog.show()
+        }
     }
 
     private fun initSmallCalendar(root: View, dates: List<Date>, firstTime: Boolean = true) {
@@ -215,10 +287,6 @@ class HomeFragment : Fragment() {
             if (simulated) smallCalendar.select(0)
             smallCalendar.scrollToPosition(0)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
     }
 
     private fun updateCircleFill(today: Calendar) {

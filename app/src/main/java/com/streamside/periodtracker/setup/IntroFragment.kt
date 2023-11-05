@@ -20,11 +20,14 @@ class IntroFragment : SetupFragment() {
         val view = inflater.inflate(R.layout.fragment_intro, container, false)
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
 
+        // Initialize reference cycle
         view.findViewById<Button>(R.id.submit_intro).setOnClickListener {
-            // Initialize reference cycle
-            periodViewModel.init(-1, 0, 0, 0)
-
-            nextPage()
+            periodViewModel.all.observe(viewLifecycleOwner) { periods ->
+                if (periods.isEmpty()) {
+                    periodViewModel.init(-1, 0, 0, 0)
+                }
+                nextPage()
+            }
         }
 
         return view
