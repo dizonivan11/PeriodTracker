@@ -113,12 +113,12 @@ class HomeFragment : Fragment() {
 
             initSmallCalendar(root, getFutureDatesOfCurrentMonth())
             btnRight.setOnClickListener {
-                // initSmallCalendar(root, getDatesOfNextMonth())
-                initSmallCalendar(root, getDatesOfNextMonth(), false)
+                initSmallCalendar(root, getDatesOfNextMonth())
+                // initSmallCalendar(root, getDatesOfNextMonth(), false)
             }
             btnLeft.setOnClickListener {
-                // initSmallCalendar(root, getDatesOfPreviousMonth())
-                initSmallCalendar(root, getDatesOfPreviousMonth(), false)
+                initSmallCalendar(root, getDatesOfPreviousMonth())
+                // initSmallCalendar(root, getDatesOfPreviousMonth(), false)
             }
         }
 
@@ -135,7 +135,7 @@ class HomeFragment : Fragment() {
             builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
                 run {
                     if (smallCalendar.getSelectedDates().isNotEmpty()) {
-                        val today = Calendar.getInstance().apply { smallCalendar.getSelectedDates()[0] }
+                        val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
 
                         // Prepare new cycle
                         periodViewModel.init(
@@ -278,14 +278,24 @@ class HomeFragment : Fragment() {
         if (firstTime) smallCalendar.init()
         root.findViewById<TextView>(R.id.tvSelectedMonth).text = getString(R.string.text_month_year, DateFormatSymbols().months[currentMonth], currentYear.toString())
 
-        if (isSameYearAndMonth(currentCalendar)) {
-            var scrollPos = todayCalendar.get(Calendar.DAY_OF_MONTH) - 3
-            if (scrollPos < 0) scrollPos = 0
-            smallCalendar.select(todayCalendar.get(Calendar.DAY_OF_MONTH) - 1)
-            smallCalendar.scrollToPosition(scrollPos)
-        } else {
-            if (simulated) smallCalendar.select(0)
-            smallCalendar.scrollToPosition(0)
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+            if (isSameYearAndMonth(currentCalendar)) {
+                var scrollPos: Int
+                if (simulated) {
+                    scrollPos = period.periodDay - 3
+                    if (scrollPos < 0) scrollPos = 0
+                    smallCalendar.select(period.periodDay - 1)
+                    smallCalendar.scrollToPosition(scrollPos)
+                } else {
+                    scrollPos = todayCalendar.get(Calendar.DAY_OF_MONTH) - 3
+                    if (scrollPos < 0) scrollPos = 0
+                    smallCalendar.select(todayCalendar.get(Calendar.DAY_OF_MONTH) - 1)
+                    smallCalendar.scrollToPosition(scrollPos)
+                }
+            } else {
+                if (simulated) smallCalendar.select(0)
+                smallCalendar.scrollToPosition(0)
+            }
         }
     }
 
