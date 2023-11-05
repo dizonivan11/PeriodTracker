@@ -25,27 +25,25 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="How is your menstrual cycle?\n(Varies by no more than 7 days)"
+                android:text="How is your menstrual cycle?\n(21 to 35 days are regular)"
                 android:textAlignment="center"
                 android:textSize="20sp" />
 
             <RadioGroup
-                android:id="@+id/radio_menstrual_cycle"
+                android:id="@+id/rg_menstrual_cycle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginTop="40dp">
 
                 <RadioButton
-                    android:id="@+id/radio_regular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Regular" />
+                    android:text="@string/menstrual_cycle_regular" />
 
                 <RadioButton
-                    android:id="@+id/radio_irregular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Irregular" />
+                    android:text="@string/menstrual_cycle_irregular" />
 
             </RadioGroup>
 

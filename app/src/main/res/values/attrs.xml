@@ -3,6 +3,7 @@
     <declare-styleable name="CircleFillView" >
         <attr name="CircleFillColor" format="color" />
         <attr name="CircleFillStrokeColor" format="color" />
+        <attr name="CircleFillSafeColor" format="color" />
         <attr name="CircleFillStrokeWidth" format="float" />
         <attr name="CircleFillValue" format="integer" />
     </declare-styleable>

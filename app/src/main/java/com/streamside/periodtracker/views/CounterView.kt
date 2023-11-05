@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import androidx.fragment.app.FragmentActivity
 import com.streamside.periodtracker.R
 
-
 class CounterView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : androidx.appcompat.widget.AppCompatTextView(context, attrs) {
     private var counterValue = 0
 

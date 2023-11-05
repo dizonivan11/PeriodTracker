@@ -31,47 +31,41 @@
                 android:textSize="20sp" />
 
             <RadioGroup
+                android:id="@+id/rg_sleep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_well"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="I sleep well" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_difficulty_falling_sleep"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Difficulty falling sleep" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_waking_up_tired"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Waking up tired" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_waking_up_during_night"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Waking up during night" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_lack_of_sleep_schedule"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lack of sleep schedule" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_insomnia"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Insomnia" />
 
                 <RadioButton
-                    android:id="@+id/radio_sleep_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other" />

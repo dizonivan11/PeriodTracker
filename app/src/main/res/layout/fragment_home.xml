@@ -49,6 +49,20 @@
             app:layout_constraintStart_toEndOf="@+id/tvDate"
             app:layout_constraintTop_toTopOf="@+id/tvDate" />
 
+        <TextView
+            android:id="@+id/tvSelectedMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="Month, Year"
+            android:layout_marginTop="12dp"
+            android:textAllCaps="true"
+            android:letterSpacing="0.5"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/main_single_row_calendar"
+            app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar" />
+
         <Button
             android:id="@+id/btnRight"
             android:layout_width="30dp"
@@ -92,8 +106,9 @@
             app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar"
             custom:CircleFillColor="?attr/colorPrimary"
             custom:CircleFillStrokeColor="?attr/colorPrimary"
+            custom:CircleFillSafeColor="?attr/colorSecondary"
             custom:CircleFillStrokeWidth="20"
-            custom:CircleFillValue="50" />
+            custom:CircleFillValue="0" />
 
         <com.streamside.periodtracker.views.CounterView
             android:id="@+id/circleFillForeText"
@@ -161,15 +176,6 @@
                 app:srcCompat="@drawable/baseline_water_drop_24"
                 app:tint="?attr/colorPrimary"
                 tools:src="@drawable/baseline_water_drop_24" />
-
-            <Button
-                android:id="@+id/btnSimulatedDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change Period Date"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:visibility="gone"/>
 
         </LinearLayout>
 

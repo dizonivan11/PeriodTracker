@@ -13,7 +13,6 @@ import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.streamside.periodtracker.databinding.ActivityMainBinding
 import com.streamside.periodtracker.setup.DischargeFragment
 import com.streamside.periodtracker.setup.DiscomfortsFragment
 import com.streamside.periodtracker.setup.FitnessFragment
@@ -31,14 +30,12 @@ var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
 private const val SETUP_PAGES = 11
+const val SAFE_MIN = 23
+const val SAFE_MAX = 35
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         DARK_MODE = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         FIRST_TIME = preferences.getBoolean(getString(R.string.first_time_key), true)
@@ -53,8 +50,8 @@ class MainActivity : AppCompatActivity() {
             SETUP_PAGER.adapter = pagerAdapter
             SETUP_PAGER.isUserInputEnabled = false
         } else {
-            setContentView(binding.root)
-            val navView: BottomNavigationView = binding.navView
+            setContentView(R.layout.activity_main)
+            val navView: BottomNavigationView = findViewById(R.id.nav_view)
             val navController = findNavController(R.id.nav_host_fragment_activity_main)
             // Passing each menu ID as a set of Ids because each
             // menu should be considered as top level destinations.

@@ -31,23 +31,26 @@
                 android:textSize="20sp" />
 
             <RadioGroup
+                android:id="@+id/rg_rhd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <RadioButton
-                    android:id="@+id/radio_rhd_endometriosis"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="None" />
+
+                <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Endometriosis" />
 
                 <RadioButton
-                    android:id="@+id/radio_rhd_pcos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="PCOS" />
 
                 <RadioButton
-                    android:id="@+id/radio_rhd_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other" />

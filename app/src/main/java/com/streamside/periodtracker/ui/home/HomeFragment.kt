@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
 import com.michalsvec.singlerowcalendar.calendar.CalendarViewManager
@@ -17,23 +19,25 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.databinding.FragmentHomeBinding
+import com.streamside.periodtracker.SAFE_MAX
+import com.streamside.periodtracker.data.Period
+import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
 import com.streamside.periodtracker.views.CounterView
+import java.text.DateFormatSymbols
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
+const val CIRCLE_FILL_DURATION = 1000L
+
 class HomeFragment : Fragment() {
-    private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
-
+    private lateinit var periodViewModel: PeriodViewModel
+    private lateinit var currentPeriod: Period
     private val todayCalendar = Calendar.getInstance().apply { time = Date() }
     private val currentCalendar = Calendar.getInstance()
+    private var currentYear = 0
     private var currentMonth = 0
     private var simulated : Boolean = false
     private lateinit var smallCalendar : SingleRowCalendar
@@ -50,65 +54,85 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
-        val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
-        val prefEditor = preferences.edit()
-        simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
+        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+            currentPeriod = period
 
-        smallCalendar = root.findViewById(R.id.main_single_row_calendar)
-        tvDate = root.findViewById(R.id.tvDate)
-        tvDay = root.findViewById(R.id.tvDay)
-        btnRight = root.findViewById(R.id.btnRight)
-        btnLeft = root.findViewById(R.id.btnLeft)
-        circleFillView = root.findViewById(R.id.circleFillView)
-        circleFillBackText = root.findViewById(R.id.circleFillBackText)
-        circleFillForeText = root.findViewById(R.id.circleFillForeText)
-        circleFillBackText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), 1000)
-        circleFillForeText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), 1000)
+            val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
+            val prefEditor = preferences.edit()
+            simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
 
-        root.findViewById<Button>(R.id.btnLog).setOnClickListener {
-            // val oldValue = circleFillView.getCircleFillValue()
-            // circleFillView.setCircleFillValue((0..100).random(), 1000)
-            // circleFillBackText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
-            // circleFillForeText.setCounterValue(requireActivity(), oldValue, circleFillView.getCircleFillValue(), 1000)
+            smallCalendar = root.findViewById(R.id.main_single_row_calendar)
+            tvDate = root.findViewById(R.id.tvDate)
+            tvDay = root.findViewById(R.id.tvDay)
+            btnRight = root.findViewById(R.id.btnRight)
+            btnLeft = root.findViewById(R.id.btnLeft)
+            circleFillView = root.findViewById(R.id.circleFillView)
+            circleFillBackText = root.findViewById(R.id.circleFillBackText)
+            circleFillForeText = root.findViewById(R.id.circleFillForeText)
+            circleFillBackText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+            circleFillForeText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
 
-            // Log period, collect cycle data and initialize new cycle setup
-            val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
-            builder.setCancelable(true)
-            builder.setTitle("Continue Log Period")
-            builder.setMessage("This will end this month's cycle and collect cycle data for you")
-            builder.setPositiveButton("Confirm") { _: DialogInterface, _: Int ->
-                run {
-                    prefEditor.putBoolean(getString(R.string.log_period_key), true)
-                    prefEditor.apply()
-                    fa.recreate()
+            root.findViewById<Button>(R.id.btnLog).setOnClickListener {
+                // Log period, collect cycle data and initialize new cycle setup
+                val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
+                builder.setCancelable(true)
+                builder.setTitle("Confirm Log Period")
+                builder.setMessage("This will end the current cycle!")
+                builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
+                    run {
+                        if (smallCalendar.getSelectedDates().isNotEmpty()) {
+                            val today = Calendar.getInstance().apply { smallCalendar.getSelectedDates()[0] }
+
+                            // Prepare new period for next cycle
+                            periodViewModel.init(
+                                currentPeriod.id,
+                                today.get(Calendar.YEAR),
+                                today.get(Calendar.MONTH),
+                                today.get(Calendar.DAY_OF_MONTH)
+                            ).observe(viewLifecycleOwner) { newPeriodId ->
+
+                                // Update foreign keys of the current period to finalize it
+                                currentPeriod.nextPeriodId = newPeriodId
+                                periodViewModel.update(currentPeriod)
+
+                                // Set log period flag to true then restart app
+                                prefEditor.putBoolean(getString(R.string.log_period_key), true)
+                                prefEditor.apply()
+                                fa.recreate()
+                            }
+                        } else {
+                            Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
+                val dialog : AlertDialog = builder.create()
+                dialog.show()
             }
-            val dialog : AlertDialog = builder.create()
-            dialog.show()
-        }
 
-        // set current date to calendar and current month to currentMonth variable
-        currentCalendar.time = Date()
-        currentMonth = currentCalendar[Calendar.MONTH]
+            // set current date to calendar and current month to currentMonth variable
+            currentCalendar.time = Date()
+            currentYear = currentCalendar[Calendar.YEAR]
+            currentMonth = currentCalendar[Calendar.MONTH]
 
-        initSmallCalendar(getFutureDatesOfCurrentMonth())
-        btnRight.setOnClickListener {
-            initSmallCalendar(getDatesOfNextMonth())
-        }
-        btnLeft.setOnClickListener {
-            initSmallCalendar(getDatesOfPreviousMonth())
-        }
+            initSmallCalendar(root, getFutureDatesOfCurrentMonth())
+            btnRight.setOnClickListener {
+                // initSmallCalendar(root, getDatesOfNextMonth())
+                initSmallCalendar(root, getDatesOfNextMonth(), false)
 
-        if (simulated)
-            root.findViewById<Button>(R.id.btnSimulatedDate).visibility = View.VISIBLE
+            }
+            btnLeft.setOnClickListener {
+                // initSmallCalendar(root, getDatesOfPreviousMonth())
+                initSmallCalendar(root, getDatesOfPreviousMonth(), false)
+            }
+        }
 
         return root
     }
 
-    private fun initSmallCalendar(dates: List<Date>) {
+    private fun initSmallCalendar(root: View, dates: List<Date>, firstTime: Boolean = true) {
         val smallCalendarViewManager = object : CalendarViewManager {
             override fun setCalendarViewResourceId(
                 position: Int,
@@ -117,10 +141,15 @@ class HomeFragment : Fragment() {
             ): Int {
                 val cal = Calendar.getInstance()
                 cal.time = date
-                return if (isSelected) when (isToday(cal)) {
+                val periodDate = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, currentPeriod.periodYear)
+                    set(Calendar.MONTH, currentPeriod.periodMonth)
+                    set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
+                }
+                return if (isSelected) when (isSameDay(cal, periodDate)) {
                     true -> R.layout.period_selected_calendar_item
                     false -> R.layout.selected_calendar_item
-                } else when (isToday(cal)) {
+                } else when (isSameDay(cal, periodDate)) {
                     true -> R.layout.period_calendar_item
                     false -> R.layout.calendar_item
                 }
@@ -152,10 +181,20 @@ class HomeFragment : Fragment() {
         // selection manager is responsible for managing selection
         val smallSelectionManager = object : CalendarSelectionManager {
             override fun canBeItemSelected(position: Int, date: Date): Boolean {
+                // Select today's date
                 return if (simulated) {
                     todayCalendar.time = date
+                    updateCircleFill(todayCalendar)
                     true
-                } else isToday(Calendar.getInstance().apply { time = date })
+                } else {
+                    val today = Calendar.getInstance().apply { time = date }
+                    if (isToday(today)) {
+                        updateCircleFill(today)
+                        true
+                    } else {
+                        false
+                    }
+                }
             }
         }
 
@@ -164,7 +203,8 @@ class HomeFragment : Fragment() {
         smallCalendar.calendarChangesObserver = smallCalendarChangesObserver
         smallCalendar.calendarSelectionManager = smallSelectionManager
         smallCalendar.setDates(dates)
-        smallCalendar.init()
+        if (firstTime) smallCalendar.init()
+        root.findViewById<TextView>(R.id.tvSelectedMonth).text = getString(R.string.text_month_year, DateFormatSymbols().months[currentMonth], currentYear.toString())
 
         if (isSameYearAndMonth(currentCalendar)) {
             var scrollPos = todayCalendar.get(Calendar.DAY_OF_MONTH) - 3
@@ -179,7 +219,23 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+    }
+
+    private fun updateCircleFill(today: Calendar) {
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
+            val fa = requireActivity()
+            val currentPeriodDate = Calendar.getInstance().apply {
+                set(Calendar.YEAR, currentPeriod.periodYear)
+                set(Calendar.MONTH, currentPeriod.periodMonth)
+                set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
+            }
+            val gap = dayDistance(today.time, currentPeriodDate.time)
+            val percentage: Float = (gap.toFloat() / SAFE_MAX) * 100f
+            val oldValue = circleFillView.getCircleFillValue()
+            circleFillView.setCircleFillValue(percentage.toInt(), CIRCLE_FILL_DURATION)
+            circleFillBackText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+            circleFillForeText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+        }
     }
 
     private fun dayDistance(date1: Date, date2: Date): Int {
@@ -215,6 +271,12 @@ class HomeFragment : Fragment() {
                 today.get(Calendar.MONTH) == date.get(Calendar.MONTH)
     }
 
+    private fun isSameDay(date1: Calendar, date2: Calendar): Boolean {
+        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
+                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
+                date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
+    }
+
     private fun isToday(date: Calendar): Boolean {
         val today = Calendar.getInstance()
         today.time = Date()
@@ -228,7 +290,8 @@ class HomeFragment : Fragment() {
         currentMonth++ // + because we want next month
         if (currentMonth == 12) {
             // we will switch to january of next year, when we reach last month of year
-            currentCalendar.set(Calendar.YEAR, currentCalendar[Calendar.YEAR] + 1)
+            currentYear = currentCalendar[Calendar.YEAR] + 1
+            currentCalendar.set(Calendar.YEAR, currentYear)
             currentMonth = 0 // 0 == january
         }
         return getDates(mutableListOf())
@@ -238,7 +301,8 @@ class HomeFragment : Fragment() {
         currentMonth-- // - because we want previous month
         if (currentMonth == -1) {
             // we will switch to december of previous year, when we reach first month of year
-            currentCalendar.set(Calendar.YEAR, currentCalendar[Calendar.YEAR] - 1)
+            currentYear = currentCalendar[Calendar.YEAR] - 1
+            currentCalendar.set(Calendar.YEAR, currentYear)
             currentMonth = 11 // 11 == december
         }
         return getDates(mutableListOf())
@@ -246,6 +310,7 @@ class HomeFragment : Fragment() {
 
     private fun getFutureDatesOfCurrentMonth(): List<Date> {
         // get all next dates of current month
+        currentYear = currentCalendar[Calendar.YEAR]
         currentMonth = currentCalendar[Calendar.MONTH]
         return getDates(mutableListOf())
     }

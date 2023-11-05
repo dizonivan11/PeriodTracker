@@ -30,7 +30,7 @@
                 android:textSize="20sp" />
 
             <DatePicker
-                android:id="@+id/date_period_date"
+                android:id="@+id/dp_period_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="40dp" />

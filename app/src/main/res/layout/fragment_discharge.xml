@@ -31,47 +31,41 @@
                 android:textSize="20sp" />
 
             <RadioGroup
+                android:id="@+id/rg_discharge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_white"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="White" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_clear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Clear" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_yellow_green"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Yellow or Green" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_brown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Brown" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_red"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Red" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_pink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Pink" />
 
                 <RadioButton
-                    android:id="@+id/radio_discharge_gray"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Gray" />

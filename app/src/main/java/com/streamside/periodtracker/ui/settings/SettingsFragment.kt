@@ -1,12 +1,17 @@
 package com.streamside.periodtracker.ui.settings
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreference
 import com.streamside.periodtracker.DARK_MODE
 import com.streamside.periodtracker.FIRST_TIME
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.PeriodViewModel
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -21,6 +26,29 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
         findPreference<SwitchPreference>(getString(R.string.first_time_key))?.setOnPreferenceChangeListener { _, newValue ->
             FIRST_TIME = newValue as Boolean
+            if (FIRST_TIME) {
+                val builder: AlertDialog.Builder = AlertDialog.Builder(requireActivity())
+                builder.setCancelable(true)
+                builder.setTitle("Confirm Data Reset")
+                builder.setMessage("This will wipe all your data!")
+                builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
+                    run {
+                        // Delete all data
+                        ViewModelProvider(this)[PeriodViewModel::class.java].deleteAll()
+
+                        // Restart app
+                        requireActivity().recreate()
+                    }
+                }
+                builder.setOnCancelListener {
+                    FIRST_TIME = false
+                    PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit()
+                        .putBoolean(getString(R.string.first_time_key), FIRST_TIME).apply()
+                    findPreference<SwitchPreference>(getString(R.string.first_time_key))?.isChecked = false
+                }
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+            }
             true
         }
     }

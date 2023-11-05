@@ -31,53 +31,46 @@
                 android:textSize="20sp" />
 
             <RadioGroup
+                android:id="@+id/rg_fitness"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_none"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="None" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_lose"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lose weight" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_gain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Gain weight" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_maintain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Maintain healthy weight" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_start"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Start exercising" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_learn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Learn about nutrition" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_energy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Get more energy" />
 
                 <RadioButton
-                    android:id="@+id/radio_fitness_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other" />

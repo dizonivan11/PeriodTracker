@@ -11,10 +11,11 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.SAFE_MAX
+import com.streamside.periodtracker.SAFE_MIN
 import kotlin.math.atan
 import kotlin.math.pow
 import kotlin.math.sqrt
-
 
 class CircleFillView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     private val center = PointF()
@@ -22,9 +23,11 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     private val segment = Path()
     private val strokePaint = Paint()
     private val fillPaint = Paint()
+    private val safePaint = Paint()
     private var radius = 0
     private var fillColor = 0
     private var strokeColor = 0
+    private var safeColor = 0
     private var strokeWidth = 0f
     private var circleFillValue = 0
 
@@ -37,6 +40,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         try {
             fillColor = a.getColor(R.styleable.CircleFillView_CircleFillColor, Color.WHITE)
             strokeColor = a.getColor(R.styleable.CircleFillView_CircleFillStrokeColor, Color.BLACK)
+            safeColor = a.getColor(R.styleable.CircleFillView_CircleFillSafeColor, Color.BLACK)
             strokeWidth = a.getFloat(R.styleable.CircleFillView_CircleFillStrokeWidth, 1f)
             setCircleFillValue(a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0), 1000)
         } finally {
@@ -46,6 +50,11 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         strokePaint.color = strokeColor
         strokePaint.strokeWidth = strokeWidth
         strokePaint.style = Paint.Style.STROKE
+        safePaint.color = safeColor
+        safePaint.strokeWidth = strokeWidth / 4
+        safePaint.style = Paint.Style.FILL
+        safePaint.textAlign = Paint.Align.CENTER
+        safePaint.textSize = 40f
     }
 
     fun setFillColor(fillColor: Int) {
@@ -124,6 +133,9 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        val safeY = (((100f - ((SAFE_MIN.toFloat() / SAFE_MAX.toFloat()) * 100f)) / 100f) * height) + strokeWidth
+        canvas.drawLine((strokeWidth * 3), safeY, width.toFloat() - (strokeWidth * 3), safeY, safePaint)
+        canvas.drawText("R E G U L A R", width / 2f, safeY - 20f, safePaint)
         canvas.drawPath(segment, fillPaint)
         canvas.drawCircle(center.x, center.y, radius.toFloat(), strokePaint)
     }
