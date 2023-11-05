@@ -65,7 +65,7 @@ class DischargeFragment : SetupFragment() {
                 }
             } else {
                 view.findViewById<Button>(R.id.back_discharge).setOnClickListener {
-                    previousPage()
+                    movePage(fa, 2)
                 }
             }
 
@@ -75,7 +75,7 @@ class DischargeFragment : SetupFragment() {
                     // Record discharge color
                     newPeriod.discharge = view.findViewById<RadioButton>(rgDischarge.checkedRadioButtonId).text.toString()
                     periodViewModel.update(newPeriod)
-                    nextPage()
+                    movePage(fa, 4)
                 } else {
                     Toast.makeText(fa, "Please select your discharge color", Toast.LENGTH_SHORT).show()
                 }

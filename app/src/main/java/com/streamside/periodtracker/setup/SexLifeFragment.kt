@@ -41,7 +41,7 @@ class SexLifeFragment : SetupFragment() {
                     // Record sex life changes
                     newPeriod.sex = getLongCheckValues(sexLifeChanges)
                     periodViewModel.update(newPeriod)
-                    nextPage()
+                    movePage(fa, 9)
                 } else {
                     Toast.makeText(fa, "Please select at least one sex changes", Toast.LENGTH_SHORT).show()
                 }
@@ -49,7 +49,7 @@ class SexLifeFragment : SetupFragment() {
         }
 
         view.findViewById<Button>(R.id.back_sex_life).setOnClickListener {
-            previousPage()
+            movePage(fa, 7)
         }
 
         return view

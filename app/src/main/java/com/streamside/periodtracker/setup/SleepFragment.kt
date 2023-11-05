@@ -35,7 +35,7 @@ class SleepFragment : SetupFragment() {
                     // Record sleep issue
                     newPeriod.sleep = view.findViewById<RadioButton>(rgSleep.checkedRadioButtonId).text.toString()
                     periodViewModel.update(newPeriod)
-                    nextPage()
+                    movePage(fa, 6)
                 } else {
                     Toast.makeText(fa, "Please select if you have sleeping issue", Toast.LENGTH_SHORT).show()
                 }
@@ -43,7 +43,7 @@ class SleepFragment : SetupFragment() {
         }
 
         view.findViewById<Button>(R.id.back_sleep).setOnClickListener {
-            previousPage()
+            movePage(fa, 4)
         }
 
         return view

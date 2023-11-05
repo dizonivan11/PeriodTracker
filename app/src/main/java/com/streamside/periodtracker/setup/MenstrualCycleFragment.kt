@@ -35,7 +35,7 @@ class MenstrualCycleFragment : SetupFragment() {
                     // Update reference period menstrual cycle
                     newPeriod.menstrualCycle = view.findViewById<RadioButton>(rgMenstrualCycle.checkedRadioButtonId).text.toString()
                     periodViewModel.update(newPeriod)
-                    nextPage()
+                    movePage(fa, 3)
                 } else {
                     Toast.makeText(fa, "Please describe your last menstrual cycle", Toast.LENGTH_SHORT).show()
                 }
@@ -43,7 +43,7 @@ class MenstrualCycleFragment : SetupFragment() {
         }
 
         view.findViewById<Button>(R.id.back_menstrual_cycle).setOnClickListener {
-            previousPage()
+            movePage(fa, 1)
         }
 
         return view

@@ -35,16 +35,15 @@ class FitnessFragment : SetupFragment() {
                     // Record fitness goal
                     newPeriod.fitness = view.findViewById<RadioButton>(rgFitness.checkedRadioButtonId).text.toString()
                     periodViewModel.update(newPeriod)
-                    nextPage()
+                    movePage(fa, 10)
                 } else {
                     Toast.makeText(fa, "Please select your fitness goal", Toast.LENGTH_SHORT).show()
                 }
-                nextPage()
             }
         }
 
         view.findViewById<Button>(R.id.back_fitness).setOnClickListener {
-            previousPage()
+            movePage(fa, 8)
         }
 
         return view

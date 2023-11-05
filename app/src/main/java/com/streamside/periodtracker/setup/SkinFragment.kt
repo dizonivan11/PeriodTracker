@@ -49,7 +49,7 @@ class SkinFragment : SetupFragment() {
         }
 
         view.findViewById<Button>(R.id.back_skin).setOnClickListener {
-            previousPage()
+            movePage(fa, 9)
         }
 
         return view
