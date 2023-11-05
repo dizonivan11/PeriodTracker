@@ -35,7 +35,7 @@ class RHDFragment : SetupFragment() {
                     // Record RHD conditions
                     newPeriod.rhd = view.findViewById<RadioButton>(rgRHD.checkedRadioButtonId).text.toString()
                     periodViewModel.update(newPeriod)
-                    movePage(fa, 7)
+                    nextPage()
                 } else {
                     Toast.makeText(fa, "Please select if you have any reproductive health disorders", Toast.LENGTH_SHORT).show()
                 }
@@ -43,7 +43,7 @@ class RHDFragment : SetupFragment() {
         }
 
         view.findViewById<Button>(R.id.back_rhd).setOnClickListener {
-            movePage(fa, 5)
+            previousPage()
         }
 
         return view

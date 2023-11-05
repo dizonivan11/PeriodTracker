@@ -22,6 +22,18 @@
     <string name="log_period_key">log_period_key</string>
     <string name="simulation_key">simulation_pref</string>
 
+    <!-- Input Check Messages -->
+    <string name="ic_discharge">Please select your discharge color</string>
+    <string name="ic_discomforts">Please select at least one discomfort you feel</string>
+    <string name="ic_fitness">Please select if you have fitness goal</string>
+    <string name="ic_menstrual">Please describe your last menstrual cycle</string>
+    <string name="ic_mental">Please select at least one mental health issue</string>
+    <string name="ic_period">Please select your last period date</string>
+    <string name="ic_rhd">Please select if you have reproductive health disorder</string>
+    <string name="ic_sex">Please select at least one sex life changes</string>
+    <string name="ic_skin">Please select at least one skin changes</string>
+    <string name="ic_sleep">Please select if you have sleep issue</string>
+
     <!-- Data Constants -->
     <string name="menstrual_cycle_regular">Regular</string>
     <string name="menstrual_cycle_irregular">Irregular</string>

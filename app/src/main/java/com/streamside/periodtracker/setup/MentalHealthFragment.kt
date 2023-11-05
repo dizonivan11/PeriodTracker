@@ -42,15 +42,15 @@ class MentalHealthFragment : SetupFragment() {
                     // Record mental health conditions
                     newPeriod.mental = getLongCheckValues(mentalHealths)
                     periodViewModel.update(newPeriod)
-                    movePage(fa, 8)
+                    nextPage()
                 } else {
-                    Toast.makeText(fa, "Please select at least one mental health issue", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_mental), Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         view.findViewById<Button>(R.id.back_mental_health).setOnClickListener {
-            movePage(fa, 6)
+            previousPage()
         }
 
         return view

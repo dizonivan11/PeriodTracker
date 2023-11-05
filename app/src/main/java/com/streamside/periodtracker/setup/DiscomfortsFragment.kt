@@ -41,15 +41,15 @@ class DiscomfortsFragment : SetupFragment() {
                     // Record discomforts
                     newPeriod.discomforts = getLongCheckValues(discomforts)
                     periodViewModel.update(newPeriod)
-                    movePage(fa, 5)
+                    nextPage()
                 } else {
-                    Toast.makeText(fa, "Please select at least one discomfort", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_discomforts), Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         view.findViewById<Button>(R.id.back_discomforts).setOnClickListener {
-            movePage(fa, 3)
+            previousPage()
         }
 
         return view

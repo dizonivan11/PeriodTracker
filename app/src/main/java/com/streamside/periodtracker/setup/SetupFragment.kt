@@ -51,13 +51,12 @@ open class SetupFragment : Fragment() {
         return value
     }
 
-    fun movePage(fa: FragmentActivity, index: Int) {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
-        if (preferences.getBoolean(getString(R.string.log_period_key), false)) {
-            SETUP_PAGER.setCurrentItem(index - 3, true)
-        } else {
-            SETUP_PAGER.setCurrentItem(index, true)
-        }
+    fun previousPage() {
+        SETUP_PAGER.currentItem = SETUP_PAGER.currentItem - 1
+    }
+
+    fun nextPage() {
+        SETUP_PAGER.currentItem = SETUP_PAGER.currentItem + 1
     }
 
     fun finalizeSetup(fa: FragmentActivity) {

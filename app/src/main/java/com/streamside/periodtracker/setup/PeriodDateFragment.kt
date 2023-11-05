@@ -22,7 +22,6 @@ class PeriodDateFragment : SetupFragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_period_date, container, false)
-        val fa = requireActivity()
 
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
@@ -40,12 +39,12 @@ class PeriodDateFragment : SetupFragment() {
                 referencePeriod.periodMonth = periodDate.get(Calendar.MONTH)
                 referencePeriod.periodDay = periodDate.get(Calendar.DAY_OF_MONTH)
                 periodViewModel.update(referencePeriod)
-                movePage(fa, 2)
+                nextPage()
             }
         }
 
         view.findViewById<Button>(R.id.back_period_date).setOnClickListener {
-            movePage(fa, 0)
+            previousPage()
         }
 
         return view

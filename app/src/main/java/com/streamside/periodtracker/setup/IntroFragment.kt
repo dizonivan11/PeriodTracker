@@ -18,7 +18,6 @@ class IntroFragment : SetupFragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_intro, container, false)
-        val fa = requireActivity()
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
 
         // Initialize reference cycle
@@ -27,7 +26,7 @@ class IntroFragment : SetupFragment() {
                 if (periods.isEmpty()) {
                     periodViewModel.init(-1, 0, 0, 0)
                 }
-                movePage(fa, 1)
+                nextPage()
             }
         }
 

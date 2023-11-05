@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Period
@@ -41,17 +42,60 @@ class SkinFragment : SetupFragment() {
                     // Record skin changes
                     newPeriod.skin = getLongCheckValues(skinChanges)
                     periodViewModel.update(newPeriod)
-                    finalizeSetup(requireActivity())
+
+                    if (inputCheck(newPeriod)) {
+                        finalizeSetup(requireActivity())
+                    } else {
+                        displayMissingInput(fa, newPeriod)
+                    }
                 } else {
-                    Toast.makeText(fa, "Please select at least one sex changes", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, "Please select at least one skin changes", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         view.findViewById<Button>(R.id.back_skin).setOnClickListener {
-            movePage(fa, 9)
+            previousPage()
         }
 
         return view
+    }
+
+    private fun inputCheck(period: Period): Boolean {
+        if (period.periodYear == 0 ||
+            period.periodMonth == 0 ||
+            period.periodDay == 0) return false
+
+        if (period.menstrualCycle == "") return false
+        if (period.discharge == "") return false
+        if (period.discomforts == 0L) return false
+        if (period.fitness == "") return false
+        if (period.mental == 0L) return false
+        if (period.rhd == "") return false
+        if (period.sex == 0L) return false
+        if (period.skin == 0L) return false
+        if (period.sleep == "") return false
+
+        return true
+    }
+
+    private fun displayMissingInput(fa: FragmentActivity, period: Period) {
+        var message = "Unknown error"
+
+        if (period.periodYear == 0 ||
+            period.periodMonth == 0 ||
+            period.periodDay == 0) message = getString(R.string.ic_period)
+
+        if (period.menstrualCycle == "") message = getString(R.string.ic_menstrual)
+        if (period.discharge == "") message = getString(R.string.ic_discharge)
+        if (period.discomforts == 0L) message = getString(R.string.ic_discomforts)
+        if (period.fitness == "") message = getString(R.string.ic_fitness)
+        if (period.mental == 0L) message = getString(R.string.ic_mental)
+        if (period.rhd == "") message = getString(R.string.ic_rhd)
+        if (period.sex == 0L) message = getString(R.string.ic_sex)
+        if (period.skin == 0L) message = getString(R.string.ic_skin)
+        if (period.sleep == "") message = getString(R.string.ic_sleep)
+
+        Toast.makeText(fa, message, Toast.LENGTH_SHORT).show()
     }
 }
