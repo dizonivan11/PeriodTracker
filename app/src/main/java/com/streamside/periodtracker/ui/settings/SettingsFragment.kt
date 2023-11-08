@@ -33,8 +33,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 builder.setMessage("This will wipe all your data!")
                 builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
                     run {
+                        val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
+
+                        // Clear all observers
+                        periodViewModel.all.removeObservers(viewLifecycleOwner)
+                        periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
+
                         // Delete all data
-                        ViewModelProvider(this)[PeriodViewModel::class.java].deleteAll()
+                        periodViewModel.deleteAll()
 
                         // Restart app
                         requireActivity().recreate()

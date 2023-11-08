@@ -25,6 +25,7 @@ class SkinFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_skin, container, false)
         val fa = requireActivity()
+        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         skinChanges.add(view.findViewById(R.id.check_skin_no_changes))
         skinChanges.add(view.findViewById(R.id.check_skin_acne_blemishes))
         skinChanges.add(view.findViewById(R.id.check_skin_dark_spots_pores))
@@ -33,11 +34,10 @@ class SkinFragment : SetupFragment() {
         skinChanges.add(view.findViewById(R.id.check_skin_dullness_texture))
         skinChanges.add(view.findViewById(R.id.check_skin_other))
 
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
+        view.findViewById<Button>(R.id.submit_skin).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_skin).setOnClickListener {
                 if (hasCheck(skinChanges)) {
                     // Record skin changes
                     newPeriod.skin = getLongCheckValues(skinChanges)
@@ -49,7 +49,7 @@ class SkinFragment : SetupFragment() {
                         displayMissingInput(fa, newPeriod)
                     }
                 } else {
-                    Toast.makeText(fa, "Please select at least one skin changes", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_skin), Toast.LENGTH_SHORT).show()
                 }
             }
         }

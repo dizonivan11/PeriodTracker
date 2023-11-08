@@ -24,12 +24,12 @@ class RHDFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_rhd, container, false)
         val fa = requireActivity()
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_rhd).setOnClickListener {
+        view.findViewById<Button>(R.id.submit_rhd).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
+
                 val rgRHD = view.findViewById<RadioGroup>(R.id.rg_rhd)
                 if (rgRHD.checkedRadioButtonId > -1) {
                     // Record RHD conditions
@@ -37,7 +37,7 @@ class RHDFragment : SetupFragment() {
                     periodViewModel.update(newPeriod)
                     nextPage()
                 } else {
-                    Toast.makeText(fa, "Please select if you have any reproductive health disorders", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_rhd), Toast.LENGTH_SHORT).show()
                 }
             }
         }

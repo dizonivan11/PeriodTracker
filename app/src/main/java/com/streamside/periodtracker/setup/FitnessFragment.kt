@@ -24,12 +24,12 @@ class FitnessFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_fitness, container, false)
         val fa = requireActivity()
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_fitness).setOnClickListener {
+        view.findViewById<Button>(R.id.submit_fitness).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
+
                 val rgFitness = view.findViewById<RadioGroup>(R.id.rg_fitness)
                 if (rgFitness.checkedRadioButtonId > -1) {
                     // Record fitness goal

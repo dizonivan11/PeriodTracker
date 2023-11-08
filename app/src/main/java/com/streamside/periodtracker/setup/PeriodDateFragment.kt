@@ -22,12 +22,12 @@ class PeriodDateFragment : SetupFragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_period_date, container, false)
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            referencePeriod = period
 
-            view.findViewById<Button>(R.id.submit_period_date).setOnClickListener {
+        view.findViewById<Button>(R.id.submit_period_date).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                referencePeriod = period
+
                 val dpPeriodDate = view.findViewById<DatePicker>(R.id.dp_period_date)
                 val periodDate = Calendar.getInstance().apply {
                     set(Calendar.YEAR, dpPeriodDate.year)

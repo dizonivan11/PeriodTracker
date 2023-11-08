@@ -24,12 +24,12 @@ class SleepFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_sleep, container, false)
         val fa = requireActivity()
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_sleep).setOnClickListener {
+        view.findViewById<Button>(R.id.submit_sleep).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
+
                 val rgSleep = view.findViewById<RadioGroup>(R.id.rg_sleep)
                 if (rgSleep.checkedRadioButtonId > -1) {
                     // Record sleep issue
@@ -37,7 +37,7 @@ class SleepFragment : SetupFragment() {
                     periodViewModel.update(newPeriod)
                     nextPage()
                 } else {
-                    Toast.makeText(fa, "Please select if you have sleeping issue", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_sleep), Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -59,6 +59,7 @@ class HomeFragment : Fragment() {
     ): View {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
+        clearObservers()
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
@@ -113,12 +114,12 @@ class HomeFragment : Fragment() {
 
             initSmallCalendar(root, getFutureDatesOfCurrentMonth())
             btnRight.setOnClickListener {
+                // smallCalendar.setDates(getDatesOfNextMonth())
                 initSmallCalendar(root, getDatesOfNextMonth())
-                // initSmallCalendar(root, getDatesOfNextMonth(), false)
             }
             btnLeft.setOnClickListener {
+                // smallCalendar.setDates(getDatesOfPreviousMonth())
                 initSmallCalendar(root, getDatesOfPreviousMonth())
-                // initSmallCalendar(root, getDatesOfPreviousMonth(), false)
             }
         }
 
@@ -204,7 +205,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun initSmallCalendar(root: View, dates: List<Date>, firstTime: Boolean = true) {
+    private fun initSmallCalendar(root: View, dates: List<Date>) {
         val smallCalendarViewManager = object : CalendarViewManager {
             override fun setCalendarViewResourceId(
                 position: Int,
@@ -271,31 +272,44 @@ class HomeFragment : Fragment() {
         }
 
         // here we init our calendar, also you can set more properties if you need them
-        smallCalendar.calendarViewManager = smallCalendarViewManager
-        smallCalendar.calendarChangesObserver = smallCalendarChangesObserver
-        smallCalendar.calendarSelectionManager = smallSelectionManager
-        smallCalendar.setDates(dates)
-        if (firstTime) smallCalendar.init()
+        val sc = smallCalendar.apply {
+            calendarViewManager = smallCalendarViewManager
+            calendarChangesObserver = smallCalendarChangesObserver
+            calendarSelectionManager = smallSelectionManager
+            futureDaysCount = 30
+            includeCurrentDate = true
+            setDates(dates)
+            init()
+        }
         root.findViewById<TextView>(R.id.tvSelectedMonth).text = getString(R.string.text_month_year, DateFormatSymbols().months[currentMonth], currentYear.toString())
 
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            if (isSameYearAndMonth(currentCalendar)) {
-                var scrollPos: Int
-                if (simulated) {
+            var scrollPos: Int
+            if (simulated) {
+                val periodDate = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, period.periodYear)
+                    set(Calendar.MONTH, period.periodMonth)
+                }
+                if (isSameYearAndMonth(periodDate, currentCalendar)) {
                     scrollPos = period.periodDay - 3
                     if (scrollPos < 0) scrollPos = 0
-                    smallCalendar.select(period.periodDay - 1)
-                    smallCalendar.scrollToPosition(scrollPos)
+                    sc.select(period.periodDay - 1)
+                    sc.scrollToPosition(scrollPos)
                 } else {
-                    scrollPos = todayCalendar.get(Calendar.DAY_OF_MONTH) - 3
-                    if (scrollPos < 0) scrollPos = 0
-                    smallCalendar.select(todayCalendar.get(Calendar.DAY_OF_MONTH) - 1)
-                    smallCalendar.scrollToPosition(scrollPos)
+                    sc.select(0)
+                    sc.scrollToPosition(0)
                 }
             } else {
-                if (simulated) smallCalendar.select(0)
-                smallCalendar.scrollToPosition(0)
+                if (isSameYearAndMonth(Calendar.getInstance().apply { time = Date() }, currentCalendar)) {
+                    scrollPos = todayCalendar.get(Calendar.DAY_OF_MONTH) - 3
+                    if (scrollPos < 0) scrollPos = 0
+                    sc.select(todayCalendar.get(Calendar.DAY_OF_MONTH) - 1)
+                    sc.scrollToPosition(scrollPos)
+                } else {
+                    sc.scrollToPosition(0)
+                }
             }
+
         }
     }
 
@@ -314,6 +328,12 @@ class HomeFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
         }
+    }
+
+    private fun clearObservers() {
+        val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
+        periodViewModel.all.removeObservers(viewLifecycleOwner)
+        periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
     }
 
     private fun dayDistance(date1: Date, date2: Date): Int {
@@ -341,12 +361,9 @@ class HomeFragment : Fragment() {
         return today.get(Calendar.YEAR) == date.get(Calendar.YEAR)
     }
 
-    private fun isSameYearAndMonth(date: Calendar): Boolean {
-        val today = Calendar.getInstance()
-        today.time = Date()
-
-        return today.get(Calendar.YEAR) == date.get(Calendar.YEAR) &&
-                today.get(Calendar.MONTH) == date.get(Calendar.MONTH)
+    private fun isSameYearAndMonth(date1: Calendar, date2: Calendar): Boolean {
+        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
+                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)
     }
 
     private fun isSameDay(date1: Calendar, date2: Calendar): Boolean {

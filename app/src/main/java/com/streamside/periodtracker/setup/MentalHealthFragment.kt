@@ -24,6 +24,7 @@ class MentalHealthFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_mental_health, container, false)
         val fa = requireActivity()
+        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         mentalHealths.add(view.findViewById(R.id.check_mental_health_fine))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_stressed))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_mood_fluctuations))
@@ -33,11 +34,10 @@ class MentalHealthFragment : SetupFragment() {
         mentalHealths.add(view.findViewById(R.id.check_mental_health_poor_self_image))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_other))
 
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
+        view.findViewById<Button>(R.id.submit_mental_health).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_mental_health).setOnClickListener {
                 if (hasCheck(mentalHealths)) {
                     // Record mental health conditions
                     newPeriod.mental = getLongCheckValues(mentalHealths)

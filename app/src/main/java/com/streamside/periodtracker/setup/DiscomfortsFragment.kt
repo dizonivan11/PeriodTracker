@@ -24,6 +24,7 @@ class DiscomfortsFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_discomforts, container, false)
         val fa = requireActivity()
+        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         discomforts.add(view.findViewById(R.id.check_discomforts_painful_menstrual_cramps))
         discomforts.add(view.findViewById(R.id.check_discomforts_pms_symptoms))
         discomforts.add(view.findViewById(R.id.check_discomforts_unusual_discharge))
@@ -32,11 +33,10 @@ class DiscomfortsFragment : SetupFragment() {
         discomforts.add(view.findViewById(R.id.check_discomforts_other))
         discomforts.add(view.findViewById(R.id.check_discomforts_none))
 
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
+        view.findViewById<Button>(R.id.submit_discomforts).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_discomforts).setOnClickListener {
                 if (hasCheck(discomforts)) {
                     // Record discomforts
                     newPeriod.discomforts = getLongCheckValues(discomforts)

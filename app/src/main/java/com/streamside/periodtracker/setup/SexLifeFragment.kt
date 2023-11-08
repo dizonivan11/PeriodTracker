@@ -24,6 +24,7 @@ class SexLifeFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_sex_life, container, false)
         val fa = requireActivity()
+        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         sexLifeChanges.add(view.findViewById(R.id.check_sex_life_none))
         sexLifeChanges.add(view.findViewById(R.id.check_sex_life_painful_sex))
         sexLifeChanges.add(view.findViewById(R.id.check_sex_life_difficulty_orgasm))
@@ -32,18 +33,17 @@ class SexLifeFragment : SetupFragment() {
         sexLifeChanges.add(view.findViewById(R.id.check_sex_life_poor_body_image))
         sexLifeChanges.add(view.findViewById(R.id.check_sex_life_other))
 
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
+        view.findViewById<Button>(R.id.submit_sex_life).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_sex_life).setOnClickListener {
                 if (hasCheck(sexLifeChanges)) {
                     // Record sex life changes
                     newPeriod.sex = getLongCheckValues(sexLifeChanges)
                     periodViewModel.update(newPeriod)
                     nextPage()
                 } else {
-                    Toast.makeText(fa, "Please select at least one sex changes", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(fa, getString(R.string.ic_sex), Toast.LENGTH_SHORT).show()
                 }
             }
         }

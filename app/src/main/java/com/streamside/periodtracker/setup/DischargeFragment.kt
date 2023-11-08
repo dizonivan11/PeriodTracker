@@ -30,14 +30,20 @@ class DischargeFragment : SetupFragment() {
         val fa = requireActivity()
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
         val logPeriod : Boolean = preferences.getBoolean(getString(R.string.log_period_key), false)
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
 
-            if (logPeriod) {
-                // Hide back button, this will be the first page for logging period
-                view.findViewById<Button>(R.id.back_discharge).visibility = View.INVISIBLE
+        if (logPeriod) {
+            // Hide back button, this will be the first page for logging period
+            view.findViewById<Button>(R.id.back_discharge).visibility = View.INVISIBLE
+        } else {
+            view.findViewById<Button>(R.id.back_discharge).setOnClickListener {
+                previousPage()
+            }
+        }
+
+        view.findViewById<Button>(R.id.submit_discharge).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
 
                 periodViewModel.all.observe(viewLifecycleOwner) { periods ->
                     // Get last period
@@ -63,13 +69,7 @@ class DischargeFragment : SetupFragment() {
                     else
                         newPeriod.menstrualCycle = getString(R.string.menstrual_cycle_irregular)
                 }
-            } else {
-                view.findViewById<Button>(R.id.back_discharge).setOnClickListener {
-                    previousPage()
-                }
-            }
 
-            view.findViewById<Button>(R.id.submit_discharge).setOnClickListener {
                 val rgDischarge = view.findViewById<RadioGroup>(R.id.rg_discharge)
                 if (rgDischarge.checkedRadioButtonId > -1) {
                     // Record discharge color

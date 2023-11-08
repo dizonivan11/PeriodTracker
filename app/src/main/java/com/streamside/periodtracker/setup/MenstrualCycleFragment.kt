@@ -24,12 +24,12 @@ class MenstrualCycleFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_menstrual_cycle, container, false)
         val fa = requireActivity()
-
         periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-            newPeriod = period
 
-            view.findViewById<Button>(R.id.submit_menstrual_cycle).setOnClickListener {
+        view.findViewById<Button>(R.id.submit_menstrual_cycle).setOnClickListener {
+            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
+                newPeriod = period
+
                 val rgMenstrualCycle = view.findViewById<RadioGroup>(R.id.rg_menstrual_cycle)
                 if (rgMenstrualCycle.checkedRadioButtonId > -1) {
                     // Update reference period menstrual cycle
