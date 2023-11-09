@@ -8,14 +8,12 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
+import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Period
-import com.streamside.periodtracker.data.PeriodViewModel
 
 class SkinFragment : SetupFragment() {
     private val skinChanges: MutableList<CheckBox> = mutableListOf()
-    private lateinit var periodViewModel: PeriodViewModel
     private lateinit var newPeriod: Period
 
     override fun onCreateView(
@@ -25,7 +23,6 @@ class SkinFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_skin, container, false)
         val fa = requireActivity()
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         skinChanges.add(view.findViewById(R.id.check_skin_no_changes))
         skinChanges.add(view.findViewById(R.id.check_skin_acne_blemishes))
         skinChanges.add(view.findViewById(R.id.check_skin_dark_spots_pores))
@@ -34,14 +31,14 @@ class SkinFragment : SetupFragment() {
         skinChanges.add(view.findViewById(R.id.check_skin_dullness_texture))
         skinChanges.add(view.findViewById(R.id.check_skin_other))
 
-        view.findViewById<Button>(R.id.submit_skin).setOnClickListener {
-            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-                newPeriod = period
+        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+            newPeriod = period
 
+            view.findViewById<Button>(R.id.submit_skin).setOnClickListener {
                 if (hasCheck(skinChanges)) {
                     // Record skin changes
                     newPeriod.skin = getLongCheckValues(skinChanges)
-                    periodViewModel.update(newPeriod)
+                    PERIOD_VIEW_MODEL.update(newPeriod)
 
                     if (inputCheck(newPeriod)) {
                         finalizeSetup(requireActivity())
@@ -64,7 +61,8 @@ class SkinFragment : SetupFragment() {
     private fun inputCheck(period: Period): Boolean {
         if (period.periodYear == 0 ||
             period.periodMonth == 0 ||
-            period.periodDay == 0) return false
+            period.periodDay == 0
+        ) return false
 
         if (period.menstrualCycle == "") return false
         if (period.discharge == "") return false
@@ -84,7 +82,8 @@ class SkinFragment : SetupFragment() {
 
         if (period.periodYear == 0 ||
             period.periodMonth == 0 ||
-            period.periodDay == 0) message = getString(R.string.ic_period)
+            period.periodDay == 0
+        ) message = getString(R.string.ic_period)
 
         if (period.menstrualCycle == "") message = getString(R.string.ic_menstrual)
         if (period.discharge == "") message = getString(R.string.ic_discharge)

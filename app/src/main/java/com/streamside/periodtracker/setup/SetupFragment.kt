@@ -3,11 +3,10 @@ package com.streamside.periodtracker.setup
 import android.widget.CheckBox
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
+import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SETUP_PAGER
-import com.streamside.periodtracker.data.PeriodViewModel
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -54,18 +53,19 @@ open class SetupFragment : Fragment() {
     }
 
     private fun clearObservers() {
-        val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.all.removeObservers(viewLifecycleOwner)
-        periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
+        PERIOD_VIEW_MODEL.currentPeriod.removeObservers(viewLifecycleOwner)
+        PERIOD_VIEW_MODEL.all.removeObservers(viewLifecycleOwner)
     }
 
     fun previousPage() {
         clearObservers()
+        SETUP_PAGER.adapter?.notifyItemChanged(SETUP_PAGER.currentItem - 1)
         SETUP_PAGER.setCurrentItem(SETUP_PAGER.currentItem - 1, true)
     }
 
     fun nextPage() {
         clearObservers()
+        SETUP_PAGER.adapter?.notifyItemChanged(SETUP_PAGER.currentItem + 1)
         SETUP_PAGER.setCurrentItem(SETUP_PAGER.currentItem + 1, true)
     }
 

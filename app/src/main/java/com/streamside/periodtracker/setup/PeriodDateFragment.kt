@@ -6,14 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.DatePicker
-import androidx.lifecycle.ViewModelProvider
+import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Period
-import com.streamside.periodtracker.data.PeriodViewModel
 import java.util.Calendar
 
 class PeriodDateFragment : SetupFragment() {
-    private lateinit var periodViewModel: PeriodViewModel
     private lateinit var referencePeriod: Period
 
     override fun onCreateView(
@@ -22,12 +20,10 @@ class PeriodDateFragment : SetupFragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_period_date, container, false)
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
+        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+            referencePeriod = period
 
-        view.findViewById<Button>(R.id.submit_period_date).setOnClickListener {
-            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-                referencePeriod = period
-
+            view.findViewById<Button>(R.id.submit_period_date).setOnClickListener {
                 val dpPeriodDate = view.findViewById<DatePicker>(R.id.dp_period_date)
                 val periodDate = Calendar.getInstance().apply {
                     set(Calendar.YEAR, dpPeriodDate.year)
@@ -38,7 +34,7 @@ class PeriodDateFragment : SetupFragment() {
                 referencePeriod.periodYear = periodDate.get(Calendar.YEAR)
                 referencePeriod.periodMonth = periodDate.get(Calendar.MONTH)
                 referencePeriod.periodDay = periodDate.get(Calendar.DAY_OF_MONTH)
-                periodViewModel.update(referencePeriod)
+                PERIOD_VIEW_MODEL.update(referencePeriod)
                 nextPage()
             }
         }

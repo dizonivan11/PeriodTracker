@@ -7,14 +7,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Period
-import com.streamside.periodtracker.data.PeriodViewModel
 
 class DiscomfortsFragment : SetupFragment() {
     private var discomforts: MutableList<CheckBox> = mutableListOf()
-    private lateinit var periodViewModel: PeriodViewModel
     private lateinit var newPeriod: Period
 
     override fun onCreateView(
@@ -24,7 +22,6 @@ class DiscomfortsFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_discomforts, container, false)
         val fa = requireActivity()
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         discomforts.add(view.findViewById(R.id.check_discomforts_painful_menstrual_cramps))
         discomforts.add(view.findViewById(R.id.check_discomforts_pms_symptoms))
         discomforts.add(view.findViewById(R.id.check_discomforts_unusual_discharge))
@@ -33,14 +30,14 @@ class DiscomfortsFragment : SetupFragment() {
         discomforts.add(view.findViewById(R.id.check_discomforts_other))
         discomforts.add(view.findViewById(R.id.check_discomforts_none))
 
-        view.findViewById<Button>(R.id.submit_discomforts).setOnClickListener {
-            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-                newPeriod = period
+        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+            newPeriod = period
 
+            view.findViewById<Button>(R.id.submit_discomforts).setOnClickListener {
                 if (hasCheck(discomforts)) {
                     // Record discomforts
                     newPeriod.discomforts = getLongCheckValues(discomforts)
-                    periodViewModel.update(newPeriod)
+                    PERIOD_VIEW_MODEL.update(newPeriod)
                     nextPage()
                 } else {
                     Toast.makeText(fa, getString(R.string.ic_discomforts), Toast.LENGTH_SHORT).show()

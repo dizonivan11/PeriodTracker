@@ -7,14 +7,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Period
-import com.streamside.periodtracker.data.PeriodViewModel
 
 class MentalHealthFragment : SetupFragment() {
     private val mentalHealths: MutableList<CheckBox> = mutableListOf()
-    private lateinit var periodViewModel: PeriodViewModel
     private lateinit var newPeriod: Period
 
     override fun onCreateView(
@@ -24,7 +22,6 @@ class MentalHealthFragment : SetupFragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_mental_health, container, false)
         val fa = requireActivity()
-        periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         mentalHealths.add(view.findViewById(R.id.check_mental_health_fine))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_stressed))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_mood_fluctuations))
@@ -34,14 +31,14 @@ class MentalHealthFragment : SetupFragment() {
         mentalHealths.add(view.findViewById(R.id.check_mental_health_poor_self_image))
         mentalHealths.add(view.findViewById(R.id.check_mental_health_other))
 
-        view.findViewById<Button>(R.id.submit_mental_health).setOnClickListener {
-            periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
-                newPeriod = period
+        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+            newPeriod = period
 
+            view.findViewById<Button>(R.id.submit_mental_health).setOnClickListener {
                 if (hasCheck(mentalHealths)) {
                     // Record mental health conditions
                     newPeriod.mental = getLongCheckValues(mentalHealths)
-                    periodViewModel.update(newPeriod)
+                    PERIOD_VIEW_MODEL.update(newPeriod)
                     nextPage()
                 } else {
                     Toast.makeText(fa, getString(R.string.ic_mental), Toast.LENGTH_SHORT).show()

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -13,6 +14,7 @@ import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.setup.DischargeFragment
 import com.streamside.periodtracker.setup.DiscomfortsFragment
 import com.streamside.periodtracker.setup.FitnessFragment
@@ -25,6 +27,7 @@ import com.streamside.periodtracker.setup.SexLifeFragment
 import com.streamside.periodtracker.setup.SkinFragment
 import com.streamside.periodtracker.setup.SleepFragment
 
+lateinit var PERIOD_VIEW_MODEL : PeriodViewModel
 lateinit var SETUP_PAGER : ViewPager2
 var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         DARK_MODE = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         FIRST_TIME = preferences.getBoolean(getString(R.string.first_time_key), true)
         LOG_PERIOD = preferences.getBoolean(getString(R.string.log_period_key), false)
+        PERIOD_VIEW_MODEL = ViewModelProvider(this)[PeriodViewModel::class.java]
 
         if (DARK_MODE) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         if (FIRST_TIME || LOG_PERIOD) {
