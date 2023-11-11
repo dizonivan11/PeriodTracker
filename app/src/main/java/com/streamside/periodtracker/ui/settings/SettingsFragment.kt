@@ -37,6 +37,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
                         // Clear all observers
                         periodViewModel.all.removeObservers(viewLifecycleOwner)
+                        periodViewModel.lastPeriod.removeObservers(viewLifecycleOwner)
                         periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
 
                         // Delete all data

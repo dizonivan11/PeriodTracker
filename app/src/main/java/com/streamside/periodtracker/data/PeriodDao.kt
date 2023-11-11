@@ -12,6 +12,8 @@ import androidx.room.Update
 interface PeriodDao {
     @Query("SELECT * FROM period")
     fun getAll(): LiveData<List<Period>>
+    @Query("SELECT * FROM period WHERE id = (SELECT lastPeriodId FROM period WHERE nextPeriodId = -1)")
+    fun getLastPeriod(): LiveData<Period>
     @Query("SELECT * FROM period WHERE nextPeriodId = -1")
     fun getCurrentPeriod(): LiveData<Period>
 

@@ -8,8 +8,11 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.RectF
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import com.streamside.periodtracker.OVULATION
+import com.streamside.periodtracker.PREGNANCY_WINDOW
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
@@ -24,12 +27,16 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     private val strokePaint = Paint()
     private val fillPaint = Paint()
     private val safePaint = Paint()
+    private val foreSafePaint = Paint()
     private var radius = 0
     private var fillColor = 0
     private var strokeColor = 0
     private var safeColor = 0
     private var strokeWidth = 0f
     private var circleFillValue = 0
+    private var ovulationY = 0.0
+    private var pregnancyY = 0.0
+    private var regularY = 0.0
 
     init {
         val a = context.theme.obtainStyledAttributes(
@@ -46,6 +53,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         } finally {
             a.recycle()
         }
+        val tf = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         fillPaint.color = fillColor
         strokePaint.color = strokeColor
         strokePaint.strokeWidth = strokeWidth
@@ -53,8 +61,15 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         safePaint.color = safeColor
         safePaint.strokeWidth = strokeWidth / 4
         safePaint.style = Paint.Style.FILL
+        safePaint.typeface = tf
         safePaint.textAlign = Paint.Align.CENTER
-        safePaint.textSize = 40f
+        safePaint.textSize = 32f
+        foreSafePaint.color = 0x40000000
+        foreSafePaint.strokeWidth = strokeWidth / 4
+        foreSafePaint.style = Paint.Style.FILL
+        foreSafePaint.typeface = tf
+        foreSafePaint.textAlign = Paint.Align.CENTER
+        foreSafePaint.textSize = 32f
     }
 
     fun setFillColor(fillColor: Int) {
@@ -109,7 +124,11 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         super.onSizeChanged(w, h, oldw, oldh)
         center.x = (width / 2).toFloat()
         center.y = (height / 2).toFloat()
-        radius = width.coerceAtMost(height) / 2 - (strokeWidth.toInt() * 2)
+        radius = width.coerceAtMost(height) / 2 - strokeWidth.toInt()
+        val h2 = height - (strokeWidth.toInt() * 2)
+        ovulationY = (((100.0 - ((OVULATION.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+        pregnancyY = (((100.0 - (((PREGNANCY_WINDOW.toDouble()) / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+        regularY = (((100.0 - ((SAFE_MIN.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
         circleRect[
             center.x - radius + strokeWidth.toInt(),
             center.y - radius + strokeWidth.toInt(),
@@ -119,11 +138,8 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     private fun setPaths() {
         val y = center.y + radius - (2 * radius * circleFillValue / 100 - 1)
-        val x = center.x - sqrt(
-            radius.toDouble().pow(2.0) - (y - center.y).toDouble().pow(2.0)
-        ).toFloat()
-        val angle =
-            Math.toDegrees(atan(((center.y - y) / (x - center.x)).toDouble())).toFloat()
+        val x = center.x - sqrt(radius.toDouble().pow(2.0) - (y - center.y).toDouble().pow(2.0)).toFloat()
+        val angle = Math.toDegrees(atan(((center.y - y) / (x - center.x)).toDouble())).toFloat()
         val startAngle = 180 - angle
         val sweepAngle = 2 * angle - 180
         segment.rewind()
@@ -133,11 +149,26 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val safeY = (((100f - ((SAFE_MIN.toFloat() / SAFE_MAX.toFloat()) * 100f)) / 100f) * height) + strokeWidth
-        canvas.drawLine((strokeWidth * 3), safeY, width.toFloat() - (strokeWidth * 3), safeY, safePaint)
-        canvas.drawText("R E G U L A R", width / 2f, safeY - 20f, safePaint)
+        drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, safePaint)
+        drawSection(canvas, "O V U L A T I O N", ovulationY, safePaint)
+        drawSection(canvas, "P E R I O D", regularY, safePaint)
         canvas.drawPath(segment, fillPaint)
+        drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, foreSafePaint)
+        drawSection(canvas, "O V U L A T I O N", ovulationY, foreSafePaint)
+        drawSection(canvas, "P E R I O D", regularY, foreSafePaint)
         canvas.drawCircle(center.x, center.y, radius.toFloat(), strokePaint)
+    }
+
+    private fun getChordLength(radius: Int, y: Double): Double {
+        val distanceToCenter = sqrt((y - center.y.toDouble()).pow(2.0))
+        return 2.0 * sqrt(radius.toDouble().pow(2.0) - distanceToCenter.pow(2.0))
+    }
+
+    private fun drawSection(canvas: Canvas, text: String, y: Double, paint: Paint) {
+        val length = getChordLength(radius, y)
+        val startX = center.x - (length / 2.0)
+        canvas.drawLine(startX.toFloat(), y.toFloat(), startX.toFloat() + length.toFloat(), y.toFloat(), paint)
+        canvas.drawText(text, center.x, y.toFloat() - 20f, paint)
     }
 
     companion object {

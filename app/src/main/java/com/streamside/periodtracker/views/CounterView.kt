@@ -8,11 +8,13 @@ import com.streamside.periodtracker.R
 
 class CounterView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : androidx.appcompat.widget.AppCompatTextView(context, attrs) {
     private var counterValue = 0
+    private var oldValue = 0
 
-    fun setCounterValue(fragment : FragmentActivity, oldValue: Int, newValue: Int, duration: Long) {
+    fun setCounterValue(fragment : FragmentActivity, newValue: Int, duration: Long) {
+        oldValue = counterValue
         val animator = ValueAnimator.ofInt(oldValue, newValue)
         animator.duration = duration
-        animator.addUpdateListener { animation -> text = fragment.getString(R.string.text_percent, animation.animatedValue.toString()) }
+        animator.addUpdateListener { animation -> text = fragment.getString(R.string.text_circle_days, animation.animatedValue.toString()) }
         animator.start()
         setCounterValue(newValue)
     }

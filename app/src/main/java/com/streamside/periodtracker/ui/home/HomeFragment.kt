@@ -23,6 +23,8 @@ import com.michalsvec.singlerowcalendar.utils.DateUtils
 import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SAFE_MAX
+import com.streamside.periodtracker.SAFE_PERIOD_MAX
+import com.streamside.periodtracker.SAFE_PERIOD_MIN
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
@@ -51,6 +53,10 @@ class HomeFragment : Fragment() {
     private lateinit var circleFillBackText : CounterView
     private lateinit var circleFillForeText : CounterView
     private lateinit var btnLog : Button
+    private lateinit var tvLastCycleLength : TextView
+    private lateinit var tvLastCycleLengthStatus : TextView
+    private lateinit var tvLastPeriodLength : TextView
+    private lateinit var tvLastPeriodLengthStatus : TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,8 +66,15 @@ class HomeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
         clearObservers()
+
         PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
+            val currentPeriodDate = Calendar.getInstance().apply {
+                set(Calendar.YEAR, currentPeriod.periodYear)
+                set(Calendar.MONTH, currentPeriod.periodMonth)
+                set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
+            }
+            val currentPeriodDays = dayDistance(currentPeriodDate.time, Date())
 
             val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
             val prefEditor = preferences.edit()
@@ -75,31 +88,57 @@ class HomeFragment : Fragment() {
             circleFillView = root.findViewById(R.id.circleFillView)
             circleFillBackText = root.findViewById(R.id.circleFillBackText)
             circleFillForeText = root.findViewById(R.id.circleFillForeText)
-            circleFillBackText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
-            circleFillForeText.setCounterValue(fa, 0, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+            circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
+            circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             btnLog = root.findViewById(R.id.btnLog)
+            tvLastCycleLength = root.findViewById(R.id.tvLastCycleLength)
+            tvLastCycleLengthStatus = root.findViewById(R.id.tvLastCycleLengthStatus)
+            tvLastPeriodLength = root.findViewById(R.id.tvLastPeriodLength)
+            tvLastPeriodLengthStatus = root.findViewById(R.id.tvLastPeriodLengthStatus)
 
-            PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
-                if (currentPeriod.lastPeriodId > -1) {
-                    // Get last period
-                    for (i in 0..periods.size) {
-                        if (periods[i].id == currentPeriod.lastPeriodId) {
-                            val lastPeriod = periods[i]
+            // Display last period statistics (part 1)
+            tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
 
-                            // Check if the last cycle period is on going
-                            if (lastPeriod.periodEndYear == 0 &&
-                                lastPeriod.periodEndMonth == 0 &&
-                                lastPeriod.periodEndDay == 0) {
-
-                                // Make the button for ending period and starting setup
-                                addEndEvent(fa, prefEditor)
-                            } else {
-                                // Make the button for logging period
-                                addLogEvent(fa)
-                            }
-                            break
-                        }
+            PERIOD_VIEW_MODEL.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
+                if (lastPeriod != null) {
+                    val lastPeriodDate = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, lastPeriod.periodYear)
+                        set(Calendar.MONTH, lastPeriod.periodMonth)
+                        set(Calendar.DAY_OF_MONTH, lastPeriod.periodDay)
                     }
+                    val lastPeriodEndDate = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, lastPeriod.periodEndYear)
+                        set(Calendar.MONTH, lastPeriod.periodEndMonth)
+                        set(Calendar.DAY_OF_MONTH, lastPeriod.periodEndDay)
+                    }
+
+                    // Check if the last cycle period is on going
+                    if (lastPeriod.periodEndYear == 0 &&
+                        lastPeriod.periodEndMonth == 0 &&
+                        lastPeriod.periodEndDay == 0) {
+
+                        // Make the button for ending period and starting setup
+                        addEndEvent(fa, prefEditor)
+                    } else {
+                        // Display last period statistics (part 2)
+                        val lastPeriodLength = dayDistance(lastPeriodEndDate.time, currentPeriodDate.time)
+                        if (lastPeriodLength > 1) tvLastPeriodLength.text = "$lastPeriodLength days"
+                        else tvLastPeriodLength.text = "$lastPeriodLength day"
+
+                        if (lastPeriodLength in SAFE_PERIOD_MIN..SAFE_PERIOD_MAX) {
+                            tvLastPeriodLengthStatus.text = "Normal"
+                        } else {
+                            tvLastPeriodLengthStatus.text = "Abnormal"
+                        }
+
+                        // Make the button for logging period
+                        addLogEvent(fa)
+                    }
+
+                    // Display last cycle statistics
+                    val lastCycleLength = dayDistance(currentPeriodDate.time, lastPeriodDate.time)
+                    if (lastCycleLength > 1) tvLastCycleLength.text = "$lastCycleLength days"
+                    else tvLastCycleLength.text = "$lastCycleLength day"
                 } else {
                     // Make the button for logging period
                     addLogEvent(fa)
@@ -175,18 +214,14 @@ class HomeFragment : Fragment() {
             builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
                 run {
                     if (smallCalendar.getSelectedDates().isNotEmpty()) {
-                        PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
-                            // Update last cycle's period end date
-                            for (i in 0..periods.size) {
-                                if (periods[i].id == currentPeriod.lastPeriodId) {
-                                    val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
-                                    val lastPeriod = periods[i]
-                                    lastPeriod.periodEndYear = today.get(Calendar.YEAR)
-                                    lastPeriod.periodEndMonth = today.get(Calendar.MONTH)
-                                    lastPeriod.periodEndDay = today.get(Calendar.DAY_OF_MONTH)
-                                    PERIOD_VIEW_MODEL.update(lastPeriod)
-                                    break
-                                }
+                        PERIOD_VIEW_MODEL.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
+                            if (lastPeriod != null) {
+                                // Update last cycle's period end date
+                                val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
+                                lastPeriod.periodEndYear = today.get(Calendar.YEAR)
+                                lastPeriod.periodEndMonth = today.get(Calendar.MONTH)
+                                lastPeriod.periodEndDay = today.get(Calendar.DAY_OF_MONTH)
+                                PERIOD_VIEW_MODEL.update(lastPeriod)
                             }
 
                             // Set log period flag to true then restart app
@@ -308,7 +343,6 @@ class HomeFragment : Fragment() {
                     sc.scrollToPosition(0)
                 }
             }
-
         }
     }
 
@@ -322,16 +356,16 @@ class HomeFragment : Fragment() {
             }
             val gap = dayDistance(today.time, currentPeriodDate.time)
             val percentage: Float = (gap.toFloat() / SAFE_MAX) * 100f
-            val oldValue = circleFillView.getCircleFillValue()
             circleFillView.setCircleFillValue(percentage.toInt(), CIRCLE_FILL_DURATION)
-            circleFillBackText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
-            circleFillForeText.setCounterValue(fa, oldValue, circleFillView.getCircleFillValue(), CIRCLE_FILL_DURATION)
+            circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
+            circleFillForeText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
         }
     }
 
     private fun clearObservers() {
         val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
         periodViewModel.all.removeObservers(viewLifecycleOwner)
+        periodViewModel.lastPeriod.removeObservers(viewLifecycleOwner)
         periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
     }
 

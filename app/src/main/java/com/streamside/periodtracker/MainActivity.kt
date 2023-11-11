@@ -33,8 +33,12 @@ var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
 private const val SETUP_PAGES = 11
+const val SAFE_PERIOD_MIN = 2
+const val SAFE_PERIOD_MAX = 7
 const val SAFE_MIN = 23
 const val SAFE_MAX = 35
+const val OVULATION = 14
+const val PREGNANCY_WINDOW = 9 // Possible days to get pregnant; before and up to Ovulation
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

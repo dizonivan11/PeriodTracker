@@ -53,8 +53,9 @@ open class SetupFragment : Fragment() {
     }
 
     private fun clearObservers() {
-        PERIOD_VIEW_MODEL.currentPeriod.removeObservers(viewLifecycleOwner)
         PERIOD_VIEW_MODEL.all.removeObservers(viewLifecycleOwner)
+        PERIOD_VIEW_MODEL.lastPeriod.removeObservers(viewLifecycleOwner)
+        PERIOD_VIEW_MODEL.currentPeriod.removeObservers(viewLifecycleOwner)
     }
 
     fun previousPage() {

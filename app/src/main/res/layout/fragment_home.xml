@@ -87,9 +87,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/text_percent"
+            android:text="@string/text_circle_days"
             android:textColor="?attr/colorPrimary"
-            android:textSize="60sp"
+            android:textSize="20sp"
+            android:layout_marginBottom="200dp"
             app:layout_constraintBottom_toBottomOf="@+id/circleFillView"
             app:layout_constraintEnd_toEndOf="@+id/circleFillView"
             app:layout_constraintStart_toStartOf="@+id/circleFillView"
@@ -106,7 +107,7 @@
             app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar"
             custom:CircleFillColor="?attr/colorPrimary"
             custom:CircleFillStrokeColor="?attr/colorPrimary"
-            custom:CircleFillSafeColor="?attr/colorSecondary"
+            custom:CircleFillSafeColor="?attr/colorPrimary"
             custom:CircleFillStrokeWidth="20"
             custom:CircleFillValue="0" />
 
@@ -115,9 +116,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/text_percent"
+            android:text="@string/text_circle_days"
             android:textColor="#80242424"
-            android:textSize="60sp"
+            android:textSize="20sp"
+            android:layout_marginBottom="200dp"
             app:layout_constraintBottom_toBottomOf="@+id/circleFillView"
             app:layout_constraintEnd_toEndOf="@+id/circleFillView"
             app:layout_constraintStart_toStartOf="@+id/circleFillView"
@@ -139,13 +141,13 @@
             android:text="My Cycles"
             android:textStyle="bold"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintBottom_toTopOf="@+id/linearMyCycles"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="20dp"
             android:layout_marginBottom="20dp" />
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/linearMyCycles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_background"
@@ -161,7 +163,28 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Current cycle status"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvMyCycleStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -176,17 +199,19 @@
                         android:layout_marginBottom="8dp" />
 
                     <TextView
+                        android:id="@+id/tvLastCycleLength"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="27 days"
+                        android:text="--"
                         android:textStyle="bold" />
 
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tvLastCycleLengthStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Normal"
+                    android:text=""
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -210,20 +235,49 @@
                         android:layout_marginBottom="8dp" />
 
                     <TextView
+                        android:id="@+id/tvLastPeriodLength"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5 days"
+                        android:text="--"
                         android:textStyle="bold" />
 
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tvLastPeriodLengthStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Normal"
+                    android:text=""
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="Cycle History"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/linearCycleHistory"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/linearCycleHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="70dp"
+            android:padding="20dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearMyCycles">
 
         </LinearLayout>
 

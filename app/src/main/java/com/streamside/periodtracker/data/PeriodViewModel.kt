@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 
 class PeriodViewModel(app: Application): AndroidViewModel(app) {
     val all: LiveData<List<Period>>
+    val lastPeriod: LiveData<Period>
     val currentPeriod: LiveData<Period>
     private val repository: PeriodRepository
 
@@ -17,6 +18,7 @@ class PeriodViewModel(app: Application): AndroidViewModel(app) {
         val dao = PeriodDatabase.getDatabase(app).periodDao()
         repository = PeriodRepository(dao)
         all = repository.all
+        lastPeriod = repository.lastPeriod
         currentPeriod = repository.currentPeriod
     }
 

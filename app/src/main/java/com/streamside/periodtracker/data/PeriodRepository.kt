@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 
 class PeriodRepository(private val dao: PeriodDao) {
     val all: LiveData<List<Period>> = dao.getAll()
+    val lastPeriod: LiveData<Period> = dao.getLastPeriod()
     val currentPeriod: LiveData<Period> = dao.getCurrentPeriod()
 
     suspend fun add(period: Period): Long {

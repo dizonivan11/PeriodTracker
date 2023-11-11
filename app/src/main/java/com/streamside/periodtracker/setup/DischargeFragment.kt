@@ -19,7 +19,6 @@ import java.util.Date
 
 class DischargeFragment : SetupFragment() {
     private lateinit var newPeriod: Period
-    private lateinit var lastPeriod: Period
     private var isReferenceCycle = true
 
     override fun onCreateView(
@@ -44,15 +43,8 @@ class DischargeFragment : SetupFragment() {
         PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
             newPeriod = period
 
-            PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
-                // Get last period
-                for (i in periods.indices) {
-                    if (periods[i].id == newPeriod.lastPeriodId) {
-                        lastPeriod = periods[i]
-                        isReferenceCycle = false
-                        break
-                    }
-                }
+            PERIOD_VIEW_MODEL.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
+                isReferenceCycle = lastPeriod == null
 
                 view.findViewById<Button>(R.id.submit_discharge).setOnClickListener {
                     if (!isReferenceCycle) {
