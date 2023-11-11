@@ -59,17 +59,17 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         strokePaint.strokeWidth = strokeWidth
         strokePaint.style = Paint.Style.STROKE
         safePaint.color = safeColor
-        safePaint.strokeWidth = strokeWidth / 4
+        safePaint.strokeWidth = strokeWidth / 6
         safePaint.style = Paint.Style.FILL
         safePaint.typeface = tf
         safePaint.textAlign = Paint.Align.CENTER
         safePaint.textSize = 32f
         foreSafePaint.color = 0x40000000
-        foreSafePaint.strokeWidth = strokeWidth / 4
-        foreSafePaint.style = Paint.Style.FILL
-        foreSafePaint.typeface = tf
-        foreSafePaint.textAlign = Paint.Align.CENTER
-        foreSafePaint.textSize = 32f
+        foreSafePaint.strokeWidth = safePaint.strokeWidth
+        foreSafePaint.style = safePaint.style
+        foreSafePaint.typeface = safePaint.typeface
+        foreSafePaint.textAlign = safePaint.textAlign
+        foreSafePaint.textSize = safePaint.textSize
     }
 
     fun setFillColor(fillColor: Int) {
@@ -149,11 +149,11 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, safePaint)
+        // drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, safePaint)
         drawSection(canvas, "O V U L A T I O N", ovulationY, safePaint)
         drawSection(canvas, "P E R I O D", regularY, safePaint)
         canvas.drawPath(segment, fillPaint)
-        drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, foreSafePaint)
+        // drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, foreSafePaint)
         drawSection(canvas, "O V U L A T I O N", ovulationY, foreSafePaint)
         drawSection(canvas, "P E R I O D", regularY, foreSafePaint)
         canvas.drawCircle(center.x, center.y, radius.toFloat(), strokePaint)
