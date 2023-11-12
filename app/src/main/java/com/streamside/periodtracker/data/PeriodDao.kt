@@ -10,6 +10,8 @@ import androidx.room.Update
 
 @Dao
 interface PeriodDao {
+    @Query("SELECT * FROM period WHERE id = :id")
+    suspend fun get(id: Long): Period
     @Query("SELECT * FROM period")
     fun getAll(): LiveData<List<Period>>
     @Query("SELECT * FROM period WHERE id = (SELECT lastPeriodId FROM period WHERE nextPeriodId = -1)")

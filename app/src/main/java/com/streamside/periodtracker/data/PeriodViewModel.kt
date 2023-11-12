@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class PeriodViewModel(app: Application): AndroidViewModel(app) {
@@ -20,6 +22,11 @@ class PeriodViewModel(app: Application): AndroidViewModel(app) {
         all = repository.all
         lastPeriod = repository.lastPeriod
         currentPeriod = repository.currentPeriod
+    }
+
+    suspend fun get(id: Long): Period {
+        val deferred: Deferred<Period> = viewModelScope.async { repository.get(id) }
+        return deferred.await()
     }
 
     fun add(period: Period): LiveData<Long> {

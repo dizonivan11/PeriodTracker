@@ -15,7 +15,6 @@ import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.data.Period
 import java.util.Calendar
-import java.util.Date
 
 class DischargeFragment : SetupFragment() {
     private lateinit var newPeriod: Period
@@ -56,8 +55,12 @@ class DischargeFragment : SetupFragment() {
                         }
 
                         // Record menstrual cycle condition
-                        val today = Calendar.getInstance().apply { Date() }
-                        val periodGap = dayDistance(today.time, lastPeriodDate.time)
+                        val newPeriodDate = Calendar.getInstance().apply {
+                            set(Calendar.YEAR, newPeriod.periodYear)
+                            set(Calendar.MONTH, newPeriod.periodMonth)
+                            set(Calendar.DAY_OF_MONTH, newPeriod.periodDay)
+                        }
+                        val periodGap = dayDistance(newPeriodDate.time, lastPeriodDate.time)
                         if (periodGap in SAFE_MIN..SAFE_MAX)
                             newPeriod.menstrualCycle = getString(R.string.menstrual_cycle_regular)
                         else

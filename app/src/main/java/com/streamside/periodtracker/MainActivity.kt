@@ -33,6 +33,7 @@ var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
 private const val SETUP_PAGES = 11
+const val MAX_HISTORY = 3
 const val SAFE_PERIOD_MIN = 2
 const val SAFE_PERIOD_MAX = 7
 const val SAFE_MIN = 23

@@ -7,6 +7,10 @@ class PeriodRepository(private val dao: PeriodDao) {
     val lastPeriod: LiveData<Period> = dao.getLastPeriod()
     val currentPeriod: LiveData<Period> = dao.getCurrentPeriod()
 
+    suspend fun get(id: Long): Period {
+        return dao.get(id)
+    }
+
     suspend fun add(period: Period): Long {
         return dao.add(period)
     }

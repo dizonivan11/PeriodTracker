@@ -59,8 +59,8 @@ class SkinFragment : SetupFragment() {
     }
 
     private fun inputCheck(period: Period): Boolean {
-        if (period.periodYear == 0 ||
-            period.periodMonth == 0 ||
+        if (period.periodYear == 0 &&
+            period.periodMonth == 0 &&
             period.periodDay == 0
         ) return false
 

@@ -3,11 +3,13 @@ package com.streamside.periodtracker.ui.home
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.SharedPreferences.Editor
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -20,15 +22,21 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
 import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
+import com.streamside.periodtracker.MAX_HISTORY
+import com.streamside.periodtracker.OVULATION
 import com.streamside.periodtracker.PERIOD_VIEW_MODEL
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SAFE_MAX
+import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
 import com.streamside.periodtracker.views.CounterView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.text.DateFormatSymbols
 import java.util.Calendar
 import java.util.Date
@@ -53,10 +61,12 @@ class HomeFragment : Fragment() {
     private lateinit var circleFillBackText : CounterView
     private lateinit var circleFillForeText : CounterView
     private lateinit var btnLog : Button
+    private lateinit var tvMyCycleStatus : TextView
     private lateinit var tvLastCycleLength : TextView
     private lateinit var tvLastCycleLengthStatus : TextView
     private lateinit var tvLastPeriodLength : TextView
     private lateinit var tvLastPeriodLengthStatus : TextView
+    private lateinit var linearCycleHistory : LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,6 +79,7 @@ class HomeFragment : Fragment() {
 
         PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
+
             val currentPeriodDate = Calendar.getInstance().apply {
                 set(Calendar.YEAR, currentPeriod.periodYear)
                 set(Calendar.MONTH, currentPeriod.periodMonth)
@@ -91,10 +102,12 @@ class HomeFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             btnLog = root.findViewById(R.id.btnLog)
+            tvMyCycleStatus = root.findViewById(R.id.tvMyCycleStatus)
             tvLastCycleLength = root.findViewById(R.id.tvLastCycleLength)
             tvLastCycleLengthStatus = root.findViewById(R.id.tvLastCycleLengthStatus)
             tvLastPeriodLength = root.findViewById(R.id.tvLastPeriodLength)
             tvLastPeriodLengthStatus = root.findViewById(R.id.tvLastPeriodLengthStatus)
+            linearCycleHistory = root.findViewById(R.id.linearCycleHistory)
 
             // Display last period statistics (part 1)
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
@@ -158,6 +171,101 @@ class HomeFragment : Fragment() {
             btnLeft.setOnClickListener {
                 // smallCalendar.setDates(getDatesOfPreviousMonth())
                 initSmallCalendar(root, getDatesOfPreviousMonth())
+            }
+
+            // Cycle History section
+            PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
+                linearCycleHistory.removeAllViews()
+                var n = 0
+                for (i in periods.size - 1 downTo 0) {
+                    val historyPeriod = periods[i]
+                    val hasLastCycle = historyPeriod.lastPeriodId > -1
+                    val hasNextCycle = historyPeriod.nextPeriodId > -1
+                    if (!hasLastCycle || !hasNextCycle) continue
+                    if (n++ > MAX_HISTORY - 1) break
+
+                    val periodDate = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, historyPeriod.periodYear)
+                        set(Calendar.MONTH, historyPeriod.periodMonth)
+                        set(Calendar.DAY_OF_MONTH, historyPeriod.periodDay)
+                    }
+
+                    val ll = LinearLayout(fa).apply {
+                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        orientation = LinearLayout.HORIZONTAL
+                    }
+                    if (n > 1) (ll.layoutParams as LinearLayout.LayoutParams).setMargins(0, 50, 0, 0)
+                    val llInner = LinearLayout(fa).apply {
+                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        orientation = LinearLayout.VERTICAL
+                    }
+                    (llInner.layoutParams as LinearLayout.LayoutParams).weight = 1f
+                    val llInnerMonthYear = TextView(fa).apply {
+                        layoutParams = ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT)
+                        text = "${DateUtils.getMonthName(periodDate.time)} ${DateUtils.getDayNumber(periodDate.time)}, ${historyPeriod.periodYear}"
+                        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                    }
+                    val llInnerCycleGap = TextView(fa).apply {
+                        layoutParams = ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT)
+                        text = "--"
+                    }
+                    (llInnerCycleGap.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0, 8, 0, 0)
+                    val llInnerPeriodGap = TextView(fa).apply {
+                        layoutParams = ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT)
+                        text = "--"
+                    }
+                    (llInnerPeriodGap.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0, 8, 0, 0)
+                    val llSStatus = TextView(fa).apply {
+                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                        text = historyPeriod.menstrualCycle
+                        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                    }
+
+                    var isPeriodEnded = true
+                    if (hasLastCycle) {
+                        CoroutineScope(MainScope().coroutineContext).launch {
+                            val lastPeriod = PERIOD_VIEW_MODEL.get(historyPeriod.lastPeriodId)
+                            val lastPeriodDate = Calendar.getInstance().apply {
+                                set(Calendar.YEAR, lastPeriod.periodYear)
+                                set(Calendar.MONTH, lastPeriod.periodMonth)
+                                set(Calendar.DAY_OF_MONTH, lastPeriod.periodDay)
+                            }
+                            llInnerCycleGap.text = "Cycle length: ${dayDistance(periodDate.time, lastPeriodDate.time)}"
+                            val lastPeriodEndDate = Calendar.getInstance().apply {
+                                set(Calendar.YEAR, lastPeriod.periodEndYear)
+                                set(Calendar.MONTH, lastPeriod.periodEndMonth)
+                                set(Calendar.DAY_OF_MONTH, lastPeriod.periodEndDay)
+                            }
+                            llInnerPeriodGap.text = "Period length: ${dayDistance(periodDate.time, lastPeriodEndDate.time)}"
+                            if (lastPeriod.periodEndYear == 0 &&
+                                lastPeriod.periodEndMonth == 0 &&
+                                lastPeriod.periodEndDay == 0) isPeriodEnded = false
+                        }
+                    }
+                    if (!isPeriodEnded) continue
+
+                    // HIERARCHY
+                    // ll
+                    //  - ll_inner
+                    //      - ll_inner_month_year
+                    //      - ll_inner_cycle_gap
+                    //      - ll_inner_period_gap
+                    //  - ll_status
+
+                    ll.addView(llInner)
+                    llInner.addView(llInnerMonthYear)
+                    llInner.addView(llInnerCycleGap)
+                    llInner.addView(llInnerPeriodGap)
+                    ll.addView(llSStatus)
+                    linearCycleHistory.addView(ll)
+                }
+                if (n < 1) {
+                    val tvNoHistory = TextView(fa).apply {
+                        layoutParams = ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.MarginLayoutParams.WRAP_CONTENT)
+                        text = "No history yet"
+                    }
+                    linearCycleHistory.addView(tvNoHistory)
+                }
             }
         }
 
@@ -355,6 +463,19 @@ class HomeFragment : Fragment() {
                 set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
             }
             val gap = dayDistance(today.time, currentPeriodDate.time)
+
+            // Update current cycle status
+            if (gap <= SAFE_PERIOD_MAX)
+                tvMyCycleStatus.text = getString(R.string.cs_period)
+            else if (gap < OVULATION)
+                tvMyCycleStatus.text = getString(R.string.cs_follicular_phase)
+            else if (gap == OVULATION)
+                tvMyCycleStatus.text = getString(R.string.cs_ovulation)
+            else if (gap < SAFE_MIN)
+                tvMyCycleStatus.text = getString(R.string.cs_luteal_phase)
+            else
+                tvMyCycleStatus.text = getString(R.string.cs_safe_period)
+
             val percentage: Float = (gap.toFloat() / SAFE_MAX) * 100f
             circleFillView.setCircleFillValue(percentage.toInt(), CIRCLE_FILL_DURATION)
             circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)

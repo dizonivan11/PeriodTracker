@@ -22,6 +22,16 @@
     <string name="log_period_key">log_period_key</string>
     <string name="simulation_key">simulation_pref</string>
 
+    <!-- Cycle status -->
+    <string name="cs_period">Menstruation: Lasts for 3~7 days</string>
+    <string name="cs_follicular_phase">Follicular Phase: Starts on the first day of your period and lasts for 13~14 days</string>
+    <string name="cs_ovulation">Ovulation: Happens once each month, about two weeks before your next period and last from 16~32 hours</string>
+    <string name="cs_luteal_phase">Luteal Phase: If pregnancy does not occur, the corpus luteum dies, progesterone levels drop, the uterus lining sheds and the period begins again</string>
+    <string name="cs_safe_period">Next period might start</string>
+
+    <!-- Cycle notes -->
+    <string name="cs_follicular_phase_pregnant">Please select your discharge color</string>
+
     <!-- Input Check Messages -->
     <string name="ic_discharge">Please select your discharge color</string>
     <string name="ic_discomforts">Please select at least one discomfort you feel</string>
