@@ -15,8 +15,4 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:tint">@null</item>
     </style>
-
-    <style name="PreferenceTheme" parent="@style/PreferenceThemeOverlay.v14.Material">
-        <item name="android:tint">?attr/colorSecondary</item>
-    </style>
 </resources>
