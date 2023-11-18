@@ -10,11 +10,13 @@
     <string name="button_back">Back</string>
     <string name="button_next">Next</string>
     <string name="button_finish">Finish</string>
+    <string name="label_no_result">No result</string>
+    <string name="label_example">Ex. %1$s</string>
 
     <!-- Preference Titles -->
     <string name="general_title">General</string>
     <string name="setup_title">Setup</string>
-    <string name="debug_title">Debug</string>
+    <string name="debug_title">Test</string>
 
     <!-- Preference Keys -->
     <string name="dark_mode_key">dark_mode_pref</string>
@@ -30,7 +32,7 @@
     <string name="cs_safe_period">Next period might start</string>
 
     <!-- Cycle notes -->
-    <string name="cs_follicular_phase_pregnant">Please select your discharge color</string>
+    <string name="cs_follicular_phase_pregnant">There is a chance to get pregnant</string>
 
     <!-- Input Check Messages -->
     <string name="ic_discharge">Please select your discharge color</string>

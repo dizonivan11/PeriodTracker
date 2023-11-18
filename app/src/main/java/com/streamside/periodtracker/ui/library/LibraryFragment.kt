@@ -8,12 +8,16 @@ import android.view.ViewGroup
 import com.streamside.periodtracker.R
 
 class LibraryFragment : Fragment() {
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_library, container, false)
+        val view =  inflater.inflate(R.layout.fragment_library, container, false)
+        val fa = requireActivity()
+
+        fa.supportFragmentManager.beginTransaction()
+            .replace(R.id.frameLibrary, LibraryHomeFragment()).commit()
+
+        return view
     }
 }

@@ -2,7 +2,10 @@ package com.streamside.periodtracker.ui.settings
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.graphics.Paint
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.TypedValue
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
@@ -14,17 +17,32 @@ import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.PeriodViewModel
 
 class SettingsFragment : PreferenceFragmentCompat() {
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-        findPreference<SwitchPreference>(getString(R.string.dark_mode_key))?.setOnPreferenceChangeListener { _, newValue ->
+        // Set icon colors
+        val typedValue = TypedValue()
+        val theme = requireActivity().theme
+        theme.resolveAttribute(com.google.android.material.R.attr.colorSecondary, typedValue, true)
+        val iconColor = Paint()
+        iconColor.color = typedValue.data
+        iconColor.style = Paint.Style.FILL
+
+        val darkModePref = findPreference<SwitchPreference>(getString(R.string.dark_mode_key))
+        val firstTimePref = findPreference<SwitchPreference>(getString(R.string.first_time_key))
+        val simulationPref = findPreference<SwitchPreference>(getString(R.string.simulation_key))
+
+        darkModePref?.icon?.setColorFilter(iconColor.color, PorterDuff.Mode.MULTIPLY)
+        firstTimePref?.icon?.setColorFilter(iconColor.color, PorterDuff.Mode.MULTIPLY)
+        simulationPref?.icon?.setColorFilter(iconColor.color, PorterDuff.Mode.MULTIPLY)
+
+        darkModePref?.setOnPreferenceChangeListener { _, newValue ->
             DARK_MODE = newValue as Boolean
             if (DARK_MODE) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             true
         }
-        findPreference<SwitchPreference>(getString(R.string.first_time_key))?.setOnPreferenceChangeListener { _, newValue ->
+        firstTimePref?.setOnPreferenceChangeListener { _, newValue ->
             FIRST_TIME = newValue as Boolean
             if (FIRST_TIME) {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(requireActivity())
