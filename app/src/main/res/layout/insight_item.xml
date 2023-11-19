@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cvInsightItem"
+    android:layout_width="100dp"
+    android:layout_height="150dp"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clInsightItem"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imageInsightItem"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="@+id/clInsightItem"
+            app:layout_constraintStart_toStartOf="@+id/clInsightItem"
+            app:layout_constraintTop_toTopOf="@+id/clInsightItem"
+            app:layout_constraintBottom_toBottomOf="@+id/clInsightItem" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="@+id/clInsightItem"
+            app:layout_constraintStart_toStartOf="@+id/clInsightItem"
+            app:layout_constraintTop_toTopOf="@+id/clInsightItem"
+            app:layout_constraintBottom_toBottomOf="@+id/clInsightItem"
+            android:background="@drawable/card_bottom_gradient"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/titleInsightItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="Insight Title"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

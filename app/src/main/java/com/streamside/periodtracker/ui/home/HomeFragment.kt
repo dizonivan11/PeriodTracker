@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.michalsvec.singlerowcalendar.calendar.CalendarChangesObserver
 import com.michalsvec.singlerowcalendar.calendar.CalendarViewManager
 import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
@@ -30,6 +32,8 @@ import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
+import com.streamside.periodtracker.data.InsightsAdapter
+import com.streamside.periodtracker.data.LibraryDataBuilder
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
@@ -61,6 +65,7 @@ class HomeFragment : Fragment() {
     private lateinit var circleFillBackText : CounterView
     private lateinit var circleFillForeText : CounterView
     private lateinit var btnLog : Button
+    private lateinit var rvInsights : RecyclerView
     private lateinit var tvMyCycleStatus : TextView
     private lateinit var tvLastCycleLength : TextView
     private lateinit var tvLastCycleLengthStatus : TextView
@@ -102,12 +107,17 @@ class HomeFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             btnLog = root.findViewById(R.id.btnLog)
+            rvInsights = root.findViewById(R.id.rvInsights)
             tvMyCycleStatus = root.findViewById(R.id.tvMyCycleStatus)
             tvLastCycleLength = root.findViewById(R.id.tvLastCycleLength)
             tvLastCycleLengthStatus = root.findViewById(R.id.tvLastCycleLengthStatus)
             tvLastPeriodLength = root.findViewById(R.id.tvLastPeriodLength)
             tvLastPeriodLengthStatus = root.findViewById(R.id.tvLastPeriodLengthStatus)
             linearCycleHistory = root.findViewById(R.id.linearCycleHistory)
+
+            // Insights section
+            rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
+            rvInsights.adapter = InsightsAdapter(LibraryDataBuilder.getLibraryData(fa))
 
             // Display last period statistics (part 1)
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
@@ -268,7 +278,6 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-
         return root
     }
 

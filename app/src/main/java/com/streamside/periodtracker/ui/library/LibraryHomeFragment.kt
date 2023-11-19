@@ -4,9 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.LibraryAdapter
+import com.streamside.periodtracker.data.LibraryDataBuilder
+
+var LIBRARY_CALLBACK: (() -> Unit)? = null
 
 class LibraryHomeFragment : Fragment() {
     override fun onCreateView(
@@ -15,12 +20,13 @@ class LibraryHomeFragment : Fragment() {
     ): View? {
         val view =  inflater.inflate(R.layout.fragment_library_home, container, false)
         val fa = requireActivity()
-        val cvDictionary = view.findViewById<CardView>(R.id.cvDictionary)
+        val rvLibrary = view.findViewById<RecyclerView>(R.id.rvLibrary)
 
-        cvDictionary.setOnClickListener {
-            fa.supportFragmentManager.beginTransaction()
-                .replace(R.id.frameLibrary, DictionaryFragment()).commit()
-        }
+        rvLibrary.layoutManager = GridLayoutManager(fa, 2)
+        rvLibrary.adapter = LibraryAdapter(LibraryDataBuilder.getLibraryData(fa))
+
+        // Call stored callback (if any)
+        LIBRARY_CALLBACK?.invoke()
 
         return view
     }

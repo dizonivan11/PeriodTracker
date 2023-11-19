@@ -178,6 +178,24 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Recommended Insights"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/rvInsights"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvInsights"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            app:layout_constraintTop_toBottomOf="@id/llPrompt" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="My Cycles"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -198,7 +216,7 @@
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llPrompt">
+            app:layout_constraintTop_toBottomOf="@+id/rvInsights">
 
             <LinearLayout
                 android:layout_width="match_parent"
