@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.LibraryAdapter
-import com.streamside.periodtracker.data.LibraryDataBuilder
+import com.streamside.periodtracker.data.AppDataBuilder
 
 var LIBRARY_CALLBACK: (() -> Unit)? = null
 
@@ -23,7 +23,7 @@ class LibraryHomeFragment : Fragment() {
         val rvLibrary = view.findViewById<RecyclerView>(R.id.rvLibrary)
 
         rvLibrary.layoutManager = GridLayoutManager(fa, 2)
-        rvLibrary.adapter = LibraryAdapter(LibraryDataBuilder.getLibraryData(fa))
+        rvLibrary.adapter = LibraryAdapter(AppDataBuilder.getLibraryData(fa))
 
         // Call stored callback (if any)
         LIBRARY_CALLBACK?.invoke()

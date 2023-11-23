@@ -9,7 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.streamside.periodtracker.R
 
-class LibraryAdapter(private val data: Array<Library>) : RecyclerView.Adapter<LibraryAdapter.ViewHolder>() {
+class LibraryAdapter(private val data: MutableList<Library>) : RecyclerView.Adapter<LibraryAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cvLibraryItem: CardView
         val imageLibraryItem: ImageView

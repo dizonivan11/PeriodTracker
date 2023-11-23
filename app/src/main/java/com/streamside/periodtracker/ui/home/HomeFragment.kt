@@ -33,7 +33,8 @@ import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
 import com.streamside.periodtracker.data.InsightsAdapter
-import com.streamside.periodtracker.data.LibraryDataBuilder
+import com.streamside.periodtracker.data.AppDataBuilder
+import com.streamside.periodtracker.data.Library
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
@@ -117,7 +118,12 @@ class HomeFragment : Fragment() {
 
             // Insights section
             rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
-            rvInsights.adapter = InsightsAdapter(LibraryDataBuilder.getLibraryData(fa))
+            val insightsData: MutableList<Library> = mutableListOf()
+            for (insight in AppDataBuilder.getLibraryData(fa)) {
+                if (insight.symptoms.isEmpty()) continue
+                insightsData.add(insight)
+            }
+            rvInsights.adapter = InsightsAdapter(insightsData)
 
             // Display last period statistics (part 1)
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle

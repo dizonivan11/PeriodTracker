@@ -9,7 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.streamside.periodtracker.R
 
-class InsightsAdapter(private val data: Array<Library>) : RecyclerView.Adapter<InsightsAdapter.ViewHolder>() {
+class InsightsAdapter(private val data: MutableList<Library>) : RecyclerView.Adapter<InsightsAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cvInsightItem: CardView
         val imageInsightItem: ImageView
