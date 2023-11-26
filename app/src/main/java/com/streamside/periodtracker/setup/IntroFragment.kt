@@ -5,26 +5,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import com.streamside.periodtracker.PERIOD_VIEW_MODEL
+import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.PeriodViewModel
 
 class IntroFragment : SetupFragment() {
+    private lateinit var periodViewModel: PeriodViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_intro, container, false)
-        PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
+        val fa = requireActivity()
+        periodViewModel = getPeriodViewModel(fa)
+
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { referencePeriod ->
             view.findViewById<Button>(R.id.submit_intro).setOnClickListener {
-                if (periods.isEmpty()) {
-                    // Initialize reference cycle
-                    PERIOD_VIEW_MODEL.init(-1, 0, 0, 0)
+                if (referencePeriod == null) {
+                    // Initialize reference period
+                    periodViewModel.init(-1, 0, 0, 0).observe(viewLifecycleOwner) {
+                        nextPage(fa)
+                    }
+                } else {
+                    nextPage(fa)
                 }
-                nextPage()
             }
         }
-
         return view
     }
 }

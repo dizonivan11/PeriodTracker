@@ -23,7 +23,7 @@ class LibraryHomeFragment : Fragment() {
         val rvLibrary = view.findViewById<RecyclerView>(R.id.rvLibrary)
 
         rvLibrary.layoutManager = GridLayoutManager(fa, 2)
-        rvLibrary.adapter = LibraryAdapter(AppDataBuilder.getLibraryData(fa))
+        rvLibrary.adapter = LibraryAdapter(AppDataBuilder.getLibraryData().filter { it.visible })
 
         // Call stored callback (if any)
         LIBRARY_CALLBACK?.invoke()

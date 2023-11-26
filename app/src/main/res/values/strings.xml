@@ -9,6 +9,7 @@
     <string name="button_start">Start</string>
     <string name="button_back">Back</string>
     <string name="button_next">Next</string>
+    <string name="button_save">Save</string>
     <string name="button_finish">Finish</string>
     <string name="label_no_result">No result</string>
     <string name="label_example">Ex. %1$s</string>
@@ -31,8 +32,14 @@
     <string name="cs_luteal_phase">Luteal Phase: If pregnancy does not occur, the corpus luteum dies, progesterone levels drop, the uterus lining sheds and the period begins again</string>
     <string name="cs_safe_period">Next period might start</string>
 
-    <!-- Cycle notes -->
-    <string name="cs_follicular_phase_pregnant">There is a chance to get pregnant</string>
+    <!-- Cycle prompts -->
+    <string name="prompt_period">On period phase</string>
+    <string name="prompt_follicular">On follicular phase</string>
+    <string name="prompt_pregnant">There is a chance to get pregnant</string>
+    <string name="prompt_ovulation">Ovulation phase</string>
+    <string name="prompt_luteal">On luteal phase</string>
+    <string name="prompt_regular">Next period may occur</string>
+    <string name="prompt_irregular">Next period may occur (irregular)</string>
 
     <!-- Input Check Messages -->
     <string name="ic_discharge">Please select your discharge color</string>
@@ -76,7 +83,6 @@
     <string name="mood_irritated">Irritated</string>
     <string name="mood_happy">Happy</string>
     <string name="mood_sad">Sad</string>
-    <string name="mood_anxious">Anxious</string>
     <string name="mood_depressed">Depressed</string>
     <string name="mood_stressed">Stressed</string>
     <string name="mood_low_energy">Low energy</string>
@@ -122,6 +128,4 @@
     <string name="sk_dark_spots_pores">Dark spots and pores</string>
     <string name="sk_fine_lines_wrinkles">Fine lines and wrinkles</string>
     <string name="sk_dullness_texture">Dullness and texture</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

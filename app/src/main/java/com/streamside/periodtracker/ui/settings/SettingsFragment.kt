@@ -7,14 +7,14 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreference
 import com.streamside.periodtracker.DARK_MODE
 import com.streamside.periodtracker.FIRST_TIME
+import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
+import com.streamside.periodtracker.MainActivity.Companion.restart
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.data.PeriodViewModel
 
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -51,18 +51,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 builder.setMessage("This will wipe all your data!")
                 builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
                     run {
-                        val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-
-                        // Clear all observers
-                        periodViewModel.all.removeObservers(viewLifecycleOwner)
-                        periodViewModel.lastPeriod.removeObservers(viewLifecycleOwner)
-                        periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
+                        val fa = requireActivity()
+                        val periodViewModel = getPeriodViewModel(fa)
 
                         // Delete all data
                         periodViewModel.deleteAll()
 
                         // Restart app
-                        requireActivity().recreate()
+                        restart(fa, viewLifecycleOwner)
                     }
                 }
                 builder.setOnCancelListener {

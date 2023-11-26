@@ -13,6 +13,13 @@
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
         <item name="android:textColor">@color/grey</item>
-        <item name="android:tint">@null</item>
+        <item name="chipStyle">@style/MaterialChips</item>
+    </style>
+
+    <style name="MaterialChips" parent="@style/Widget.MaterialComponents.Chip.Choice">
+        <item name="chipIconVisible">true</item>
+        <item name="chipIconTint">@color/chip_text_color</item>
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="android:textColor">@color/chip_text_color</item>
     </style>
 </resources>

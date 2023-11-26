@@ -9,7 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.streamside.periodtracker.R
 
-class InsightsAdapter(private val data: MutableList<Library>) : RecyclerView.Adapter<InsightsAdapter.ViewHolder>() {
+class InsightsAdapter(private val data: List<Library>) : RecyclerView.Adapter<InsightsAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cvInsightItem: CardView
         val imageInsightItem: ImageView
@@ -23,7 +23,7 @@ class InsightsAdapter(private val data: MutableList<Library>) : RecyclerView.Ada
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.insight_item, viewGroup, false)
+        val view = LayoutInflater.from(viewGroup.context).inflate(viewType, viewGroup, false)
         return ViewHolder(view)
     }
 
@@ -31,6 +31,10 @@ class InsightsAdapter(private val data: MutableList<Library>) : RecyclerView.Ada
         viewHolder.cvInsightItem.setOnClickListener(data[position].callback)
         viewHolder.imageInsightItem.setImageResource(data[position].image)
         viewHolder.titleInsightItem.text = data[position].title
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return data[position].insightView
     }
 
     override fun getItemCount() = data.size

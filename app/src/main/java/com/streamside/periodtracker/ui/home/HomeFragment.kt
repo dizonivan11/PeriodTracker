@@ -14,7 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,9 +23,20 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
 import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
+import com.patrykandpatrick.vico.core.entry.entriesOf
+import com.patrykandpatrick.vico.core.entry.entryModelOf
+import com.patrykandpatrick.vico.views.chart.ChartView
 import com.streamside.periodtracker.MAX_HISTORY
+import com.streamside.periodtracker.MainActivity.Companion.clearObservers
+import com.streamside.periodtracker.MainActivity.Companion.dayDistance
+import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
+import com.streamside.periodtracker.MainActivity.Companion.isSameDay
+import com.streamside.periodtracker.MainActivity.Companion.isSameYearAndMonth
+import com.streamside.periodtracker.MainActivity.Companion.isToday
+import com.streamside.periodtracker.MainActivity.Companion.restart
+import com.streamside.periodtracker.MainActivity.Companion.toCalendar
 import com.streamside.periodtracker.OVULATION
-import com.streamside.periodtracker.PERIOD_VIEW_MODEL
+import com.streamside.periodtracker.PREGNANCY_WINDOW
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
@@ -39,18 +49,14 @@ import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.views.CircleFillView
 import com.streamside.periodtracker.views.CounterView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import java.text.DateFormatSymbols
 import java.util.Calendar
 import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 const val CIRCLE_FILL_DURATION = 1000L
 
 class HomeFragment : Fragment() {
+    private lateinit var periodViewModel: PeriodViewModel
     private lateinit var currentPeriod: Period
     private val todayCalendar = Calendar.getInstance().apply { time = Date() }
     private val currentCalendar = Calendar.getInstance()
@@ -67,12 +73,14 @@ class HomeFragment : Fragment() {
     private lateinit var circleFillForeText : CounterView
     private lateinit var btnLog : Button
     private lateinit var rvInsights : RecyclerView
+    private lateinit var tvPrompt : TextView
     private lateinit var tvMyCycleStatus : TextView
     private lateinit var tvLastCycleLength : TextView
     private lateinit var tvLastCycleLengthStatus : TextView
     private lateinit var tvLastPeriodLength : TextView
     private lateinit var tvLastPeriodLengthStatus : TextView
     private lateinit var linearCycleHistory : LinearLayout
+    private lateinit var chartCycleTrend: ChartView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,45 +89,44 @@ class HomeFragment : Fragment() {
     ): View {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
-        clearObservers()
+        clearObservers(fa, viewLifecycleOwner)
+        periodViewModel = getPeriodViewModel(fa)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
+        val prefEditor = preferences.edit()
+        simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
 
-        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+        smallCalendar = root.findViewById(R.id.main_single_row_calendar)
+        tvDate = root.findViewById(R.id.tvDate)
+        tvDay = root.findViewById(R.id.tvDay)
+        btnRight = root.findViewById(R.id.btnRight)
+        btnLeft = root.findViewById(R.id.btnLeft)
+        circleFillView = root.findViewById(R.id.circleFillView)
+        circleFillBackText = root.findViewById(R.id.circleFillBackText)
+        circleFillForeText = root.findViewById(R.id.circleFillForeText)
+        btnLog = root.findViewById(R.id.btnLog)
+        rvInsights = root.findViewById(R.id.rvInsights)
+        tvPrompt = root.findViewById(R.id.tvPrompt)
+        tvMyCycleStatus = root.findViewById(R.id.tvMyCycleStatus)
+        tvLastCycleLength = root.findViewById(R.id.tvLastCycleLength)
+        tvLastCycleLengthStatus = root.findViewById(R.id.tvLastCycleLengthStatus)
+        tvLastPeriodLength = root.findViewById(R.id.tvLastPeriodLength)
+        tvLastPeriodLengthStatus = root.findViewById(R.id.tvLastPeriodLengthStatus)
+        linearCycleHistory = root.findViewById(R.id.linearCycleHistory)
+        chartCycleTrend = root.findViewById(R.id.chartCycleTrend)
+
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
 
-            val currentPeriodDate = Calendar.getInstance().apply {
-                set(Calendar.YEAR, currentPeriod.periodYear)
-                set(Calendar.MONTH, currentPeriod.periodMonth)
-                set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
-            }
+            val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val currentPeriodDays = dayDistance(currentPeriodDate.time, Date())
 
-            val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
-            val prefEditor = preferences.edit()
-            simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
-
-            smallCalendar = root.findViewById(R.id.main_single_row_calendar)
-            tvDate = root.findViewById(R.id.tvDate)
-            tvDay = root.findViewById(R.id.tvDay)
-            btnRight = root.findViewById(R.id.btnRight)
-            btnLeft = root.findViewById(R.id.btnLeft)
-            circleFillView = root.findViewById(R.id.circleFillView)
-            circleFillBackText = root.findViewById(R.id.circleFillBackText)
-            circleFillForeText = root.findViewById(R.id.circleFillForeText)
             circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
-            btnLog = root.findViewById(R.id.btnLog)
-            rvInsights = root.findViewById(R.id.rvInsights)
-            tvMyCycleStatus = root.findViewById(R.id.tvMyCycleStatus)
-            tvLastCycleLength = root.findViewById(R.id.tvLastCycleLength)
-            tvLastCycleLengthStatus = root.findViewById(R.id.tvLastCycleLengthStatus)
-            tvLastPeriodLength = root.findViewById(R.id.tvLastPeriodLength)
-            tvLastPeriodLengthStatus = root.findViewById(R.id.tvLastPeriodLengthStatus)
-            linearCycleHistory = root.findViewById(R.id.linearCycleHistory)
 
             // Insights section
             rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
             val insightsData: MutableList<Library> = mutableListOf()
-            for (insight in AppDataBuilder.getLibraryData(fa)) {
+            for (insight in AppDataBuilder.getLibraryData()) {
                 if (insight.symptoms.isEmpty()) continue
                 insightsData.add(insight)
             }
@@ -128,18 +135,10 @@ class HomeFragment : Fragment() {
             // Display last period statistics (part 1)
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
 
-            PERIOD_VIEW_MODEL.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
+            periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
                 if (lastPeriod != null) {
-                    val lastPeriodDate = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, lastPeriod.periodYear)
-                        set(Calendar.MONTH, lastPeriod.periodMonth)
-                        set(Calendar.DAY_OF_MONTH, lastPeriod.periodDay)
-                    }
-                    val lastPeriodEndDate = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, lastPeriod.periodEndYear)
-                        set(Calendar.MONTH, lastPeriod.periodEndMonth)
-                        set(Calendar.DAY_OF_MONTH, lastPeriod.periodEndDay)
-                    }
+                    val lastPeriodDate = toCalendar(lastPeriod.periodYear, lastPeriod.periodMonth, lastPeriod.periodDay)
+                    val lastPeriodEndDate = toCalendar(lastPeriod.periodEndYear, lastPeriod.periodEndMonth, lastPeriod.periodEndDay)
 
                     // Check if the last cycle period is on going
                     if (lastPeriod.periodEndYear == 0 &&
@@ -190,7 +189,7 @@ class HomeFragment : Fragment() {
             }
 
             // Cycle History section
-            PERIOD_VIEW_MODEL.all.observe(viewLifecycleOwner) { periods ->
+            periodViewModel.all.observe(viewLifecycleOwner) { periods ->
                 linearCycleHistory.removeAllViews()
                 var n = 0
                 for (i in periods.size - 1 downTo 0) {
@@ -200,11 +199,7 @@ class HomeFragment : Fragment() {
                     if (!hasLastCycle || !hasNextCycle) continue
                     if (n++ > MAX_HISTORY - 1) break
 
-                    val periodDate = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, historyPeriod.periodYear)
-                        set(Calendar.MONTH, historyPeriod.periodMonth)
-                        set(Calendar.DAY_OF_MONTH, historyPeriod.periodDay)
-                    }
+                    val periodDate = toCalendar(historyPeriod.periodYear, historyPeriod.periodMonth, historyPeriod.periodDay)
 
                     val ll = LinearLayout(fa).apply {
                         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -238,20 +233,11 @@ class HomeFragment : Fragment() {
                     }
 
                     var isPeriodEnded = true
-                    if (hasLastCycle) {
-                        CoroutineScope(MainScope().coroutineContext).launch {
-                            val lastPeriod = PERIOD_VIEW_MODEL.get(historyPeriod.lastPeriodId)
-                            val lastPeriodDate = Calendar.getInstance().apply {
-                                set(Calendar.YEAR, lastPeriod.periodYear)
-                                set(Calendar.MONTH, lastPeriod.periodMonth)
-                                set(Calendar.DAY_OF_MONTH, lastPeriod.periodDay)
-                            }
+                    periodViewModel.get(historyPeriod.lastPeriodId).observe(viewLifecycleOwner) { lastPeriod ->
+                        if (lastPeriod != null) {
+                            val lastPeriodDate = toCalendar(lastPeriod.periodYear, lastPeriod.periodMonth, lastPeriod.periodDay)
                             llInnerCycleGap.text = "Cycle length: ${dayDistance(periodDate.time, lastPeriodDate.time)}"
-                            val lastPeriodEndDate = Calendar.getInstance().apply {
-                                set(Calendar.YEAR, lastPeriod.periodEndYear)
-                                set(Calendar.MONTH, lastPeriod.periodEndMonth)
-                                set(Calendar.DAY_OF_MONTH, lastPeriod.periodEndDay)
-                            }
+                            val lastPeriodEndDate = toCalendar(lastPeriod.periodEndYear, lastPeriod.periodEndMonth, lastPeriod.periodEndDay)
                             llInnerPeriodGap.text = "Period length: ${dayDistance(periodDate.time, lastPeriodEndDate.time)}"
                             if (lastPeriod.periodEndYear == 0 &&
                                 lastPeriod.periodEndMonth == 0 &&
@@ -282,9 +268,40 @@ class HomeFragment : Fragment() {
                     }
                     linearCycleHistory.addView(tvNoHistory)
                 }
+
+                chartCycleTrend.setModel(entryModelOf(entriesOf(4f, 12f, 8f, 16f, 4f, 12f, 8f, 16f), entriesOf(12f, 16f, 4f, 12f, 12f, 16f, 4f, 12f)))
+                for (period in periods) {
+                    if (currentYear == period.periodYear) {
+                        // Populate data
+                    }
+                }
             }
         }
         return root
+    }
+
+    private fun getCurrentPrompt(today: Calendar) {
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
+            val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
+
+            // Update current cycle status
+            when (dayDistance(today.time, currentPeriodDate.time)) {
+                in 0..SAFE_PERIOD_MAX ->
+                    tvPrompt.text = getString(R.string.prompt_period)
+                in SAFE_PERIOD_MAX..<PREGNANCY_WINDOW ->
+                    tvPrompt.text = getString(R.string.prompt_follicular)
+                in PREGNANCY_WINDOW..<OVULATION ->
+                    tvPrompt.text = getString(R.string.prompt_pregnant)
+                OVULATION ->
+                    tvPrompt.text = getString(R.string.prompt_ovulation)
+                in OVULATION..<SAFE_MIN ->
+                    tvPrompt.text = getString(R.string.prompt_luteal)
+                in SAFE_MIN..SAFE_MAX ->
+                    tvPrompt.text = getString(R.string.prompt_regular)
+                else ->
+                    tvPrompt.text = getString(R.string.prompt_irregular)
+            }
+        }
     }
 
     private fun addLogEvent(fa: FragmentActivity) {
@@ -299,20 +316,37 @@ class HomeFragment : Fragment() {
                     if (smallCalendar.getSelectedDates().isNotEmpty()) {
                         val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
 
-                        // Prepare new cycle
-                        PERIOD_VIEW_MODEL.init(
+                        // Prepare new cycle with starting period date as today's small calendar
+                        periodViewModel.init(
                             currentPeriod.id,
                             today.get(Calendar.YEAR),
                             today.get(Calendar.MONTH),
                             today.get(Calendar.DAY_OF_MONTH)
                         ).observe(viewLifecycleOwner) { newPeriodId ->
-
                             // Update foreign keys of the current cycle to finalize it
                             currentPeriod.nextPeriodId = newPeriodId
-                            PERIOD_VIEW_MODEL.update(currentPeriod)
+                            periodViewModel.update(currentPeriod)
 
-                            // Refresh app
-                            fa.recreate()
+                            // Update new period's menstrual cycle condition
+                            periodViewModel.get(newPeriodId).observe(viewLifecycleOwner) { newPeriod ->
+                                val newPeriodDate = toCalendar(newPeriod.periodYear, newPeriod.periodMonth, newPeriod.periodDay)
+
+                                periodViewModel.get(newPeriod.lastPeriodId).observe(viewLifecycleOwner) { lastPeriod ->
+                                    val lastPeriodDate = toCalendar(lastPeriod.periodYear, lastPeriod.periodMonth, lastPeriod.periodDay)
+
+                                    // Check if the period gap happened between SAFE_MIN and SAFE_MAX and mark it as regular
+                                    if (dayDistance(newPeriodDate.time, lastPeriodDate.time) in SAFE_MIN..SAFE_MAX)
+                                        newPeriod.menstrualCycle = getString(R.string.menstrual_cycle_regular)
+                                    else
+                                        newPeriod.menstrualCycle = getString(R.string.menstrual_cycle_irregular)
+
+                                    // Update menstrual cycle condition
+                                    periodViewModel.update(newPeriod)
+
+                                    // Restart app
+                                    restart(fa, viewLifecycleOwner)
+                                }
+                            }
                         }
                     } else {
                         Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
@@ -337,20 +371,20 @@ class HomeFragment : Fragment() {
             builder.setPositiveButton("Continue") { _: DialogInterface, _: Int ->
                 run {
                     if (smallCalendar.getSelectedDates().isNotEmpty()) {
-                        PERIOD_VIEW_MODEL.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
+                        periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
                             if (lastPeriod != null) {
                                 // Update last cycle's period end date
                                 val today = Calendar.getInstance().apply { time = smallCalendar.getSelectedDates()[0] }
                                 lastPeriod.periodEndYear = today.get(Calendar.YEAR)
                                 lastPeriod.periodEndMonth = today.get(Calendar.MONTH)
                                 lastPeriod.periodEndDay = today.get(Calendar.DAY_OF_MONTH)
-                                PERIOD_VIEW_MODEL.update(lastPeriod)
+                                periodViewModel.update(lastPeriod)
                             }
 
                             // Set log period flag to true then restart app
                             prefEditor.putBoolean(getString(R.string.log_period_key), true)
                             prefEditor.apply()
-                            fa.recreate()
+                            restart(fa, viewLifecycleOwner)
                         }
                     } else {
                         Toast.makeText(fa, "Please select a date on small calendar", Toast.LENGTH_SHORT).show()
@@ -371,11 +405,7 @@ class HomeFragment : Fragment() {
             ): Int {
                 val cal = Calendar.getInstance()
                 cal.time = date
-                val periodDate = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, currentPeriod.periodYear)
-                    set(Calendar.MONTH, currentPeriod.periodMonth)
-                    set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
-                }
+                val periodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
                 return if (isSelected) when (isSameDay(cal, periodDate)) {
                     true -> R.layout.period_selected_calendar_item
                     false -> R.layout.selected_calendar_item
@@ -391,16 +421,12 @@ class HomeFragment : Fragment() {
                 position: Int,
                 isSelected: Boolean
             ) {
-                // using this method we can bind data to calendar view
-                // good practice is if all views in layout have same IDs in all item views
                 holder.itemView.findViewById<TextView>(R.id.tv_date_calendar_item).text = DateUtils.getDayNumber(date)
                 holder.itemView.findViewById<TextView>(R.id.tv_day_calendar_item).text = DateUtils.getDay3LettersName(date)
             }
         }
 
-        // using calendar changes observer we can track changes in calendar
         val smallCalendarChangesObserver = object : CalendarChangesObserver {
-            // you can override more methods, in this example we need only this one
             override fun whenSelectionChanged(isSelected: Boolean, position: Int, date: Date) {
                 tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthName(date), DateUtils.getDayNumber(date), DateUtils.getYear(date))
                 tvDay.text = DateUtils.getDay3LettersName(date)
@@ -408,16 +434,19 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // selection manager is responsible for managing selection
         val smallSelectionManager = object : CalendarSelectionManager {
             override fun canBeItemSelected(position: Int, date: Date): Boolean {
+                val today = Calendar.getInstance().apply { time = date }
+
+                // Switch prompt messages based on today date on small calendar
+                getCurrentPrompt(today)
+
                 // Select today's date
                 return if (simulated) {
                     todayCalendar.time = date
                     updateCircleFill(todayCalendar)
                     true
                 } else {
-                    val today = Calendar.getInstance().apply { time = date }
                     if (isToday(today)) {
                         updateCircleFill(today)
                         true
@@ -428,7 +457,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // here we init our calendar, also you can set more properties if you need them
         val sc = smallCalendar.apply {
             calendarViewManager = smallCalendarViewManager
             calendarChangesObserver = smallCalendarChangesObserver
@@ -440,13 +468,10 @@ class HomeFragment : Fragment() {
         }
         root.findViewById<TextView>(R.id.tvSelectedMonth).text = getString(R.string.text_month_year, DateFormatSymbols().months[currentMonth], currentYear.toString())
 
-        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { period ->
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
             var scrollPos: Int
             if (simulated) {
-                val periodDate = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, period.periodYear)
-                    set(Calendar.MONTH, period.periodMonth)
-                }
+                val periodDate = toCalendar(period.periodYear, period.periodMonth, period.periodDay)
                 if (isSameYearAndMonth(periodDate, currentCalendar)) {
                     scrollPos = period.periodDay - 3
                     if (scrollPos < 0) scrollPos = 0
@@ -470,13 +495,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateCircleFill(today: Calendar) {
-        PERIOD_VIEW_MODEL.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
+        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
             val fa = requireActivity()
-            val currentPeriodDate = Calendar.getInstance().apply {
-                set(Calendar.YEAR, currentPeriod.periodYear)
-                set(Calendar.MONTH, currentPeriod.periodMonth)
-                set(Calendar.DAY_OF_MONTH, currentPeriod.periodDay)
-            }
+            val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val gap = dayDistance(today.time, currentPeriodDate.time)
 
             // Update current cycle status
@@ -496,58 +517,6 @@ class HomeFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
         }
-    }
-
-    private fun clearObservers() {
-        val periodViewModel = ViewModelProvider(this)[PeriodViewModel::class.java]
-        periodViewModel.all.removeObservers(viewLifecycleOwner)
-        periodViewModel.lastPeriod.removeObservers(viewLifecycleOwner)
-        periodViewModel.currentPeriod.removeObservers(viewLifecycleOwner)
-    }
-
-    private fun dayDistance(date1: Date, date2: Date): Int {
-        val cal1 = Calendar.getInstance().apply {
-            time = date1
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val cal2 = Calendar.getInstance().apply {
-            time = date2
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return abs(TimeUnit.MILLISECONDS.toDays(cal1.time.time - cal2.time.time).toInt())
-    }
-
-    private fun isSameYear(date: Calendar): Boolean {
-        val today = Calendar.getInstance()
-        today.time = Date()
-
-        return today.get(Calendar.YEAR) == date.get(Calendar.YEAR)
-    }
-
-    private fun isSameYearAndMonth(date1: Calendar, date2: Calendar): Boolean {
-        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
-                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)
-    }
-
-    private fun isSameDay(date1: Calendar, date2: Calendar): Boolean {
-        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
-                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
-                date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
-    }
-
-    private fun isToday(date: Calendar): Boolean {
-        val today = Calendar.getInstance()
-        today.time = Date()
-
-        return today.get(Calendar.YEAR) == date.get(Calendar.YEAR) &&
-                today.get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
-                today.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH)
     }
 
     private fun getDatesOfNextMonth(): List<Date> {

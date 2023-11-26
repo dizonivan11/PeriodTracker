@@ -1,10 +1,10 @@
 package com.streamside.periodtracker.data
 
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.FA
+import com.streamside.periodtracker.MainActivity.Companion.replaceFragment
+import com.streamside.periodtracker.NAVVIEW
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.setup.SymptomsFragment
 import com.streamside.periodtracker.ui.library.DictionaryFragment
 import com.streamside.periodtracker.ui.library.LIBRARY_CALLBACK
 import com.streamside.periodtracker.ui.library.WebFragment
@@ -12,137 +12,148 @@ import com.streamside.periodtracker.ui.library.WebFragment
 class AppDataBuilder {
     companion object {
         @Volatile
-        private var SYMPTOMS_INSTANCE: MutableList<Category>? = null
+        private var SYMPTOMS_INSTANCE: SymptomList? = null
         @Volatile
-        private var LIBRARY_INSTANCE: MutableList<Library>? = null
+        private var LIBRARY_INSTANCE: List<Library>? = null
 
-        fun getSymptomsData(): MutableList<Category> {
+        fun newSymptomsData(): SymptomList {
             val temp = SYMPTOMS_INSTANCE
             if (temp != null) return temp
             synchronized(this) {
-                val instance = mutableListOf(
+                val instance = SymptomList(listOf(
                     Category(R.string.cat_vaginal_discharge_color, listOf(
-                        Symptom(R.string.vdc_white),
-                        Symptom(R.string.vdc_clear),
-                        Symptom(R.string.vdc_yellow_green),
-                        Symptom(R.string.vdc_brown),
-                        Symptom(R.string.vdc_red),
-                        Symptom(R.string.vdc_pink),
-                        Symptom(R.string.vdc_gray),
-                    )),
+                        Symptom(R.string.vdc_white, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_clear, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_yellow_green, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_brown, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_red, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_pink, R.drawable.baseline_water_drop_24),
+                        Symptom(R.string.vdc_gray, R.drawable.baseline_water_drop_24),
+                    ), true),
                     Category(R.string.cat_vaginal_discharge, listOf(
-                        Symptom(R.string.vd_no_discharge),
-                        Symptom(R.string.vd_creamy),
-                        Symptom(R.string.vd_watery),
-                        Symptom(R.string.vd_sticky),
-                        Symptom(R.string.vd_egg_white),
-                        Symptom(R.string.vd_spotting),
-                        Symptom(R.string.vd_unusual),
-                    )),
+                        Symptom(R.string.vd_no_discharge, R.drawable.baseline_block_24),
+                        Symptom(R.string.vd_creamy, R.drawable.waves),
+                        Symptom(R.string.vd_watery, R.drawable.baseline_water_24),
+                        Symptom(R.string.vd_sticky, R.drawable.egg_alt),
+                        Symptom(R.string.vd_egg_white, R.drawable.egg),
+                        Symptom(R.string.vd_spotting, R.drawable.baseline_search_24),
+                        Symptom(R.string.vd_unusual, R.drawable.baseline_question_mark_24),
+                    ), true),
                     Category(R.string.cat_mood, listOf(
-                        Symptom(R.string.mood_calm),
-                        Symptom(R.string.mood_energetic),
-                        Symptom(R.string.mood_swings),
-                        Symptom(R.string.mood_irritated),
-                        Symptom(R.string.mood_happy),
-                        Symptom(R.string.mood_sad),
-                        Symptom(R.string.mood_anxious),
-                        Symptom(R.string.mood_depressed),
-                        Symptom(R.string.mood_stressed),
-                        Symptom(R.string.mood_low_energy),
+                        Symptom(R.string.mood_calm, R.drawable.sentiment_calm_24px),
+                        Symptom(R.string.mood_energetic, R.drawable.battery_charging_full),
+                        Symptom(R.string.mood_swings, R.drawable.sentiment_worried_24px),
+                        Symptom(R.string.mood_irritated, R.drawable.sentiment_neutral),
+                        Symptom(R.string.mood_happy, R.drawable.sentiment_excited),
+                        Symptom(R.string.mood_sad, R.drawable.sentiment_dissatisfied_24px),
+                        Symptom(R.string.mood_depressed, R.drawable.sentiment_frustrated_24px),
+                        Symptom(R.string.mood_stressed, R.drawable.sentiment_stressed_4px),
+                        Symptom(R.string.mood_low_energy, R.drawable.baseline_battery_1_bar_24),
                     )),
                     Category(R.string.cat_sex, listOf(
-                        Symptom(R.string.sex_protected_sex),
-                        Symptom(R.string.sex_unprotected_sex),
-                        Symptom(R.string.sex_masturbation),
-                        Symptom(R.string.sex_high_sex_drive),
-                        Symptom(R.string.sex_low_sex_drive),
-                        Symptom(R.string.sex_painful_sex),
-                        Symptom(R.string.sex_difficulty_with_orgasm),
+                        Symptom(R.string.sex_protected_sex, R.drawable.shield_with_heart),
+                        Symptom(R.string.sex_unprotected_sex, R.drawable.shield),
+                        Symptom(R.string.sex_masturbation, R.drawable.volunteer_activism),
+                        Symptom(R.string.sex_high_sex_drive, R.drawable.ecg_heart),
+                        Symptom(R.string.sex_low_sex_drive, R.drawable.favorite),
+                        Symptom(R.string.sex_painful_sex, R.drawable.bolt),
+                        Symptom(R.string.sex_difficulty_with_orgasm, R.drawable.sentiment_sad),
                     )),
                     Category(R.string.cat_symptoms, listOf(
-                        Symptom(R.string.sym_menstrual_cramps),
-                        Symptom(R.string.sym_tender_breasts),
-                        Symptom(R.string.sym_backache),
-                        Symptom(R.string.sym_abdominal_pain),
-                        Symptom(R.string.sym_vaginal_itching),
-                        Symptom(R.string.sym_vaginal_dryness),
+                        Symptom(R.string.sym_menstrual_cramps, R.drawable.gynecology),
+                        Symptom(R.string.sym_tender_breasts, R.drawable.breastfeeding),
+                        Symptom(R.string.sym_backache, R.drawable.orthopedics),
+                        Symptom(R.string.sym_abdominal_pain, R.drawable.gastroenterology),
+                        Symptom(R.string.sym_vaginal_itching, R.drawable.hand_gesture),
+                        Symptom(R.string.sym_vaginal_dryness, R.drawable.cool_to_dry),
                     )),
                     Category(R.string.cat_digestion_stool, listOf(
-                        Symptom(R.string.ds_nausea),
-                        Symptom(R.string.ds_bloating),
-                        Symptom(R.string.ds_constipation),
-                        Symptom(R.string.ds_diarrhea),
+                        Symptom(R.string.ds_nausea, R.drawable.oncology),
+                        Symptom(R.string.ds_bloating, R.drawable.zoom_out_map),
+                        Symptom(R.string.ds_constipation, R.drawable.sentiment_very_dissatisfied),
+                        Symptom(R.string.ds_diarrhea, R.drawable.gastroenterology),
                     )),
                     Category(R.string.cat_fitness_goal, listOf(
-                        Symptom(R.string.fg_lose_weight),
-                        Symptom(R.string.fg_gain_weight),
-                        Symptom(R.string.fg_maintain_healthy_weight),
-                        Symptom(R.string.fg_get_more_energy),
+                        Symptom(R.string.fg_lose_weight, R.drawable.monitor_weight_loss),
+                        Symptom(R.string.fg_gain_weight, R.drawable.monitor_weight_gain),
+                        Symptom(R.string.fg_maintain_healthy_weight, R.drawable.monitor_weight),
+                        Symptom(R.string.fg_get_more_energy, R.drawable.fitness_center),
                     )),
                     Category(R.string.cat_sleep, listOf(
-                        Symptom(R.string.sl_insomnia),
-                        Symptom(R.string.sl_waking_up_tired),
-                        Symptom(R.string.sl_waking_up_during_night),
-                        Symptom(R.string.sl_lack_of_sleep_schedule),
+                        Symptom(R.string.sl_insomnia, R.drawable.bedtime_off),
+                        Symptom(R.string.sl_waking_up_tired, R.drawable.bed),
+                        Symptom(R.string.sl_waking_up_during_night, R.drawable.bedtime),
+                        Symptom(R.string.sl_lack_of_sleep_schedule, R.drawable.sleep_score),
                     )),
                     Category(R.string.cat_skin, listOf(
-                        Symptom(R.string.sk_dryness),
-                        Symptom(R.string.sk_acne_and_blemishes),
-                        Symptom(R.string.sk_dark_spots_pores),
-                        Symptom(R.string.sk_fine_lines_wrinkles),
-                        Symptom(R.string.sk_dullness_texture),
+                        Symptom(R.string.sk_dryness, R.drawable.dry),
+                        Symptom(R.string.sk_acne_and_blemishes, R.drawable.face_5),
+                        Symptom(R.string.sk_dark_spots_pores, R.drawable.mystery),
+                        Symptom(R.string.sk_fine_lines_wrinkles, R.drawable.ssid_chart),
+                        Symptom(R.string.sk_dullness_texture, R.drawable.dermatology),
                     )),
-                )
+                ))
                 SYMPTOMS_INSTANCE = instance
                 return instance
             }
         }
 
-        fun getLibraryData(fa: FragmentActivity): MutableList<Library> {
+        fun getLibraryData(): List<Library> {
             val temp = LIBRARY_INSTANCE
             if (temp != null) return temp
             synchronized(this) {
-                val navView: BottomNavigationView = fa.findViewById(R.id.nav_view)
-                val fm = fa.supportFragmentManager
-                val symptoms = getSymptomsData()
-                val instance = mutableListOf(
+                val instance = listOf(
                     Library("Search for word or term on dictionary", R.drawable.pexels_pixabay_159581) {
-                        generateLibraryCallback(navView) {
-                            replaceFragment(fm, DictionaryFragment())
+                        generateLibraryCallback {
+                            replaceFragment(DictionaryFragment(), R.id.frameLibrary)
                         }
                     },
-                    Library("Meaning behind your discharge color", R.drawable.pexels_sora_shimazaki_5938447, listOf(
+                    Library("Log your symptoms", R.drawable.rebecca_manning_q7dgla0rvuy_unsplash, false, listOf(
+                        R.string.cat_vaginal_discharge_color,
+                        R.string.cat_vaginal_discharge,
+                        R.string.cat_mood,
+                        R.string.cat_sex,
+                        R.string.cat_symptoms,
+                        R.string.cat_digestion_stool,
+                        R.string.cat_fitness_goal,
+                        R.string.cat_sleep,
+                        R.string.cat_skin,
+                    ), R.layout.insight_symptoms_item) {
+                        generateLibraryCallback {
+                            replaceFragment(SymptomsFragment(), R.id.frameLibrary)
+                        }
+                    },
+                    Library("Meaning behind your discharge color", R.drawable.pexels_sora_shimazaki_5938447, true, listOf(
                         R.string.cat_vaginal_discharge_color
                     )) {
-                        generateLibraryCallback(navView) {
-                            openWeb(fm, "https://www.sutterhealth.org/health/teens/female/vaginal-discharge")
+                        generateLibraryCallback {
+                            openWeb("https://www.sutterhealth.org/health/teens/female/vaginal-discharge")
                         }
                     },
-                    Library("Fixing your sleep problems", R.drawable.pexels_karolina_grabowska_6660783, listOf(
+                    Library("Fixing your sleep problems", R.drawable.pexels_karolina_grabowska_6660783, true,  listOf(
                         R.string.cat_sleep
                     )) {
-                        generateLibraryCallback(navView) {
-                            openWeb(fm, "https://sleepopolis.com/education/the-ultimate-guide-to-the-menstrual-cycle-and-sleep/#:~:text=You%20may%20also%20need%20more,sleep%2C%20and%20disrupted%20circadian%20rhythms.")
+                        generateLibraryCallback {
+                            openWeb("https://sleepopolis.com/education/the-ultimate-guide-to-the-menstrual-cycle-and-sleep/")
                         }
                     },
-                    Library("Handling discomforts during your period", R.drawable.pexels_cottonbro_studio_6542718, listOf(
-                        R.string.ic_discomforts
+                    Library("Handling discomforts during your period", R.drawable.pexels_cottonbro_studio_6542718, true,  listOf(
+                        R.string.cat_symptoms
                     )) {
-                        generateLibraryCallback(navView) {
-                            openWeb(fm, "https://medlineplus.gov/periodpain.html#:~:text=Many%20women%20have%20painful%20periods,as%20premenstrual%20syndrome%20(PMS).")
+                        generateLibraryCallback {
+                            openWeb("https://medlineplus.gov/periodpain.html")
                         }
                     },
-                    Library("How exercise may change your period", R.drawable.pexels_tirachard_kumtanom_601177, listOf(
+                    Library("How exercise may change your period", R.drawable.pexels_tirachard_kumtanom_601177, true,  listOf(
                         R.string.cat_fitness_goal
                     )) {
-                        generateLibraryCallback(navView) {
-                            openWeb(fm, "https://www.verywellhealth.com/exercise-effects-on-menstruation-4104136#:~:text=Intense%20exercise%20can%20cause%20changes,sometimes%2C%20no%20period%20at%20all.")
+                        generateLibraryCallback {
+                            openWeb("https://www.verywellhealth.com/exercise-effects-on-menstruation-4104136")
                         }
                     },
                     Library("What are irregular periods and its effect?", R.drawable.pexels_nadezhda_moryak_7467101) {
-                        generateLibraryCallback(navView) {
-                            openWeb(fm, "https://my.clevelandclinic.org/health/diseases/14633-abnormal-menstruation-periods")
+                        generateLibraryCallback {
+                            openWeb("https://my.clevelandclinic.org/health/diseases/14633-abnormal-menstruation-periods")
                         }
                     },
                 )
@@ -152,26 +163,21 @@ class AppDataBuilder {
         }
 
         // Handles the bottom navigation bar item change then invokes the callback inside the Library item
-        private fun generateLibraryCallback(navView: BottomNavigationView, callback: () -> Unit) {
+        private fun generateLibraryCallback(callback: () -> Unit) {
             LIBRARY_CALLBACK = {
                 callback.invoke()
                 LIBRARY_CALLBACK = null
             }
 
-            if (navView.selectedItemId == R.id.navigation_library)
+            if (NAVVIEW.selectedItemId == R.id.navigation_library)
                 LIBRARY_CALLBACK?.invoke()
             else
-                navView.selectedItemId = R.id.navigation_library
-        }
-
-        // Simplify Fragment transaction
-        private fun replaceFragment(fm: FragmentManager, newFragment: Fragment) {
-            fm.beginTransaction().replace(R.id.frameLibrary, newFragment).commit()
+                NAVVIEW.selectedItemId = R.id.navigation_library
         }
 
         // Simplify WebFragment transaction
-        private fun openWeb(fm: FragmentManager, url: String) {
-            fm.beginTransaction().replace(R.id.frameLibrary, WebFragment(url)).commit()
+        private fun openWeb(url: String) {
+            FA.supportFragmentManager.beginTransaction().replace(R.id.frameLibrary, WebFragment(url)).commit()
         }
     }
 }

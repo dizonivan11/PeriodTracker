@@ -16,12 +16,5 @@ data class Period(
     var periodEndMonth: Int,
     var periodEndDay: Int,
     var menstrualCycle: String,
-    var discharge: String,
-    var discomforts: Long,
-    var fitness: String,
-    var mental: Long,
-    var rhd: String,
-    var sex: Long,
-    var skin: Long,
-    var sleep: String
+    var symptoms: SymptomList = AppDataBuilder.newSymptomsData()
 )

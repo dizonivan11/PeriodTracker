@@ -1,76 +1,33 @@
 package com.streamside.periodtracker.setup
 
-import android.widget.CheckBox
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
 import androidx.preference.PreferenceManager
-import com.streamside.periodtracker.PERIOD_VIEW_MODEL
+import com.streamside.periodtracker.LOG_PERIOD
+import com.streamside.periodtracker.MainActivity.Companion.clearObservers
+import com.streamside.periodtracker.MainActivity.Companion.replaceFragment
+import com.streamside.periodtracker.MainActivity.Companion.restart
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.SETUP_PAGER
-import java.util.Calendar
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
+
+lateinit var SETUP_FRAME : FragmentContainerView
+var SETUP_CURRENT_PAGE = 0
 
 open class SetupFragment : Fragment() {
-    fun dayDistance(date1: Date, date2: Date): Int {
-        val cal1 = Calendar.getInstance().apply {
-            time = date1
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val cal2 = Calendar.getInstance().apply {
-            time = date2
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return abs(TimeUnit.MILLISECONDS.toDays(cal1.time.time - cal2.time.time).toInt())
+    fun previousPage(fa: FragmentActivity) {
+        clearObservers(fa, viewLifecycleOwner)
+        SETUP_CURRENT_PAGE--
+        replaceFragment(createFragment(), R.id.fcvSetup)
     }
 
-    fun hasCheck(checkboxes: MutableList<CheckBox>): Boolean {
-        var hasChecked = false
-        for (i in 0..<checkboxes.size) {
-            if (checkboxes[i].isChecked) {
-                hasChecked = true
-                break
-            }
-        }
-        return hasChecked
-    }
-
-    fun getLongCheckValues(checkboxes: MutableList<CheckBox>): Long {
-        var value: Long = 0
-        var bitVal: Long = 1
-        for (i in 0..<checkboxes.size) {
-            if (checkboxes[i].isChecked) value += bitVal
-            bitVal *= 2
-        }
-        return value
-    }
-
-    private fun clearObservers() {
-        PERIOD_VIEW_MODEL.all.removeObservers(viewLifecycleOwner)
-        PERIOD_VIEW_MODEL.lastPeriod.removeObservers(viewLifecycleOwner)
-        PERIOD_VIEW_MODEL.currentPeriod.removeObservers(viewLifecycleOwner)
-    }
-
-    fun previousPage() {
-        clearObservers()
-        SETUP_PAGER.adapter?.notifyItemChanged(SETUP_PAGER.currentItem - 1)
-        SETUP_PAGER.setCurrentItem(SETUP_PAGER.currentItem - 1, true)
-    }
-
-    fun nextPage() {
-        clearObservers()
-        SETUP_PAGER.adapter?.notifyItemChanged(SETUP_PAGER.currentItem + 1)
-        SETUP_PAGER.setCurrentItem(SETUP_PAGER.currentItem + 1, true)
+    fun nextPage(fa: FragmentActivity) {
+        clearObservers(fa, viewLifecycleOwner)
+        SETUP_CURRENT_PAGE++
+        replaceFragment(createFragment(), R.id.fcvSetup)
     }
 
     fun finalizeSetup(fa: FragmentActivity) {
+        clearObservers(fa, viewLifecycleOwner)
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
 
         // Set First Time settings to false
@@ -80,6 +37,32 @@ open class SetupFragment : Fragment() {
         preferences.edit().putBoolean(getString(R.string.log_period_key), false).apply()
 
         // Restart activity
-        fa.recreate()
+        restart(fa, viewLifecycleOwner)
+    }
+
+    companion object {
+        fun initFragment(): Fragment {
+            return if (LOG_PERIOD) SymptomsFragment() else IntroFragment()
+        }
+
+        fun createFragment(): Fragment {
+            if (LOG_PERIOD) {
+                return when (SETUP_CURRENT_PAGE) {
+                    // Log period starts here
+                    0 -> SymptomsFragment()
+                    else -> IntroFragment()
+                }
+            } else {
+                return when (SETUP_CURRENT_PAGE) {
+                    // Clean setup starts here
+                    0 -> IntroFragment()
+                    1 -> PeriodDateFragment()
+                    2 -> MenstrualCycleFragment()
+                    // Log period starts here
+                    3 -> SymptomsFragment()
+                    else -> IntroFragment()
+                }
+            }
+        }
     }
 }

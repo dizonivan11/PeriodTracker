@@ -3,13 +3,10 @@ package com.streamside.periodtracker.data
 import androidx.lifecycle.LiveData
 
 class PeriodRepository(private val dao: PeriodDao) {
+    fun get(id: Long): LiveData<Period> = dao.get(id)
     val all: LiveData<List<Period>> = dao.getAll()
     val lastPeriod: LiveData<Period> = dao.getLastPeriod()
     val currentPeriod: LiveData<Period> = dao.getCurrentPeriod()
-
-    suspend fun get(id: Long): Period {
-        return dao.get(id)
-    }
 
     suspend fun add(period: Period): Long {
         return dao.add(period)
@@ -23,14 +20,6 @@ class PeriodRepository(private val dao: PeriodDao) {
             0,
             0,
             0,
-            "",
-            "",
-            0L,
-            "",
-            0L,
-            "",
-            0L,
-            0L,
             ""
         ))
     }
