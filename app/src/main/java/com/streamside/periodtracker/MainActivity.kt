@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         START = intent
+        START.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         FA = this
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         DARK_MODE = preferences.getBoolean(getString(R.string.dark_mode_key), false)
