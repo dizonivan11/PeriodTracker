@@ -72,5 +72,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
             true
         }
+        simulationPref?.setOnPreferenceChangeListener { _, _ ->
+            val fa = requireActivity()
+
+            // Restart app
+            restart(fa, viewLifecycleOwner)
+
+            true
+        }
     }
 }

@@ -23,10 +23,9 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
 import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
-import com.patrykandpatrick.vico.core.entry.entriesOf
+import com.patrykandpatrick.vico.core.entry.FloatEntry
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
-import com.streamside.periodtracker.MAX_HISTORY
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.dayDistance
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
@@ -54,6 +53,8 @@ import java.util.Calendar
 import java.util.Date
 
 const val CIRCLE_FILL_DURATION = 1000L
+const val MAX_HISTORY = 3
+const val MAX_TREND = 9
 
 class HomeFragment : Fragment() {
     private lateinit var periodViewModel: PeriodViewModel
@@ -120,6 +121,14 @@ class HomeFragment : Fragment() {
             val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val currentPeriodDays = dayDistance(currentPeriodDate.time, Date())
 
+            if (!simulated) {
+                currentCalendar.time = Date()
+            } else {
+                currentCalendar.time = currentPeriodDate.time
+            }
+            currentYear = currentCalendar[Calendar.YEAR]
+            currentMonth = currentCalendar[Calendar.MONTH]
+
             circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
 
@@ -172,11 +181,6 @@ class HomeFragment : Fragment() {
                     addLogEvent(fa)
                 }
             }
-
-            // set current date to calendar and current month to currentMonth variable
-            currentCalendar.time = Date()
-            currentYear = currentCalendar[Calendar.YEAR]
-            currentMonth = currentCalendar[Calendar.MONTH]
 
             initSmallCalendar(root, getFutureDatesOfCurrentMonth())
             btnRight.setOnClickListener {
@@ -269,12 +273,30 @@ class HomeFragment : Fragment() {
                     linearCycleHistory.addView(tvNoHistory)
                 }
 
-                chartCycleTrend.setModel(entryModelOf(entriesOf(4f, 12f, 8f, 16f, 4f, 12f, 8f, 16f), entriesOf(12f, 16f, 4f, 12f, 12f, 16f, 4f, 12f)))
-                for (period in periods) {
-                    if (currentYear == period.periodYear) {
-                        // Populate data
+                n = 0
+                val entries: MutableList<FloatEntry> = mutableListOf()
+                val periodEntries: MutableList<FloatEntry> = mutableListOf()
+                for (p in periods.size - 1 downTo 0) {
+                    if (n++ > MAX_TREND - 1) break
+
+                    val entryPeriodDate = toCalendar(periods[p].periodYear, periods[p].periodMonth, periods[p].periodDay)
+                    var lastEntryPeriodDate = entryPeriodDate
+                    if (p > 0) lastEntryPeriodDate = toCalendar(periods[p - 1].periodYear, periods[p - 1].periodMonth, periods[p - 1].periodDay)
+                    val gap = dayDistance(entryPeriodDate.time, lastEntryPeriodDate.time).toFloat()
+                    entries.add(FloatEntry(p + 1f, gap))
+
+                    var periodLength = 0f
+                    if (p > 0) {
+                        val entryPeriodEndDate = toCalendar(periods[p - 1].periodEndYear, periods[p - 1].periodEndMonth, periods[p - 1].periodEndDay)
+                        if (periods[p - 1].periodEndYear != 0 &&
+                            periods[p - 1].periodEndMonth != 0 &&
+                            periods[p - 1].periodEndDay != 0) {
+                            periodLength = dayDistance(entryPeriodDate.time, entryPeriodEndDate.time).toFloat()
+                        }
                     }
+                    periodEntries.add(FloatEntry(p + 1f, periodLength))
                 }
+                chartCycleTrend.setModel(entryModelOf(entries, periodEntries))
             }
         }
         return root

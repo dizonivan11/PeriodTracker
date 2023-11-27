@@ -373,7 +373,6 @@
                 android:id="@+id/chartCycleTrend"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 app:chart="line"
                 app:showStartAxis="true"
                 app:showBottomAxis="true" />
