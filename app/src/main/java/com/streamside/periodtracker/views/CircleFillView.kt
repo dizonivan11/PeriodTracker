@@ -12,7 +12,6 @@ import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
 import com.streamside.periodtracker.OVULATION
-import com.streamside.periodtracker.PREGNANCY_WINDOW
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
@@ -35,8 +34,9 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var strokeWidth = 0f
     private var circleFillValue = 0
     private var ovulationY = 0.0
-    private var pregnancyY = 0.0
     private var regularY = 0.0
+    private var safePeriodY = 0.0
+    private var periodMode = false
 
     init {
         val a = context.theme.obtainStyledAttributes(
@@ -50,6 +50,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
             safeColor = a.getColor(R.styleable.CircleFillView_CircleFillSafeColor, Color.BLACK)
             strokeWidth = a.getFloat(R.styleable.CircleFillView_CircleFillStrokeWidth, 1f)
             setCircleFillValue(a.getInteger(R.styleable.CircleFillView_CircleFillValue, 0), 1000)
+            periodMode = a.getBoolean(R.styleable.CircleFillView_CircleFillPeriodMode, false)
         } finally {
             a.recycle()
         }
@@ -102,6 +103,19 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         return strokeWidth
     }
 
+    fun getPeriodMode(): Boolean {
+        return periodMode
+    }
+
+    fun setPeriodMode(periodMode: Boolean) {
+        this.periodMode = periodMode
+        safePaint.textSize = 50f
+        foreSafePaint.textSize = safePaint.textSize
+        val h2 = height - (strokeWidth.toInt() * 2)
+        safePeriodY = (0.45 * h2) + strokeWidth
+        invalidate()
+    }
+
     fun setCircleFillValue(value: Int, duration: Long) {
         ObjectAnimator.ofInt(this, "CircleFillValue", value).apply {
             this.duration = duration
@@ -126,9 +140,12 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         center.y = (height / 2).toFloat()
         radius = width.coerceAtMost(height) / 2 - strokeWidth.toInt()
         val h2 = height - (strokeWidth.toInt() * 2)
-        ovulationY = (((100.0 - ((OVULATION.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
-        pregnancyY = (((100.0 - (((PREGNANCY_WINDOW.toDouble()) / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
-        regularY = (((100.0 - ((SAFE_MIN.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+        if (!periodMode) {
+            ovulationY = (((100.0 - ((OVULATION.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+            regularY = (((100.0 - ((SAFE_MIN.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+        } else {
+            safePeriodY = (0.45 * h2) + strokeWidth
+        }
         circleRect[
             center.x - radius + strokeWidth.toInt(),
             center.y - radius + strokeWidth.toInt(),
@@ -149,13 +166,19 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, safePaint)
-        drawSection(canvas, "O V U L A T I O N", ovulationY, safePaint)
-        drawSection(canvas, "P E R I O D", regularY, safePaint)
+        if (!periodMode) {
+            drawSection(canvas, "O V U L A T I O N", ovulationY, safePaint)
+            drawSection(canvas, "P E R I O D", regularY, safePaint)
+        } else {
+            drawSection(canvas, "P E R I O D   P H A S E", safePeriodY, safePaint, false)
+        }
         canvas.drawPath(segment, fillPaint)
-        // drawSection(canvas, "P R E G N A N C Y   W I N D O W", pregnancyY, foreSafePaint)
-        drawSection(canvas, "O V U L A T I O N", ovulationY, foreSafePaint)
-        drawSection(canvas, "P E R I O D", regularY, foreSafePaint)
+        if (!periodMode) {
+            drawSection(canvas, "O V U L A T I O N", ovulationY, foreSafePaint)
+            drawSection(canvas, "P E R I O D", regularY, foreSafePaint)
+        } else {
+            drawSection(canvas, "P E R I O D   P H A S E", safePeriodY, foreSafePaint, false)
+        }
         canvas.drawCircle(center.x, center.y, radius.toFloat(), strokePaint)
     }
 
@@ -164,10 +187,10 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         return 2.0 * sqrt(radius.toDouble().pow(2.0) - distanceToCenter.pow(2.0))
     }
 
-    private fun drawSection(canvas: Canvas, text: String, y: Double, paint: Paint) {
+    private fun drawSection(canvas: Canvas, text: String, y: Double, paint: Paint, displayLine: Boolean = true) {
         val length = getChordLength(radius, y)
         val startX = center.x - (length / 2.0)
-        canvas.drawLine(startX.toFloat(), y.toFloat(), startX.toFloat() + length.toFloat(), y.toFloat(), paint)
+        if (displayLine) canvas.drawLine(startX.toFloat(), y.toFloat(), startX.toFloat() + length.toFloat(), y.toFloat(), paint)
         canvas.drawText(text, center.x, y.toFloat() - 20f, paint)
     }
 

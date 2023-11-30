@@ -24,6 +24,7 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
 import com.patrykandpatrick.vico.core.entry.FloatEntry
+import com.patrykandpatrick.vico.core.entry.entriesOf
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
@@ -153,6 +154,9 @@ class HomeFragment : Fragment() {
                     if (lastPeriod.periodEndYear == 0 &&
                         lastPeriod.periodEndMonth == 0 &&
                         lastPeriod.periodEndDay == 0) {
+
+                        // Change circle fill view mode to period phase
+                        circleFillView.setPeriodMode(true)
 
                         // Make the button for ending period and starting setup
                         addEndEvent(fa, prefEditor)
@@ -296,7 +300,11 @@ class HomeFragment : Fragment() {
                     }
                     periodEntries.add(FloatEntry(p + 1f, periodLength))
                 }
-                chartCycleTrend.setModel(entryModelOf(entries, periodEntries))
+                try {
+                    chartCycleTrend.setModel(entryModelOf(entries, periodEntries))
+                } catch (ex: Exception) {
+                    chartCycleTrend.setModel(entryModelOf(entriesOf(0f)))
+                }
             }
         }
         return root
@@ -521,6 +529,7 @@ class HomeFragment : Fragment() {
             val fa = requireActivity()
             val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val gap = dayDistance(today.time, currentPeriodDate.time)
+            var maxFillValue = SAFE_MAX
 
             // Update current cycle status
             if (gap <= SAFE_PERIOD_MAX)
@@ -534,7 +543,8 @@ class HomeFragment : Fragment() {
             else
                 tvMyCycleStatus.text = getString(R.string.cs_safe_period)
 
-            val percentage: Float = (gap.toFloat() / SAFE_MAX) * 100f
+            if (circleFillView.getPeriodMode()) maxFillValue = SAFE_PERIOD_MAX
+            val percentage: Float = (gap.toFloat() / maxFillValue) * 100f
             circleFillView.setCircleFillValue(percentage.toInt(), CIRCLE_FILL_DURATION)
             circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)

@@ -6,5 +6,6 @@
         <attr name="CircleFillSafeColor" format="color" />
         <attr name="CircleFillStrokeWidth" format="float" />
         <attr name="CircleFillValue" format="integer" />
+        <attr name="CircleFillPeriodMode" format="boolean" />
     </declare-styleable>
 </resources>
