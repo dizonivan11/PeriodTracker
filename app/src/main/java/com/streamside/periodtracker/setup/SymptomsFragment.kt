@@ -20,6 +20,7 @@ import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.NAVVIEW
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.Category
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
 
@@ -37,25 +38,7 @@ class SymptomsFragment : SetupFragment() {
 
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
-                if (LOG_PERIOD) {
-                    // Set selected period as the last period to review and finalize it after moving to next period
-                    selectedPeriod = lastPeriod
-                } else {
-                    selectedPeriod = if (lastPeriod != null) {
-                        // Check first if there's a last period without period end date yet
-                        if (lastPeriod.periodEndYear == 0 &&
-                            lastPeriod.periodEndMonth == 0 &&
-                            lastPeriod.periodEndDay == 0) {
-
-                            // Set selected period as the last period if there's no period end date yet
-                            lastPeriod
-                        } else {
-                            currentPeriod
-                        }
-                    } else {
-                        currentPeriod
-                    }
-                }
+                selectedPeriod = symptomsPeriod(currentPeriod, lastPeriod)
                 populateSymptomChips(view, fa)
             }
         }
@@ -144,6 +127,35 @@ class SymptomsFragment : SetupFragment() {
                     chipSymptom.chipIcon = ResourcesCompat.getDrawable(resources, R.drawable.baseline_info_24, fa.theme)
                 cgSymptom.addView(chipSymptom)
             }
+        }
+    }
+
+    companion object {
+        fun symptomsPeriod(currentPeriod: Period, lastPeriod: Period): Period {
+            if (LOG_PERIOD) {
+                // Set selected period as the last period to review and finalize it after moving to next period
+                return lastPeriod
+            } else {
+                return if (lastPeriod != null) {
+                    // Check first if there's a last period without period end date yet
+                    if (lastPeriod.periodEndYear == 0 &&
+                        lastPeriod.periodEndMonth == 0 &&
+                        lastPeriod.periodEndDay == 0) {
+
+                        // Set selected period as the last period if there's no period end date yet
+                        lastPeriod
+                    } else {
+                        currentPeriod
+                    }
+                } else {
+                    currentPeriod
+                }
+            }
+        }
+
+        fun hasSymptomsOn(category: Category): Boolean {
+            for (symptom in category.symptoms) if (symptom.value) return true
+            return false
         }
     }
 }

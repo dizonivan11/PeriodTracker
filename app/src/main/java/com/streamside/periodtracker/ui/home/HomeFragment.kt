@@ -47,6 +47,8 @@ import com.streamside.periodtracker.data.AppDataBuilder
 import com.streamside.periodtracker.data.Library
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
+import com.streamside.periodtracker.setup.SymptomsFragment.Companion.hasSymptomsOn
+import com.streamside.periodtracker.setup.SymptomsFragment.Companion.symptomsPeriod
 import com.streamside.periodtracker.views.CircleFillView
 import com.streamside.periodtracker.views.CounterView
 import java.text.DateFormatSymbols
@@ -133,20 +135,44 @@ class HomeFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, currentPeriodDays, CIRCLE_FILL_DURATION)
 
-            // Insights section
-            rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
-            val insightsData: MutableList<Library> = mutableListOf()
-            for (insight in AppDataBuilder.getLibraryData()) {
-                if (insight.symptoms.isEmpty()) continue
-                insightsData.add(insight)
-            }
-            rvInsights.adapter = InsightsAdapter(insightsData)
-
             // Display last period statistics (part 1)
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
 
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
                 if (lastPeriod != null) {
+                    // Insights section
+                    rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
+                    val insightsData: MutableList<Library> = mutableListOf()
+                    val selectedPeriodSymptoms = symptomsPeriod(currentPeriod, lastPeriod)
+                    for (insight in AppDataBuilder.getLibraryData()) {
+                        // Invisible library data will be displayed as Insight item
+                        if (!insight.visible) insightsData.add(insight)
+                        var include = false
+                        for (c in selectedPeriodSymptoms.symptoms.categories) {
+                            // Check if at least one was checked on this category
+                            for (symptom in insight.symptoms) {
+                                if (c.id == symptom) {
+                                    include = hasSymptomsOn(c)
+                                    break
+                                }
+                            }
+                            if (!include) {
+                                for (s in c.symptoms) {
+                                    // Check for individual symptom check value
+                                    for (symptom in insight.symptoms) {
+                                        if (s.id == symptom) {
+                                            include = s.value
+                                            break
+                                        }
+                                    }
+                                    if (include) break
+                                }
+                            }
+                        }
+                        if (include) insightsData.add(insight)
+                    }
+                    rvInsights.adapter = InsightsAdapter(insightsData)
+
                     val lastPeriodDate = toCalendar(lastPeriod.periodYear, lastPeriod.periodMonth, lastPeriod.periodDay)
                     val lastPeriodEndDate = toCalendar(lastPeriod.periodEndYear, lastPeriod.periodEndMonth, lastPeriod.periodEndDay)
 
@@ -293,7 +319,6 @@ class HomeFragment : Fragment() {
                     if (p > 0) {
                         val entryPeriodEndDate = toCalendar(periods[p - 1].periodEndYear, periods[p - 1].periodEndMonth, periods[p - 1].periodEndDay)
                         if (periods[p - 1].periodEndYear != 0 &&
-                            periods[p - 1].periodEndMonth != 0 &&
                             periods[p - 1].periodEndDay != 0) {
                             periodLength = dayDistance(entryPeriodDate.time, entryPeriodEndDate.time).toFloat()
                         }
