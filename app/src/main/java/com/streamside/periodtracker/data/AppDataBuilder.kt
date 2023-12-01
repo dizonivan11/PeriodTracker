@@ -108,17 +108,7 @@ class AppDataBuilder {
                             replaceFragment(DictionaryFragment(), R.id.frameLibrary)
                         }
                     },
-                    Library("Log your symptoms", R.drawable.rebecca_manning_q7dgla0rvuy_unsplash, false, listOf(
-                        R.string.cat_vaginal_discharge_color,
-                        R.string.cat_vaginal_discharge,
-                        R.string.cat_mood,
-                        R.string.cat_sex,
-                        R.string.cat_symptoms,
-                        R.string.cat_digestion_stool,
-                        R.string.cat_fitness_goal,
-                        R.string.cat_sleep,
-                        R.string.cat_skin,
-                    ), R.layout.insight_symptoms_item) {
+                    Library("Log your symptoms", R.drawable.rebecca_manning_q7dgla0rvuy_unsplash, false, listOf(), R.layout.insight_symptoms_item) {
                         generateLibraryCallback {
                             replaceFragment(SymptomsFragment(), R.id.frameLibrary)
                         }
