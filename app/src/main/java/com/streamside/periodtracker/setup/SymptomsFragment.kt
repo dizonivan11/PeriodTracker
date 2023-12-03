@@ -38,7 +38,7 @@ class SymptomsFragment : SetupFragment() {
 
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
-                selectedPeriod = symptomsPeriod(currentPeriod, lastPeriod)
+                selectedPeriod = if (lastPeriod != null) symptomsPeriod(currentPeriod, lastPeriod) else currentPeriod
                 populateSymptomChips(view, fa)
             }
         }
@@ -102,7 +102,7 @@ class SymptomsFragment : SetupFragment() {
             tvCategory.layoutParams = MarginLayoutParams(MarginLayoutParams.MATCH_PARENT, MarginLayoutParams.WRAP_CONTENT)
             (tvCategory.layoutParams as MarginLayoutParams).setMargins(0, 0, 0, 20)
             tvCategory.textSize = 20F
-            tvCategory.text = getString(category.id)
+            tvCategory.text = category.id
             llSymptoms.addView(tvCategory)
 
             val cgSymptom = ChipGroup(fa)
@@ -114,7 +114,7 @@ class SymptomsFragment : SetupFragment() {
             for (symptom in category.symptoms) {
                 val chipSymptom = Chip(fa)
                 chipSymptom.layoutParams = MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT)
-                chipSymptom.text = getString(symptom.id)
+                chipSymptom.text = symptom.id
                 chipSymptom.elevation = 10f
                 chipSymptom.isChecked = symptom.value
                 chipSymptom.setOnClickListener { it.isSelected = !it.isSelected }
@@ -132,21 +132,17 @@ class SymptomsFragment : SetupFragment() {
 
     companion object {
         fun symptomsPeriod(currentPeriod: Period, lastPeriod: Period): Period {
-            if (LOG_PERIOD) {
+            return if (LOG_PERIOD) {
                 // Set selected period as the last period to review and finalize it after moving to next period
-                return lastPeriod
+                lastPeriod
             } else {
-                return if (lastPeriod != null) {
-                    // Check first if there's a last period without period end date yet
-                    if (lastPeriod.periodEndYear == 0 &&
-                        lastPeriod.periodEndMonth == 0 &&
-                        lastPeriod.periodEndDay == 0) {
+                // Check first if there's a last period without period end date yet
+                if (lastPeriod.periodEndYear == 0 &&
+                    lastPeriod.periodEndMonth == 0 &&
+                    lastPeriod.periodEndDay == 0) {
 
-                        // Set selected period as the last period if there's no period end date yet
-                        lastPeriod
-                    } else {
-                        currentPeriod
-                    }
+                    // Set selected period as the last period if there's no period end date yet
+                    lastPeriod
                 } else {
                     currentPeriod
                 }
