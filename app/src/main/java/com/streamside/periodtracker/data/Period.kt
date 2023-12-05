@@ -16,5 +16,5 @@ data class Period(
     var periodEndMonth: Int,
     var periodEndDay: Int,
     var menstrualCycle: String,
-    var symptoms: SymptomList = AppDataBuilder.newSymptomsData()
+    var symptoms: SymptomList = SymptomList(mutableListOf())
 )

@@ -6,10 +6,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.streamside.periodtracker.R
 
-class LibraryAdapter(private val data: List<Library>) : RecyclerView.Adapter<LibraryAdapter.ViewHolder>() {
+class LibraryAdapter(private val fragment: Fragment, private val data: List<Library>) : RecyclerView.Adapter<LibraryAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cvLibraryItem: CardView
         val imageLibraryItem: ImageView
@@ -29,7 +31,12 @@ class LibraryAdapter(private val data: List<Library>) : RecyclerView.Adapter<Lib
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.cvLibraryItem.setOnClickListener(data[position].callback)
-        viewHolder.imageLibraryItem.setImageResource(data[position].image)
+
+        if (data[position].image != "")
+            Glide.with(fragment).load(data[position].image).centerCrop().into(viewHolder.imageLibraryItem)
+        else
+            viewHolder.imageLibraryItem.setImageResource(R.drawable.default_library_image)
+
         viewHolder.titleLibraryItem.text = data[position].title
     }
 

@@ -10,23 +10,28 @@ import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.streamside.periodtracker.FIRST_TIME
 import com.streamside.periodtracker.LOG_PERIOD
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
+import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.NAVVIEW
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.Category
+import com.streamside.periodtracker.data.DataViewModel
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
+import com.streamside.periodtracker.data.Symptom
+import com.streamside.periodtracker.data.SymptomList
 
 class SymptomsFragment : SetupFragment() {
     private lateinit var periodViewModel: PeriodViewModel
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var selectedPeriod: Period
+    private lateinit var symptomList: SymptomList
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,11 +40,15 @@ class SymptomsFragment : SetupFragment() {
         val view = inflater.inflate(R.layout.fragment_symptoms, container, false)
         val fa =  requireActivity()
         periodViewModel = getPeriodViewModel(fa)
+        dataViewModel = getDataViewModel(fa)
 
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
                 selectedPeriod = if (lastPeriod != null) symptomsPeriod(currentPeriod, lastPeriod) else currentPeriod
-                populateSymptomChips(view, fa)
+                dataViewModel.newSymptomsData().observe(viewLifecycleOwner) {
+                    symptomList = it
+                    populateSymptomChips(view, fa)
+                }
             }
         }
 
@@ -48,31 +57,22 @@ class SymptomsFragment : SetupFragment() {
                 // Hide back button if this isn't a first time setup
                 view.findViewById<Button>(R.id.back_symptoms).visibility = View.INVISIBLE
 
-                // Make save button click navigate to Home
-                view.findViewById<Button>(R.id.submit_symptoms).setOnClickListener {
-                    periodViewModel.update(selectedPeriod)
-                    finalizeSetup(fa)
-                }
+                // Make save button click
+                setSubmitOnClick(view, fa)
             } else {
                 // Make back button click navigate to Home
                 view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
                     NAVVIEW.selectedItemId = R.id.navigation_home
                 }
                 // Make save button click navigate to Home
-                view.findViewById<Button>(R.id.submit_symptoms).setOnClickListener {
-                    periodViewModel.update(selectedPeriod)
-                    NAVVIEW.selectedItemId = R.id.navigation_home
-                }
+                setSubmitOnClick(view, fa, true)
             }
         } else {
             view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
                 previousPage(fa)
             }
-            // Make save button click navigate to Home
-            view.findViewById<Button>(R.id.submit_symptoms).setOnClickListener {
-                periodViewModel.update(selectedPeriod)
-                finalizeSetup(fa)
-            }
+            // Make save button click
+            setSubmitOnClick(view, fa)
         }
         return view
     }
@@ -82,7 +82,25 @@ class SymptomsFragment : SetupFragment() {
         clearObservers(requireActivity(), viewLifecycleOwner)
     }
 
+    private fun setSubmitOnClick(root: View, fa: FragmentActivity, logOnly: Boolean = false) {
+        root.findViewById<Button>(R.id.submit_symptoms).setOnClickListener {
+            val submittedList = SymptomList(mutableListOf())
+            for (category in symptomList.categories) {
+                val checkedSymptoms = category.symptoms.filter { it.value }.toMutableList()
+                if (checkedSymptoms.size != 0) {
+                    submittedList.categories.add(category)
+                    category.symptoms = checkedSymptoms
+                }
+            }
+            selectedPeriod.symptoms = submittedList
+            periodViewModel.update(selectedPeriod)
+            if (logOnly) NAVVIEW.selectedItemId = R.id.navigation_home
+            else finalizeSetup(fa)
+        }
+    }
+
     private fun populateSymptomChips(view: View, fa: FragmentActivity) {
+        val typeface = Typeface.createFromAsset(fa.assets, "Poppins-Regular.ttf")
         val llSymptoms = view.findViewById<LinearLayout>(R.id.llSymptoms)
         llSymptoms.removeAllViews()
 
@@ -97,7 +115,9 @@ class SymptomsFragment : SetupFragment() {
         else tvSymptomsTitle.text = "Log your symptoms"
         llSymptoms.addView(tvSymptomsTitle)
 
-        for (category in selectedPeriod.symptoms.categories) {
+        for (category in symptomList.categories) {
+            if (!category.visible) continue
+
             val tvCategory = TextView(fa)
             tvCategory.layoutParams = MarginLayoutParams(MarginLayoutParams.MATCH_PARENT, MarginLayoutParams.WRAP_CONTENT)
             (tvCategory.layoutParams as MarginLayoutParams).setMargins(0, 0, 0, 20)
@@ -108,23 +128,20 @@ class SymptomsFragment : SetupFragment() {
             val cgSymptom = ChipGroup(fa)
             cgSymptom.layoutParams = MarginLayoutParams(MarginLayoutParams.MATCH_PARENT, MarginLayoutParams.WRAP_CONTENT)
             (cgSymptom.layoutParams as MarginLayoutParams).setMargins(0, 0, 0, 80)
-            cgSymptom.isSingleSelection = category.singleSelection
             llSymptoms.addView(cgSymptom)
 
             for (symptom in category.symptoms) {
+                if (!symptom.visible) continue
+                symptom.value = hasSymptom(selectedPeriod.symptoms, symptom)
+
                 val chipSymptom = Chip(fa)
                 chipSymptom.layoutParams = MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT)
+                chipSymptom.typeface = typeface
                 chipSymptom.text = symptom.id
                 chipSymptom.elevation = 10f
                 chipSymptom.isChecked = symptom.value
                 chipSymptom.setOnClickListener { it.isSelected = !it.isSelected }
-                chipSymptom.setOnCheckedChangeListener { _: CompoundButton, value: Boolean ->
-                    symptom.value = value
-                }
-                if (symptom.icon > 0)
-                    chipSymptom.chipIcon = ResourcesCompat.getDrawable(resources, symptom.icon, fa.theme)
-                else
-                    chipSymptom.chipIcon = ResourcesCompat.getDrawable(resources, R.drawable.baseline_info_24, fa.theme)
+                chipSymptom.setOnCheckedChangeListener { _: CompoundButton, value: Boolean -> symptom.value = value }
                 cgSymptom.addView(chipSymptom)
             }
         }
@@ -151,6 +168,15 @@ class SymptomsFragment : SetupFragment() {
 
         fun hasSymptomsOn(category: Category): Boolean {
             for (symptom in category.symptoms) if (symptom.value) return true
+            return false
+        }
+
+        fun hasSymptom(list: SymptomList, symptom: Symptom): Boolean {
+            for (c in list.categories) {
+                for (s in c.symptoms) {
+                    if (s.id == symptom.id) return s.value
+                }
+            }
             return false
         }
     }

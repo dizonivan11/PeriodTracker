@@ -15,6 +15,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.data.DataViewModel
 import com.streamside.periodtracker.data.PeriodViewModel
 import com.streamside.periodtracker.setup.SETUP_CURRENT_PAGE
 import com.streamside.periodtracker.setup.SETUP_FRAME
@@ -87,6 +88,11 @@ class MainActivity : AppCompatActivity() {
         fun getPeriodViewModel(fa: FragmentActivity): PeriodViewModel {
             return ViewModelProvider(fa)[PeriodViewModel::class.java]
         }
+
+        fun getDataViewModel(fa: FragmentActivity): DataViewModel {
+            return ViewModelProvider(fa)[DataViewModel::class.java]
+        }
+
         fun toCalendar(year: Int, month: Int, day: Int): Calendar {
             return Calendar.getInstance().apply {
                 set(Calendar.YEAR, year)

@@ -29,6 +29,7 @@ import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.dayDistance
+import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.isSameDay
 import com.streamside.periodtracker.MainActivity.Companion.isSameYearAndMonth
@@ -43,7 +44,7 @@ import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
 import com.streamside.periodtracker.data.InsightsAdapter
-import com.streamside.periodtracker.data.AppDataBuilder
+import com.streamside.periodtracker.data.DataViewModel
 import com.streamside.periodtracker.data.Library
 import com.streamside.periodtracker.data.Period
 import com.streamside.periodtracker.data.PeriodViewModel
@@ -61,6 +62,7 @@ const val MAX_TREND = 9
 
 class HomeFragment : Fragment() {
     private lateinit var periodViewModel: PeriodViewModel
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var currentPeriod: Period
     private val todayCalendar = Calendar.getInstance().apply { time = Date() }
     private val currentCalendar = Calendar.getInstance()
@@ -95,6 +97,7 @@ class HomeFragment : Fragment() {
         val fa = requireActivity()
         clearObservers(fa, viewLifecycleOwner)
         periodViewModel = getPeriodViewModel(fa)
+        dataViewModel = getDataViewModel(fa)
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
         val prefEditor = preferences.edit()
         simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
@@ -139,14 +142,17 @@ class HomeFragment : Fragment() {
             tvLastCycleLengthStatus.text = currentPeriod.menstrualCycle
 
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
-                if (lastPeriod != null) {
+                dataViewModel.getLibraryData().observe(viewLifecycleOwner) { libraryData ->
                     // Insights section
                     rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
                     val insightsData: MutableList<Library> = mutableListOf()
-                    val selectedPeriodSymptoms = symptomsPeriod(currentPeriod, lastPeriod)
-                    for (insight in AppDataBuilder.getLibraryData()) {
+                    val selectedPeriodSymptoms = if (lastPeriod != null) symptomsPeriod(currentPeriod, lastPeriod) else currentPeriod
+                    for (insight in libraryData) {
                         // Invisible library data will be displayed as Insight item
-                        if (!insight.visible) insightsData.add(insight)
+                        if (!insight.visible) {
+                            insightsData.add(insight)
+                            continue
+                        }
                         var include = false
                         for (c in selectedPeriodSymptoms.symptoms.categories) {
                             // Check if at least one was checked on this category
@@ -171,8 +177,10 @@ class HomeFragment : Fragment() {
                         }
                         if (include) insightsData.add(insight)
                     }
-                    rvInsights.adapter = InsightsAdapter(insightsData)
+                    rvInsights.adapter = InsightsAdapter(this, insightsData)
+                }
 
+                if (lastPeriod != null) {
                     val lastPeriodDate = toCalendar(lastPeriod.periodYear, lastPeriod.periodMonth, lastPeriod.periodDay)
                     val lastPeriodEndDate = toCalendar(lastPeriod.periodEndYear, lastPeriod.periodEndMonth, lastPeriod.periodEndDay)
 
