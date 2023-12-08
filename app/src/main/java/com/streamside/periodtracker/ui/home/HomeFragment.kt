@@ -73,7 +73,7 @@ class HomeFragment : Fragment() {
         cv2Tracker.setOnClickListener { goTo(R.id.navigation_tracker) }
 
         btnCreateProfile.setOnClickListener {
-            // TODO: Revise ALL fragment navigation, all must be on BottomNavBar just hidden just like Period Tracker page
+            goTo(R.id.navigation_health_setup)
         }
 
         return root
