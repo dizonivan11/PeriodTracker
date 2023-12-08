@@ -12,18 +12,16 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.data.DictionaryEntry
+import com.streamside.periodtracker.data.dictionary.DictionaryEntry
 import com.streamside.periodtracker.net.ApiHandler
 import com.streamside.periodtracker.net.ApiServices
 import retrofit2.Call
 import retrofit2.Response
 
 class DictionaryFragment : Fragment() {
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_dictionary, container, false)
         val fa = requireActivity()
         val mainDictionary = view.findViewById<LinearLayout>(R.id.mainDictionary)
@@ -33,8 +31,7 @@ class DictionaryFragment : Fragment() {
         mainDictionary.visibility = View.GONE
 
         btnDictionaryBack.setOnClickListener {
-            fa.supportFragmentManager.beginTransaction()
-                .replace(R.id.frameLibrary, LibraryHomeFragment()).commit()
+            goTo(R.id.navigation_library)
         }
 
         btnSearchDictionary.setOnClickListener {

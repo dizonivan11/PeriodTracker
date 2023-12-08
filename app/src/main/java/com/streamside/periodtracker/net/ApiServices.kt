@@ -1,6 +1,6 @@
 package com.streamside.periodtracker.net
 
-import com.streamside.periodtracker.data.DictionaryEntry
+import com.streamside.periodtracker.data.dictionary.DictionaryEntry
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

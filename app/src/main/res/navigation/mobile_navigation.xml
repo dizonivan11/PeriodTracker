@@ -6,16 +6,64 @@
     app:startDestination="@+id/navigation_home">
 
     <fragment
+        android:id="@+id/navigation_intro"
+        android:name="com.streamside.periodtracker.setup.IntroFragment"
+        android:label="@string/title_intro"
+        tools:layout="@layout/fragment_intro" />
+
+    <fragment
+        android:id="@+id/navigation_health_setup"
+        android:name="com.streamside.periodtracker.setup.HealthSetupFragment"
+        android:label="@string/title_health_setup"
+        tools:layout="@layout/fragment_health_setup" />
+
+    <fragment
+        android:id="@+id/navigation_period_date"
+        android:name="com.streamside.periodtracker.setup.PeriodDateFragment"
+        android:label="@string/title_period_date"
+        tools:layout="@layout/fragment_period_date" />
+
+    <fragment
+        android:id="@+id/navigation_menstrual_cycle"
+        android:name="com.streamside.periodtracker.setup.MenstrualCycleFragment"
+        android:label="@string/title_menstrual_cycle"
+        tools:layout="@layout/fragment_menstrual_cycle" />
+
+    <fragment
         android:id="@+id/navigation_home"
         android:name="com.streamside.periodtracker.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/navigation_tracker"
+        android:name="com.streamside.periodtracker.ui.tracker.TrackerFragment"
+        android:label="@string/title_tracker"
+        tools:layout="@layout/fragment_tracker" />
+
+    <fragment
+        android:id="@+id/navigation_period_symptoms"
+        android:name="com.streamside.periodtracker.setup.SymptomsFragment"
+        android:label="@string/title_period_symptoms"
+        tools:layout="@layout/fragment_symptoms" />
+
+    <fragment
         android:id="@+id/navigation_library"
         android:name="com.streamside.periodtracker.ui.library.LibraryFragment"
         android:label="@string/title_library"
         tools:layout="@layout/fragment_library" />
+
+    <fragment
+        android:id="@+id/navigation_dictionary"
+        android:name="com.streamside.periodtracker.ui.library.DictionaryFragment"
+        android:label="@string/title_dictionary"
+        tools:layout="@layout/fragment_dictionary" />
+
+    <fragment
+        android:id="@+id/navigation_web"
+        android:name="com.streamside.periodtracker.ui.library.WebFragment"
+        android:label="@string/title_web"
+        tools:layout="@layout/fragment_web" />
 
     <fragment
         android:id="@+id/navigation_settings"

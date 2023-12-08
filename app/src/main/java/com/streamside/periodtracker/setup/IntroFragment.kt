@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
+import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.data.PeriodViewModel
+import com.streamside.periodtracker.data.period.PeriodViewModel
 
 class IntroFragment : SetupFragment() {
     private lateinit var periodViewModel: PeriodViewModel
@@ -24,10 +25,10 @@ class IntroFragment : SetupFragment() {
                 if (referencePeriod == null) {
                     // Initialize reference period
                     periodViewModel.init(-1, 0, 0, 0).observe(viewLifecycleOwner) {
-                        nextPage(fa)
+                        goTo(R.id.navigation_health_setup)
                     }
                 } else {
-                    nextPage(fa)
+                    goTo(R.id.navigation_health_setup)
                 }
             }
         }

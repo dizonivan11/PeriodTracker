@@ -7,26 +7,28 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
 
-class WebFragment(private val url: String) : Fragment() {
+var WEB_URL: String = ""
+
+class WebFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_web, container, false)
-        val fa = requireActivity()
         val btnWebBack = view.findViewById<Button>(R.id.btnWebBack)
         val wvWeb = view.findViewById<WebView>(R.id.wvWeb)
         val wvWebSettings = wvWeb.settings
         wvWebSettings.javaScriptEnabled = true
 
         btnWebBack.setOnClickListener {
-            fa.supportFragmentManager.beginTransaction()
-                .replace(R.id.frameLibrary, LibraryHomeFragment()).commit()
+            goTo(R.id.navigation_library)
         }
 
-        if (url != "") wvWeb.loadUrl(url)
+        if (WEB_URL != "")
+            wvWeb.loadUrl(WEB_URL)
 
         return view
     }

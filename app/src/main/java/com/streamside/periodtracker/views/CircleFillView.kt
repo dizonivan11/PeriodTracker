@@ -39,11 +39,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var periodMode = false
 
     init {
-        val a = context.theme.obtainStyledAttributes(
-            attrs,
-            R.styleable.CircleFillView,
-            0, 0
-        )
+        val a = context.theme.obtainStyledAttributes(attrs, R.styleable.CircleFillView, 0, 0)
         try {
             fillColor = a.getColor(R.styleable.CircleFillView_CircleFillColor, Color.WHITE)
             strokeColor = a.getColor(R.styleable.CircleFillView_CircleFillStrokeColor, Color.BLACK)

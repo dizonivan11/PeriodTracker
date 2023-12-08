@@ -18,14 +18,14 @@ import com.streamside.periodtracker.LOG_PERIOD
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
-import com.streamside.periodtracker.NAVVIEW
+import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.data.Category
-import com.streamside.periodtracker.data.DataViewModel
-import com.streamside.periodtracker.data.Period
-import com.streamside.periodtracker.data.PeriodViewModel
-import com.streamside.periodtracker.data.Symptom
-import com.streamside.periodtracker.data.SymptomList
+import com.streamside.periodtracker.data.period.Category
+import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.period.Period
+import com.streamside.periodtracker.data.period.PeriodViewModel
+import com.streamside.periodtracker.data.period.Symptom
+import com.streamside.periodtracker.data.period.SymptomList
 
 class SymptomsFragment : SetupFragment() {
     private lateinit var periodViewModel: PeriodViewModel
@@ -33,10 +33,7 @@ class SymptomsFragment : SetupFragment() {
     private lateinit var selectedPeriod: Period
     private lateinit var symptomList: SymptomList
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_symptoms, container, false)
         val fa =  requireActivity()
         periodViewModel = getPeriodViewModel(fa)
@@ -62,14 +59,14 @@ class SymptomsFragment : SetupFragment() {
             } else {
                 // Make back button click navigate to Home
                 view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
-                    NAVVIEW.selectedItemId = R.id.navigation_home
+                    goTo(R.id.navigation_tracker)
                 }
                 // Make save button click navigate to Home
                 setSubmitOnClick(view, fa, true)
             }
         } else {
             view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
-                previousPage(fa)
+                goTo(R.id.navigation_menstrual_cycle)
             }
             // Make save button click
             setSubmitOnClick(view, fa)
@@ -94,7 +91,7 @@ class SymptomsFragment : SetupFragment() {
             }
             selectedPeriod.symptoms = submittedList
             periodViewModel.update(selectedPeriod)
-            if (logOnly) NAVVIEW.selectedItemId = R.id.navigation_home
+            if (logOnly) goTo(R.id.navigation_tracker)
             else finalizeSetup(fa)
         }
     }

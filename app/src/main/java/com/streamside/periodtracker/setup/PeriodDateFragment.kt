@@ -7,17 +7,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.DatePicker
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
+import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.MainActivity.Companion.toCalendar
 import com.streamside.periodtracker.R
-import com.streamside.periodtracker.data.PeriodViewModel
+import com.streamside.periodtracker.data.period.PeriodViewModel
 import java.util.Calendar
 
 class PeriodDateFragment : SetupFragment() {
     private lateinit var periodViewModel: PeriodViewModel
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_period_date, container, false)
         val fa = requireActivity()
         periodViewModel = getPeriodViewModel(fa)
@@ -31,12 +29,12 @@ class PeriodDateFragment : SetupFragment() {
                 referencePeriod.periodMonth = periodDate.get(Calendar.MONTH)
                 referencePeriod.periodDay = periodDate.get(Calendar.DAY_OF_MONTH)
                 periodViewModel.update(referencePeriod)
-                nextPage(fa)
+                goTo(R.id.navigation_menstrual_cycle)
             }
         }
 
         view.findViewById<Button>(R.id.back_period_date).setOnClickListener {
-            previousPage(fa)
+            goTo(R.id.navigation_health_setup)
         }
         return view
     }
