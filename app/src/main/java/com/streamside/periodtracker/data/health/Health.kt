@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 data class Health(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    val name: String,
-    val age: Int,
-    var weight: Int,
-    var height: Float
+    var name: String,
+    var age: Int,
+    var weight: Int, // In kilograms
+    var height: Int // In inches, can be converted to centimeter by function, saved from input feet+inches
 )

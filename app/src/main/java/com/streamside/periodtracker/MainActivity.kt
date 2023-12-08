@@ -13,6 +13,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.PeriodViewModel
 import java.util.Calendar
@@ -85,6 +86,10 @@ class MainActivity : AppCompatActivity() {
             clearObservers(fa, owner)
             fa.finish()
             fa.startActivity(START)
+        }
+
+        fun getHealthViewModel(fa: FragmentActivity): HealthViewModel {
+            return ViewModelProvider(fa)[HealthViewModel::class.java]
         }
 
         fun getPeriodViewModel(fa: FragmentActivity): PeriodViewModel {

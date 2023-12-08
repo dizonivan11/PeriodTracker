@@ -18,14 +18,14 @@
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
+                android:id="@+id/hsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Create Health Profile"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="60dp"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -71,14 +71,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <AutoCompleteTextView
+                <Spinner
                     android:id="@+id/hsHeightFeet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Feet" />
 
-                <AutoCompleteTextView
+                <Spinner
                     android:id="@+id/hsHeightInch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

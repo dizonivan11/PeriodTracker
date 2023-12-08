@@ -12,6 +12,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreference
 import com.streamside.periodtracker.DARK_MODE
 import com.streamside.periodtracker.FIRST_TIME
+import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.restart
 import com.streamside.periodtracker.R
@@ -53,9 +54,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     run {
                         val fa = requireActivity()
                         val periodViewModel = getPeriodViewModel(fa)
+                        val healthViewModel = getHealthViewModel(fa)
 
                         // Delete all data
                         periodViewModel.deleteAll()
+                        healthViewModel.deleteAll()
 
                         // Restart app
                         restart(fa, viewLifecycleOwner)

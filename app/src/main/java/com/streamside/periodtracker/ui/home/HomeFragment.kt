@@ -15,25 +15,26 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
+import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.views.CardView2
 import kotlin.random.Random
 
 class HomeFragment : Fragment() {
     private lateinit var dataViewModel: DataViewModel
+    private lateinit var healthViewModel: HealthViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
         dataViewModel = getDataViewModel(fa)
+        healthViewModel = getHealthViewModel(fa)
         clearObservers(fa, viewLifecycleOwner)
 
+        val cv2Header = root.findViewById<CardView2>(R.id.cv2Header)
         val cv2RandomTip = root.findViewById<CardView2>(R.id.cv2RandomTip)
         val cv2Tracker = root.findViewById<CardView2>(R.id.cv2Tracker)
         val btnCreateProfile = root.findViewById<Button>(R.id.btnCreateProfile)
@@ -67,6 +68,13 @@ class HomeFragment : Fragment() {
             cv2RandomTip.setCardText(randomArticle.title)
             cv2RandomTip.setOnClickListener { it2 ->
                 randomArticle.callback.invoke(it2)
+            }
+        }
+
+        healthViewModel.all.observe(viewLifecycleOwner) { healthProfiles ->
+            if (healthProfiles.isNotEmpty()) {
+                val healthProfile = healthProfiles[0]
+                cv2Header.setCardText("Welcome Back ${healthProfile.name}!")
             }
         }
 
