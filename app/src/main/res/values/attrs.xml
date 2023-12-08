@@ -8,4 +8,9 @@
         <attr name="CircleFillValue" format="integer" />
         <attr name="CircleFillPeriodMode" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="CardView2" >
+        <attr name="cardText" format="string" />
+        <attr name="cardTextSize" format="dimension" />
+        <attr name="cardImage" format="reference" />
+    </declare-styleable>
 </resources>
