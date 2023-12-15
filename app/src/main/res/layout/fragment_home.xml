@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:queryBackground="@android:color/transparent"
                 android:iconifiedByDefault="false"
-                android:queryHint="What do you want to know?" />
+                android:queryHint="What do you want to know about?" />
 
         </androidx.cardview.widget.CardView>
 
