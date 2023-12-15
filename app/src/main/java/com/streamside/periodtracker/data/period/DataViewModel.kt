@@ -63,6 +63,44 @@ class DataViewModel(app: Application): AndroidViewModel(app) {
         return result
     }
 
+    fun getSymptomsData(): LiveData<Map<String, Subject>> {
+        val result = MutableLiveData<Map<String, Subject>>()
+        viewModelScope.launch(Dispatchers.IO) {
+            var lastCategory = ""
+            val list: MutableMap<String, Subject> = mutableMapOf()
+            val queue = Volley.newRequestQueue(FA)
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.GET,
+                String.format(SPREADSHEET_URL, SHEET_ID, SYMPTOMS_TAB_NAME, API_KEY),
+                null,
+                { response ->
+                    try {
+                        val root = response.getJSONArray("values")
+                        for (i in 0 until root.length()) {
+                            val symptom = root.getJSONArray(i)
+                            val id = symptom.getString(0)
+                            val type = symptom.getString(1)
+                            if (type == "Category") {
+                                list[id] = Subject()
+                                lastCategory = id
+                            } else if (type == "Symptom") {
+                                if (lastCategory.isNotEmpty())
+                                    list[lastCategory]?.children?.set(id, Subject(lastCategory))
+                            }
+                        }
+                        result.postValue(list)
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+                }, {
+                    throw it
+                }
+            )
+            queue.add(jsonObjectRequest)
+        }
+        return result
+    }
+
     fun getLibraryData(): LiveData<List<Library>> {
         val result = MutableLiveData<List<Library>>()
         viewModelScope.launch(Dispatchers.IO) {

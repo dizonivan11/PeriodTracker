@@ -30,6 +30,7 @@ import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.library.SearchAdapter
 import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.period.Subject
 import com.streamside.periodtracker.views.CardView2
 import kotlin.random.Random
 
@@ -38,6 +39,7 @@ private var CREATE_PROFILE_INITIAL_VISIBILITY = View.INVISIBLE
 class HomeFragment : Fragment() {
     private lateinit var dataViewModel: DataViewModel
     private lateinit var healthViewModel: HealthViewModel
+    private lateinit var symptoms: Map<String, Subject>
     private var libraryList: List<Library> = listOf()
     private lateinit var rvSearch: RecyclerView
     private lateinit var searchAdapter: SearchAdapter
@@ -65,29 +67,23 @@ class HomeFragment : Fragment() {
         rvSearch.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.VERTICAL, false)
         rvSearch.adapter = searchAdapter
 
+        dataViewModel.getSymptomsData().observe(viewLifecycleOwner) { symptomsList ->
+            symptoms = symptomsList
+        }
+
         dataViewModel.getLibraryData().observe(viewLifecycleOwner) { articles ->
-            val filteredArticles = articles.filter { it.visible }
+            val filteredArticles: MutableList<Library> = articles.filter { it.visible }.toMutableList()
+            filteredArticles.removeAt(0)
             libraryList = filteredArticles
-            val randomArticle = filteredArticles[Random.nextInt(1, filteredArticles.size)]
+            val randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
             Glide.with(fa).load(randomArticle.image).centerCrop().listener(object :
                 RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>,
-                    isFirstResource: Boolean
-                ): Boolean {
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     cv2RandomTip.setCardImage(ResourcesCompat.getDrawable(fa.resources, R.drawable.default_library_image, fa.theme))
                     return false
                 }
 
-                override fun onResourceReady(
-                    resource: Drawable,
-                    model: Any,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource,
-                    isFirstResource: Boolean
-                ): Boolean {
+                override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
                     cv2RandomTip.setCardImage(resource)
                     return false
                 }
@@ -159,14 +155,49 @@ class HomeFragment : Fragment() {
         val trimmedQuery = query.trim()
         val filteredList = mutableListOf<Library>()
         for (library in libraryList) {
+            if (library.title.contains(trimmedQuery, true)) {
+                filteredList.add(library)
+                continue
+            }
+
             for (symptom in library.symptoms) {
                 if (symptom.contains(trimmedQuery, true) ||
-                    library.title.contains(trimmedQuery, true)) {
+                    isChild(symptom, trimmedQuery)) {
                     filteredList.add(library)
                     break
                 }
             }
         }
         searchAdapter.updateData(filteredList)
+    }
+
+    private fun isChild(symptom: String, trimmedQuery: String): Boolean {
+        var parent = findParentOf(symptom, symptoms)
+
+        while (true) {
+            if (parent == "") return false
+            else {
+                if (parent.contains(trimmedQuery, true)) {
+                    return true
+                } else {
+                    parent = findParentOf(parent, symptoms)
+                }
+            }
+        }
+    }
+
+    private fun findParentOf(child: String, list: Map<String, Subject>): String {
+        var parent = ""
+        for (symptom in list.keys) {
+            val l = list[symptom] ?: continue
+            if (child == symptom) {
+                parent = l.parent
+                break
+            } else {
+                parent = findParentOf(child, l.children)
+                if (parent.isNotEmpty()) break
+            }
+        }
+        return parent
     }
 }

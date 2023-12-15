@@ -16,11 +16,13 @@ class SearchAdapter(private val fragment: Fragment, private var data: List<Libra
         val searchQuery: LinearLayout
         val searchQueryImage: ImageView
         val searchQueryTitle: TextView
+        val searchQueryCategory: TextView
 
         init {
             searchQuery = view.findViewById(R.id.searchQuery)
             searchQueryImage = view.findViewById(R.id.searchQueryImage)
             searchQueryTitle = view.findViewById(R.id.searchQueryTitle)
+            searchQueryCategory = view.findViewById(R.id.searchQueryCategory)
         }
     }
 
@@ -41,6 +43,14 @@ class SearchAdapter(private val fragment: Fragment, private var data: List<Libra
             Glide.with(fragment).load(data[position].image).centerCrop().into(viewHolder.searchQueryImage)
 
         viewHolder.searchQueryTitle.text = data[position].title
+
+        var categories = ""
+        for (symptom in data[position].symptoms) {
+            categories = "${categories}, $symptom"
+        }
+        categories = "Category: ${categories.substring(2)}"
+
+        viewHolder.searchQueryCategory.text = categories
     }
 
     override fun getItemCount() = data.size
