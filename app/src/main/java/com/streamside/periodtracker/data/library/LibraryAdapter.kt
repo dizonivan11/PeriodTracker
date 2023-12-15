@@ -34,8 +34,6 @@ class LibraryAdapter(private val fragment: Fragment, private val data: List<Libr
 
         if (data[position].image != "")
             Glide.with(fragment).load(data[position].image).centerCrop().into(viewHolder.imageLibraryItem)
-        else
-            viewHolder.imageLibraryItem.setImageResource(R.drawable.default_library_image)
 
         viewHolder.titleLibraryItem.text = data[position].title
     }

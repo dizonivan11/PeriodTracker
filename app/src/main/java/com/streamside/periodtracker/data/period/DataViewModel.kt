@@ -90,8 +90,8 @@ class DataViewModel(app: Application): AndroidViewModel(app) {
                         for (i in 1 until root.length()) {
                             val library = root.getJSONArray(i)
                             val symptoms = library.getString(0).split(",")
-                            val title = library.getString(1)
-                            val url = library.getString(2)
+                            val title = if (library.length() > 1) library.getString(1) else ""
+                            val url = if (library.length() > 2) library.getString(2) else ""
                             val image = if (library.length() > 3) library.getString(3) else ""
                             list.add(Library(title, image, true, symptoms) {
                                 WEB_URL = url

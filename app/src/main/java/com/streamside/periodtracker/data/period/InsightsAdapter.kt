@@ -35,8 +35,6 @@ class InsightsAdapter(private val fragment: Fragment, private val data: List<Lib
 
         if (data[position].image != "")
             Glide.with(fragment).load(data[position].image).centerCrop().into(viewHolder.imageInsightItem)
-        else
-            viewHolder.imageInsightItem.setImageResource(R.drawable.default_library_image)
 
         viewHolder.titleInsightItem.text = data[position].title
     }

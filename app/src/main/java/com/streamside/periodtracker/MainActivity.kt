@@ -13,8 +13,10 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.data.health.Health
 import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.period.Period
 import com.streamside.periodtracker.data.period.PeriodViewModel
 import java.util.Calendar
 import java.util.Date
@@ -111,6 +113,14 @@ class MainActivity : AppCompatActivity() {
         fun goTo(selectedPage: Int) {
             NAVIGATED_FROM_GOTO = true
             FA.findNavController(R.id.nav_host_fragment_activity_main).navigate(selectedPage)
+        }
+
+        fun isNotEmptyPeriod(period: Period): Boolean {
+            return period.periodYear > 0 && period.periodDay > 0 && period.menstrualCycle.isNotEmpty()
+        }
+
+        fun isNotEmptyHealthProfile(healthProfile: Health): Boolean {
+            return healthProfile.name.isNotEmpty() && healthProfile.age > 0 && healthProfile.weight > 0 && healthProfile.height > 0
         }
 
         fun dayDistance(date1: Date, date2: Date): Int {

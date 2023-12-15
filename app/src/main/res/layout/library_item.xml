@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:scaleType="centerCrop"
+            android:src="@drawable/default_library_image"
             app:layout_constraintEnd_toEndOf="@+id/clLibraryItem"
             app:layout_constraintStart_toStartOf="@+id/clLibraryItem"
             app:layout_constraintTop_toTopOf="@+id/clLibraryItem"

@@ -83,11 +83,7 @@ class TrackerFragment : Fragment() {
     private lateinit var linearCycleHistory : LinearLayout
     private lateinit var chartCycleTrend: ChartView
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_tracker, container, false)
         val fa = requireActivity()
         MainActivity.clearObservers(fa, viewLifecycleOwner)
@@ -566,7 +562,7 @@ class TrackerFragment : Fragment() {
             val fa = requireActivity()
             val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val gap = dayDistance(today.time, currentPeriodDate.time)
-            var maxFillValue = SAFE_MAX
+            val maxFillValue = if (circleFillView.getPeriodMode()) SAFE_PERIOD_MAX else SAFE_MAX
 
             // Update current cycle status
             if (gap <= SAFE_PERIOD_MAX)
@@ -580,7 +576,6 @@ class TrackerFragment : Fragment() {
             else
                 tvMyCycleStatus.text = getString(R.string.cs_safe_period)
 
-            if (circleFillView.getPeriodMode()) maxFillValue = SAFE_PERIOD_MAX
             val percentage: Float = (gap.toFloat() / maxFillValue) * 100f
             circleFillView.setCircleFillValue(percentage.toInt(), CIRCLE_FILL_DURATION)
             circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
