@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
+import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
@@ -32,6 +33,10 @@ import com.streamside.periodtracker.data.library.SearchAdapter
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.Subject
 import com.streamside.periodtracker.views.CardView2
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 private var CREATE_PROFILE_INITIAL_VISIBILITY = View.INVISIBLE
@@ -59,6 +64,14 @@ class HomeFragment : Fragment() {
         val tvCreateProfileContent = root.findViewById<TextView>(R.id.tvCreateProfileContent)
         val btnCreateProfile = root.findViewById<Button>(R.id.btnCreateProfile)
         val llMainCards = root.findViewById<GridLayout>(R.id.llMainCards)
+        val cvWeight = root.findViewById<CardView>(R.id.cvWeight)
+        val tvWeight = root.findViewById<TextView>(R.id.tvWeight)
+        val cvHeight = root.findViewById<CardView>(R.id.cvHeight)
+        val tvHeight = root.findViewById<TextView>(R.id.tvHeight)
+        val cvBMI = root.findViewById<CardView>(R.id.cvBMI)
+        val llBMI = root.findViewById<LinearLayout>(R.id.llBMI)
+        val tvBMI = root.findViewById<TextView>(R.id.tvBMI)
+        val tvBMIStatus = root.findViewById<TextView>(R.id.tvBMIStatus)
         val tvRandomTip = root.findViewById<TextView>(R.id.tvRandomTip)
         val cv2RandomTip = root.findViewById<CardView2>(R.id.cv2RandomTip)
         val cv2Tracker = root.findViewById<CardView2>(R.id.cv2Tracker)
@@ -102,8 +115,25 @@ class HomeFragment : Fragment() {
                     CREATE_PROFILE_INITIAL_VISIBILITY = View.GONE
                     cv2CreateProfile.visibility = View.GONE
                     cv2Header.setCardText("Welcome Back ${healthProfile.name}!")
+
+                    // WEIGHT
+                    tvWeight.text = "${healthProfile.weight} kg"
+
+                    // HEIGHT
+                    val heightInCM = toCM(healthProfile.height)
+                    tvHeight.text = "${heightInCM.roundToInt()} cm"
+
+                    // BMI
+                    val bmi = getBMI(healthProfile.weight, heightInCM)
+                    val df = DecimalFormat("#.#")
+                    df.roundingMode = RoundingMode.UP
+                    tvBMI.text = df.format(bmi)
+                    updateBMIInfo(bmi, llBMI, tvBMIStatus)
                 } else {
                     CREATE_PROFILE_INITIAL_VISIBILITY = View.VISIBLE
+                    cvWeight.visibility = View.GONE
+                    cvHeight.visibility = View.GONE
+                    cvBMI.visibility = View.GONE
                     tvCreateProfile.text = "Update Your Health Profile"
                     tvCreateProfileContent.text = "Health profile incomplete, app features may be limited"
                     btnCreateProfile.text = getString(R.string.button_update)
@@ -150,6 +180,26 @@ class HomeFragment : Fragment() {
 
         return root
     }
+
+    private fun updateBMIInfo(bmi: Float, llBMI: LinearLayout, tvBMIStatus: TextView) {
+        if (bmi < 18.5) {
+            // Underweight
+            tvBMIStatus.text = "Underweight"
+        } else if (bmi >= 18.5 && bmi < 25) {
+            // Normal
+            llBMI.setBackgroundResource(R.drawable.bmi_good_bg)
+            tvBMIStatus.text = "Normal"
+        } else if (bmi >= 25 && bmi < 30) {
+            // Overweight
+            tvBMIStatus.text = "Overweight"
+        } else {
+            // Obesity
+            tvBMIStatus.text = "Obesity"
+        }
+    }
+
+    private fun toCM(inches: Int) = inches * 2.54f
+    private fun getBMI(weight: Int, height: Float) = weight / (height * 0.01f).pow(2)
 
     private fun filterSearchQuery(query: String) {
         val trimmedQuery = query.trim()
