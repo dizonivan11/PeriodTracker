@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
                     // BMI
                     val bmi = getBMI(healthProfile.weight, heightInCM)
                     val df = DecimalFormat("#.#")
-                    df.roundingMode = RoundingMode.UP
+                    df.roundingMode = RoundingMode.HALF_DOWN
                     tvBMI.text = df.format(bmi)
                     updateBMIInfo(bmi, llBMI, tvBMIStatus)
                 } else {
@@ -186,15 +186,16 @@ class HomeFragment : Fragment() {
             // Underweight
             tvBMIStatus.text = "Underweight"
         } else if (bmi >= 18.5 && bmi < 25) {
-            // Normal
+            // Healthy
             llBMI.setBackgroundResource(R.drawable.bmi_good_bg)
-            tvBMIStatus.text = "Normal"
+            tvBMIStatus.text = "Healthy"
         } else if (bmi >= 25 && bmi < 30) {
             // Overweight
             tvBMIStatus.text = "Overweight"
         } else {
             // Obesity
             tvBMIStatus.text = "Obesity"
+            llBMI.setBackgroundResource(R.drawable.bmi_critical_bg)
         }
     }
 
