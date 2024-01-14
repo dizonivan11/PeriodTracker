@@ -32,6 +32,8 @@ import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.library.SearchAdapter
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.Subject
+import com.streamside.periodtracker.ui.library.FILTER
+import com.streamside.periodtracker.ui.library.LibraryFragment.Companion.isChild
 import com.streamside.periodtracker.views.CardView2
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -57,6 +59,7 @@ class HomeFragment : Fragment() {
         clearObservers(fa, viewLifecycleOwner)
 
         val cv2Header = root.findViewById<CardView2>(R.id.cv2Header)
+        val btnUpdateProfile = root.findViewById<Button>(R.id.btnUpdateProfile)
         val svSearchBox = root.findViewById<SearchView>(R.id.svSearchBox)
         rvSearch = root.findViewById(R.id.rvSearch)
         val cv2CreateProfile = root.findViewById<CardView>(R.id.cv2CreateProfile)
@@ -72,9 +75,18 @@ class HomeFragment : Fragment() {
         val llBMI = root.findViewById<LinearLayout>(R.id.llBMI)
         val tvBMI = root.findViewById<TextView>(R.id.tvBMI)
         val tvBMIStatus = root.findViewById<TextView>(R.id.tvBMIStatus)
+        val tvBMIRange = root.findViewById<TextView>(R.id.tvBMIRange)
+        val tvBMITips = root.findViewById<TextView>(R.id.tvBMITips)
+        val cv2Tips = root.findViewById<CardView2>(R.id.cv2Tips)
         val tvRandomTip = root.findViewById<TextView>(R.id.tvRandomTip)
         val cv2RandomTip = root.findViewById<CardView2>(R.id.cv2RandomTip)
-        val cv2Tracker = root.findViewById<CardView2>(R.id.cv2Tracker)
+        val llCategories = root.findViewById<LinearLayout>(R.id.llCategories)
+        val cv2Menstruation = root.findViewById<CardView2>(R.id.cv2Menstruation)
+        val cv2Hair = root.findViewById<CardView2>(R.id.cv2Hair)
+        val cv2Skin = root.findViewById<CardView2>(R.id.cv2Skin)
+        val cv2Eyes = root.findViewById<CardView2>(R.id.cv2Eyes)
+        val cv2Breasts = root.findViewById<CardView2>(R.id.cv2Breasts)
+        val cv2DentalOral = root.findViewById<CardView2>(R.id.cv2DentalOral)
 
         searchAdapter = SearchAdapter(this, listOf())
         rvSearch.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.VERTICAL, false)
@@ -102,8 +114,38 @@ class HomeFragment : Fragment() {
                 }
             }).preload()
             cv2RandomTip.setCardText(randomArticle.title)
-            cv2RandomTip.setOnClickListener { it2 ->
-                randomArticle.callback.invoke(it2)
+            cv2RandomTip.setOnClickListener {
+                randomArticle.callback.invoke(it)
+            }
+
+            cv2Menstruation.setOnClickListener {
+                FILTER.add("Menstruation")
+                goTo(R.id.navigation_library)
+            }
+
+            cv2Hair.setOnClickListener {
+                FILTER.add("Hair")
+                goTo(R.id.navigation_library)
+            }
+
+            cv2Skin.setOnClickListener {
+                FILTER.add("Skin")
+                goTo(R.id.navigation_library)
+            }
+
+            cv2Eyes.setOnClickListener {
+                FILTER.add("Eyes")
+                goTo(R.id.navigation_library)
+            }
+
+            cv2Breasts.setOnClickListener {
+                FILTER.add("Breast")
+                goTo(R.id.navigation_library)
+            }
+
+            cv2DentalOral.setOnClickListener {
+                FILTER.add("Dental and Oral")
+                goTo(R.id.navigation_library)
             }
         }
 
@@ -117,19 +159,20 @@ class HomeFragment : Fragment() {
                     cv2Header.setCardText("Welcome Back ${healthProfile.name}!")
 
                     // WEIGHT
-                    tvWeight.text = "${healthProfile.weight} kg"
+                    tvWeight.text = "${healthProfile.weight}kg"
 
                     // HEIGHT
                     val heightInCM = toCM(healthProfile.height)
-                    tvHeight.text = "${heightInCM.roundToInt()} cm"
+                    tvHeight.text = "${heightInCM.roundToInt()}cm"
 
                     // BMI
                     val bmi = getBMI(healthProfile.weight, heightInCM)
                     val df = DecimalFormat("#.#")
                     df.roundingMode = RoundingMode.HALF_DOWN
                     tvBMI.text = df.format(bmi)
-                    updateBMIInfo(bmi, llBMI, tvBMIStatus)
+                    updateBMIInfo(bmi, llBMI, tvBMIStatus, tvBMIRange, tvBMITips)
                 } else {
+                    btnUpdateProfile.visibility = View.GONE
                     CREATE_PROFILE_INITIAL_VISIBILITY = View.VISIBLE
                     cvWeight.visibility = View.GONE
                     cvHeight.visibility = View.GONE
@@ -155,8 +198,9 @@ class HomeFragment : Fragment() {
                         cv2CreateProfile.visibility = View.GONE
                         llMainCards.visibility = View.GONE
                         tvRandomTip.visibility = View.GONE
-                        cv2Tracker.visibility = View.GONE
+                        cv2Tips.visibility = View.GONE
                         cv2RandomTip.visibility = View.GONE
+                        llCategories.visibility = View.GONE
                         filterSearchQuery(query)
                     } else {
                         cv2Header.visibility = View.VISIBLE
@@ -164,15 +208,20 @@ class HomeFragment : Fragment() {
                         cv2CreateProfile.visibility = CREATE_PROFILE_INITIAL_VISIBILITY
                         llMainCards.visibility = View.VISIBLE
                         tvRandomTip.visibility = View.VISIBLE
-                        cv2Tracker.visibility = View.VISIBLE
+                        cv2Tips.visibility = View.VISIBLE
                         cv2RandomTip.visibility = View.VISIBLE
+                        llCategories.visibility = View.VISIBLE
                     }
                     true
                 }
             }
         })
 
-        cv2Tracker.setOnClickListener { goTo(R.id.navigation_tracker) }
+        cv2Tips.setOnClickListener { goTo(R.id.navigation_library) }
+
+        btnUpdateProfile.setOnClickListener {
+            goTo(R.id.navigation_health_setup)
+        }
 
         btnCreateProfile.setOnClickListener {
             goTo(R.id.navigation_health_setup)
@@ -181,20 +230,28 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    private fun updateBMIInfo(bmi: Float, llBMI: LinearLayout, tvBMIStatus: TextView) {
+    private fun updateBMIInfo(bmi: Float, llBMI: LinearLayout, tvBMIStatus: TextView, tvBMIRange: TextView, tvBMITips: TextView) {
         if (bmi < 18.5) {
             // Underweight
             tvBMIStatus.text = "Underweight"
+            tvBMIRange.text = getString(R.string.range_underweight)
+            tvBMITips.text = getString(R.string.tips_underweight)
         } else if (bmi >= 18.5 && bmi < 25) {
             // Healthy
-            llBMI.setBackgroundResource(R.drawable.bmi_good_bg)
             tvBMIStatus.text = "Healthy"
+            tvBMIRange.text = getString(R.string.range_healthy)
+            tvBMITips.text = getString(R.string.tips_healthy)
+            llBMI.setBackgroundResource(R.drawable.bmi_good_bg)
         } else if (bmi >= 25 && bmi < 30) {
             // Overweight
             tvBMIStatus.text = "Overweight"
+            tvBMIRange.text = getString(R.string.range_overweight)
+            tvBMITips.text = getString(R.string.tips_overweight)
         } else {
             // Obesity
             tvBMIStatus.text = "Obesity"
+            tvBMIRange.text = getString(R.string.range_obesity)
+            tvBMITips.text = getString(R.string.tips_obesity)
             llBMI.setBackgroundResource(R.drawable.bmi_critical_bg)
         }
     }
@@ -213,42 +270,12 @@ class HomeFragment : Fragment() {
 
             for (symptom in library.symptoms) {
                 if (symptom.contains(trimmedQuery, true) ||
-                    isChild(symptom, trimmedQuery)) {
+                    isChild(symptoms, symptom, trimmedQuery, true)) {
                     filteredList.add(library)
                     break
                 }
             }
         }
         searchAdapter.updateData(filteredList)
-    }
-
-    private fun isChild(symptom: String, trimmedQuery: String): Boolean {
-        var parent = findParentOf(symptom, symptoms)
-
-        while (true) {
-            if (parent == "") return false
-            else {
-                if (parent.contains(trimmedQuery, true)) {
-                    return true
-                } else {
-                    parent = findParentOf(parent, symptoms)
-                }
-            }
-        }
-    }
-
-    private fun findParentOf(child: String, list: Map<String, Subject>): String {
-        var parent = ""
-        for (symptom in list.keys) {
-            val l = list[symptom] ?: continue
-            if (child == symptom) {
-                parent = l.parent
-                break
-            } else {
-                parent = findParentOf(child, l.children)
-                if (parent.isNotEmpty()) break
-            }
-        }
-        return parent
     }
 }

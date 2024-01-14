@@ -7,9 +7,9 @@
         android:title="@string/title_home" />
 
     <item
-        android:id="@+id/navigation_library"
-        android:icon="@drawable/baseline_library_books_24"
-        android:title="@string/title_library" />
+        android:id="@+id/navigation_tracker"
+        android:icon="@drawable/baseline_water_drop_24"
+        android:title="@string/title_tracker" />
 
     <item
         android:id="@+id/navigation_settings"

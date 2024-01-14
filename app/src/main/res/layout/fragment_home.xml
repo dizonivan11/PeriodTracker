@@ -22,7 +22,22 @@
             app:cardTextSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                android:id="@+id/btnUpdateProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                app:backgroundTint="@null"
+                android:textColor="@android:color/black"
+                android:background="@drawable/secondary_button_background"
+                android:text="Update Profile"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:textSize="10sp" />
+
+        </com.streamside.periodtracker.views.CardView2>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cvSearchBox"
@@ -198,7 +213,7 @@
                 android:id="@+id/cvBMI"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="20dp"
                 android:layout_column="0"
                 android:layout_columnWeight="1"
                 android:layout_columnSpan="2"
@@ -209,7 +224,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="10dp"
+                    android:padding="15dp"
                     android:gravity="center"
                     android:baselineAligned="false">
 
@@ -220,7 +235,7 @@
                         android:layout_weight="1"
                         android:padding="8dp"
                         android:gravity="center"
-                        android:layout_marginEnd="15dp"
+                        android:layout_marginEnd="20dp"
                         android:background="@drawable/bmi_bad_bg"
                         android:orientation="vertical">
 
@@ -260,9 +275,18 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvBMIRange"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
+                            android:text="Lorem ipsum"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvBMITips"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
                             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
                             android:textSize="13sp" />
 
@@ -273,13 +297,13 @@
             </androidx.cardview.widget.CardView>
 
             <com.streamside.periodtracker.views.CardView2
-                android:id="@+id/cv2Tracker"
+                android:id="@+id/cv2Tips"
                 android:layout_width="0dp"
                 android:layout_height="150dp"
                 android:layout_column="0"
                 android:layout_columnWeight="1"
                 android:layout_columnSpan="2"
-                app:cardText="Track your Period"
+                app:cardText="Browse All Tips"
                 app:cardTextSize="20sp"
                 app:cardImage="@drawable/pexels_karolina_grabowska_4238993"
                 app:cardCornerRadius="10dp"
@@ -304,6 +328,96 @@
             android:layout_marginTop="15dp"
             app:cardCornerRadius="10dp"
             app:layout_constraintTop_toBottomOf="@+id/tvRandomTip" />
+
+        <LinearLayout
+            android:id="@+id/llCategories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/cv2RandomTip">
+
+            <TextView
+                android:id="@+id/tvCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Categories"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2Menstruation"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/home_menstruation"
+                app:cardText="Menstruation"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2Hair"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/home_hair"
+                app:cardText="Hair"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2Skin"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/home_skin"
+                app:cardText="Skin"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2Eyes"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/home_eye"
+                app:cardText="Eyes"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2Breasts"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/home_breasts"
+                app:cardText="Breasts"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+            <com.streamside.periodtracker.views.CardView2
+                android:id="@+id/cv2DentalOral"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_columnWeight="1"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardImage="@drawable/pexels_sarah_chai_7262387"
+                app:cardText="Dental and Oral"
+                app:cardTextSize="20sp"
+                android:layout_marginTop="20dp" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
