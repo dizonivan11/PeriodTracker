@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.streamside.periodtracker.data.period.DataConverters
 
 @Database(entities = [Health::class], version = 1, exportSchema = false)
+@TypeConverters(DataConverters::class)
 abstract class HealthDatabase : RoomDatabase() {
     abstract fun healthDao(): HealthDao
 

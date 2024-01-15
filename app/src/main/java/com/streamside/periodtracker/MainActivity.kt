@@ -30,7 +30,7 @@ private var NAVIGATED_FROM_GOTO = false
 var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
-const val FIRST_PERIOD_START_MIN = 10
+const val FIRST_PERIOD_START_MIN = 12
 const val FIRST_PERIOD_START_MAX = 15
 const val SAFE_PERIOD_MIN = 2
 const val SAFE_PERIOD_MAX = 7
@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun isNotEmptyHealthProfile(healthProfile: Health): Boolean {
-            return healthProfile.name.isNotEmpty() && healthProfile.age > 0 && healthProfile.weight > 0 && healthProfile.height > 0
+            return healthProfile.name.isNotEmpty() && healthProfile.birthdate != null && healthProfile.weight > 0 && healthProfile.height > 0
         }
 
         fun dayDistance(date1: Date, date2: Date): Int {

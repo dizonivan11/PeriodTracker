@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your name?"
+                android:text="Name"
                 android:layout_marginBottom="10dp"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -45,22 +45,45 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your age?"
+                android:text="Birth Date"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="10dp"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/hsAge"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/hsBirthMonth"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_weight="1"
+                    android:hint="mm" />
+
+                <Spinner
+                    android:id="@+id/hsBirthDay"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_weight="1"
+                    android:hint="dd" />
+
+                <EditText
+                    android:id="@+id/hsBirthYear"
+                    android:inputType="number"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="yyyy" />
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your height?"
+                android:text="Height"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="10dp"
                 android:textSize="20sp"
@@ -73,15 +96,15 @@
 
                 <Spinner
                     android:id="@+id/hsHeightFeet"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
                     android:layout_weight="1"
                     android:hint="Feet" />
 
                 <Spinner
                     android:id="@+id/hsHeightInch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
                     android:layout_weight="1"
                     android:hint="Inch" />
 
@@ -90,7 +113,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your weight? (kg)"
+                android:text="Weight (kg)"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="10dp"
                 android:textSize="20sp"
