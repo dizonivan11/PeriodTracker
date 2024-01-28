@@ -21,24 +21,26 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.MainActivity.Companion.isNotEmptyHealthProfile
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.health.Health
 import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.library.SearchAdapter
+import com.streamside.periodtracker.data.period.Category
 import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.period.InsightsAdapter
 import com.streamside.periodtracker.data.period.Subject
+import com.streamside.periodtracker.data.period.Symptom
 import com.streamside.periodtracker.ui.library.FILTER
 import com.streamside.periodtracker.ui.library.LibraryFragment.Companion.isChild
 import com.streamside.periodtracker.views.CardView2
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 private var CREATE_PROFILE_INITIAL_VISIBILITY = View.INVISIBLE
@@ -56,7 +58,6 @@ class HomeFragment : Fragment() {
         val fa = requireActivity()
         dataViewModel = getDataViewModel(fa)
         healthViewModel = getHealthViewModel(fa)
-        clearObservers(fa, viewLifecycleOwner)
 
         val cv2Header = root.findViewById<CardView2>(R.id.cv2Header)
         val btnUpdateProfile = root.findViewById<Button>(R.id.btnUpdateProfile)
@@ -77,6 +78,9 @@ class HomeFragment : Fragment() {
         val tvBMIStatus = root.findViewById<TextView>(R.id.tvBMIStatus)
         val tvBMIRange = root.findViewById<TextView>(R.id.tvBMIRange)
         val tvBMITips = root.findViewById<TextView>(R.id.tvBMITips)
+        val cv2Step = root.findViewById<CardView2>(R.id.cv2Step)
+        val tvRecommendedTip = root.findViewById<TextView>(R.id.tvRecommendedTip)
+        val rvRecommendedTips = root.findViewById<RecyclerView>(R.id.rvRecommendedTips)
         val cv2Tips = root.findViewById<CardView2>(R.id.cv2Tips)
         val tvRandomTip = root.findViewById<TextView>(R.id.tvRandomTip)
         val cv2RandomTip = root.findViewById<CardView2>(R.id.cv2RandomTip)
@@ -85,8 +89,9 @@ class HomeFragment : Fragment() {
         val cv2Hair = root.findViewById<CardView2>(R.id.cv2Hair)
         val cv2Skin = root.findViewById<CardView2>(R.id.cv2Skin)
         val cv2Eyes = root.findViewById<CardView2>(R.id.cv2Eyes)
-        val cv2Breasts = root.findViewById<CardView2>(R.id.cv2Breasts)
+        val cv2Upper = root.findViewById<CardView2>(R.id.cv2Upper)
         val cv2DentalOral = root.findViewById<CardView2>(R.id.cv2DentalOral)
+        val cv2Lower = root.findViewById<CardView2>(R.id.cv2Lower)
 
         searchAdapter = SearchAdapter(this, listOf())
         rvSearch.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.VERTICAL, false)
@@ -100,6 +105,69 @@ class HomeFragment : Fragment() {
             val filteredArticles: MutableList<Library> = articles.filter { it.visible }.toMutableList()
             filteredArticles.removeAt(0)
             libraryList = filteredArticles
+
+            healthViewModel.all.observe(viewLifecycleOwner) { healthProfiles ->
+                if (healthProfiles.isNotEmpty()) {
+                    val healthProfile = healthProfiles[0]
+
+                    if (isNotEmptyHealthProfile(healthProfile)) {
+                        CREATE_PROFILE_INITIAL_VISIBILITY = View.GONE
+                        cv2CreateProfile.visibility = View.GONE
+                        cv2Header.setCardText("Welcome Back ${healthProfile.name}!")
+
+                        // WEIGHT
+                        tvWeight.text = "${healthProfile.weight}kg"
+
+                        // HEIGHT
+                        val heightFeet = healthProfile.height / 12
+                        val heightInches = healthProfile.height % 12
+                        tvHeight.text = "${heightFeet}ft ${heightInches}in"
+
+                        // BMI
+                        val bmi = getBMI(healthProfile.weight, toCM(healthProfile.height))
+                        val df = DecimalFormat("#.#")
+                        df.roundingMode = RoundingMode.HALF_DOWN
+                        tvBMI.text = df.format(bmi)
+                        updateBMIInfo(bmi, llBMI, tvBMIStatus, tvBMIRange, tvBMITips)
+
+                        // Recommended tips section
+                        rvRecommendedTips.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
+                        val recommendedTips: MutableList<Library> = mutableListOf()
+                        for (library in libraryList) {
+                            var include = false
+                            for (c in gatherRecommendedTips(healthProfile)) {
+                                if (!include) {
+                                    for (s in c.symptoms) {
+                                        // Check for individual symptom check value
+                                        for (symptom in library.symptoms) {
+                                            if (s.id == symptom) {
+                                                include = s.value
+                                                break
+                                            }
+                                        }
+                                        if (include) break
+                                    }
+                                }
+                            }
+                            if (include) recommendedTips.add(library)
+                        }
+                        rvRecommendedTips.adapter = InsightsAdapter(this, recommendedTips)
+                    } else {
+                        btnUpdateProfile.visibility = View.GONE
+                        CREATE_PROFILE_INITIAL_VISIBILITY = View.VISIBLE
+                        cvWeight.visibility = View.GONE
+                        cvHeight.visibility = View.GONE
+                        cvBMI.visibility = View.GONE
+                        tvRecommendedTip.visibility = View.GONE
+                        rvRecommendedTips.visibility = View.GONE
+                        tvCreateProfile.text = "Update Your Health Profile"
+                        tvCreateProfileContent.text = "Health profile incomplete, app features may be limited"
+                        btnCreateProfile.text = getString(R.string.button_update)
+                    }
+                }
+            }
+
+            // Random tips of the day section
             val randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
             Glide.with(fa).load(randomArticle.image).centerCrop().listener(object :
                 RequestListener<Drawable> {
@@ -120,67 +188,37 @@ class HomeFragment : Fragment() {
 
             cv2Menstruation.setOnClickListener {
                 FILTER.add("Menstruation")
-                goTo(R.id.navigation_library)
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Hair.setOnClickListener {
                 FILTER.add("Hair")
-                goTo(R.id.navigation_library)
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Skin.setOnClickListener {
                 FILTER.add("Skin")
-                goTo(R.id.navigation_library)
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Eyes.setOnClickListener {
                 FILTER.add("Eyes")
-                goTo(R.id.navigation_library)
-            }
-
-            cv2Breasts.setOnClickListener {
-                FILTER.add("Breast")
-                goTo(R.id.navigation_library)
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2DentalOral.setOnClickListener {
                 FILTER.add("Dental and Oral")
-                goTo(R.id.navigation_library)
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
-        }
 
-        healthViewModel.all.observe(viewLifecycleOwner) { healthProfiles ->
-            if (healthProfiles.isNotEmpty()) {
-                val healthProfile = healthProfiles[0]
+            cv2Upper.setOnClickListener {
+                FILTER.add("Upper Body")
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
+            }
 
-                if (isNotEmptyHealthProfile(healthProfile)) {
-                    CREATE_PROFILE_INITIAL_VISIBILITY = View.GONE
-                    cv2CreateProfile.visibility = View.GONE
-                    cv2Header.setCardText("Welcome Back ${healthProfile.name}!")
-
-                    // WEIGHT
-                    tvWeight.text = "${healthProfile.weight}kg"
-
-                    // HEIGHT
-                    val heightInCM = toCM(healthProfile.height)
-                    tvHeight.text = "${heightInCM.roundToInt()}cm"
-
-                    // BMI
-                    val bmi = getBMI(healthProfile.weight, heightInCM)
-                    val df = DecimalFormat("#.#")
-                    df.roundingMode = RoundingMode.HALF_DOWN
-                    tvBMI.text = df.format(bmi)
-                    updateBMIInfo(bmi, llBMI, tvBMIStatus, tvBMIRange, tvBMITips)
-                } else {
-                    btnUpdateProfile.visibility = View.GONE
-                    CREATE_PROFILE_INITIAL_VISIBILITY = View.VISIBLE
-                    cvWeight.visibility = View.GONE
-                    cvHeight.visibility = View.GONE
-                    cvBMI.visibility = View.GONE
-                    tvCreateProfile.text = "Update Your Health Profile"
-                    tvCreateProfileContent.text = "Health profile incomplete, app features may be limited"
-                    btnCreateProfile.text = getString(R.string.button_update)
-                }
+            cv2Lower.setOnClickListener {
+                FILTER.add("Lower Body")
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
         }
 
@@ -217,17 +255,43 @@ class HomeFragment : Fragment() {
             }
         })
 
-        cv2Tips.setOnClickListener { goTo(R.id.navigation_library) }
+        cv2Step.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_step) }
+
+        cv2Tips.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_library) }
 
         btnUpdateProfile.setOnClickListener {
-            goTo(R.id.navigation_health_setup)
+            goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
         }
 
         btnCreateProfile.setOnClickListener {
-            goTo(R.id.navigation_health_setup)
+            goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
         }
 
         return root
+    }
+
+    private fun gatherRecommendedTips(healthProfile: Health): List<Category> {
+        val result = mutableListOf<Category>()
+
+        val heightInCM = toCM(healthProfile.height)
+        val bmi = getBMI(healthProfile.weight, heightInCM)
+        val fitness = Category("Fitness", mutableListOf())
+        if (bmi < 18.5) {
+            // Underweight
+            fitness.symptoms.add(Symptom("Underweight", visible = false, value = true))
+        } else if (bmi >= 18.5 && bmi < 25) {
+            // Healthy
+            fitness.symptoms.add(Symptom("Healthy", visible = false, value = true))
+        } else if (bmi >= 25 && bmi < 30) {
+            // Overweight
+            fitness.symptoms.add(Symptom("Overweight", visible = false, value = true))
+        } else {
+            // Obesity
+            fitness.symptoms.add(Symptom("Obesity", visible = false, value = true))
+        }
+        result.add(fitness)
+
+        return result
     }
 
     private fun updateBMIInfo(bmi: Float, llBMI: LinearLayout, tvBMIStatus: TextView, tvBMIRange: TextView, tvBMITips: TextView) {

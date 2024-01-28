@@ -3,7 +3,9 @@ package com.streamside.periodtracker.ui.tracker
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,6 +15,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,9 +30,11 @@ import com.patrykandpatrick.vico.core.entry.FloatEntry
 import com.patrykandpatrick.vico.core.entry.entriesOf
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
+import com.streamside.periodtracker.FIRST_PERIOD_START_MIN
 import com.streamside.periodtracker.MainActivity
 import com.streamside.periodtracker.MainActivity.Companion.dayDistance
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
+import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.toCalendar
 import com.streamside.periodtracker.OVULATION
@@ -39,6 +44,7 @@ import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
+import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.InsightsAdapter
 import com.streamside.periodtracker.data.library.Library
@@ -48,6 +54,7 @@ import com.streamside.periodtracker.setup.SymptomsFragment
 import com.streamside.periodtracker.views.CircleFillView
 import com.streamside.periodtracker.views.CounterView
 import java.text.DateFormatSymbols
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 
@@ -58,6 +65,7 @@ const val MAX_TREND = 9
 class TrackerFragment : Fragment() {
     private lateinit var periodViewModel: PeriodViewModel
     private lateinit var dataViewModel: DataViewModel
+    private  lateinit var healthViewModel: HealthViewModel
     private lateinit var currentPeriod: Period
     private val todayCalendar = Calendar.getInstance().apply { time = Date() }
     private val currentCalendar = Calendar.getInstance()
@@ -83,12 +91,13 @@ class TrackerFragment : Fragment() {
     private lateinit var linearCycleHistory : LinearLayout
     private lateinit var chartCycleTrend: ChartView
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_tracker, container, false)
         val fa = requireActivity()
-        MainActivity.clearObservers(fa, viewLifecycleOwner)
         periodViewModel = getPeriodViewModel(fa)
         dataViewModel = getDataViewModel(fa)
+        healthViewModel = getHealthViewModel(fa)
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
         val prefEditor = preferences.edit()
         simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
@@ -112,6 +121,41 @@ class TrackerFragment : Fragment() {
         linearCycleHistory = root.findViewById(R.id.linearCycleHistory)
         chartCycleTrend = root.findViewById(R.id.chartCycleTrend)
 
+        // Check if the user can able to proceed
+        // Create a reference period if it doesn't exist yet
+        healthViewModel.all.observe(viewLifecycleOwner) {
+            if (it.isNotEmpty()) {
+                val existingProfile = it[0]
+                if (existingProfile.birthdate != null) {
+                    if (getAge(existingProfile.birthdate!!) >= FIRST_PERIOD_START_MIN) {
+                        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { referencePeriod ->
+                            if (referencePeriod == null) {
+                                // Initialize reference period
+                                periodViewModel.init(-1, 0, 0, 0).observe(viewLifecycleOwner) {
+                                    MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_period_date)
+                                }
+                            } else if (!MainActivity.isNotEmptyPeriod(referencePeriod)) {
+                                MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_period_date)
+                            }
+                             else {
+                                 initTracker(fa, prefEditor, root)
+                            }
+                        }
+                    } else {
+                        Toast.makeText(fa, "You must be age ${FIRST_PERIOD_START_MIN}+ to use this feature", Toast.LENGTH_SHORT).show()
+                        MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_home)
+                    }
+                } else {
+                    Toast.makeText(fa, "Please setup your health profile first", Toast.LENGTH_SHORT).show()
+                    MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_home)
+                }
+            }
+        }
+
+        return root
+    }
+
+    private fun initTracker(fa: FragmentActivity, prefEditor: Editor, root: View) {
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
 
@@ -336,7 +380,6 @@ class TrackerFragment : Fragment() {
                 }
             }
         }
-        return root
     }
 
     private fun getCurrentPrompt(today: Calendar) {
@@ -487,7 +530,7 @@ class TrackerFragment : Fragment() {
 
         val smallCalendarChangesObserver = object : CalendarChangesObserver {
             override fun whenSelectionChanged(isSelected: Boolean, position: Int, date: Date) {
-                tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthName(date), DateUtils.getDayNumber(date), DateUtils.getYear(date))
+                tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthNumber(date), DateUtils.getDayNumber(date), DateUtils.getYear(date))
                 tvDay.text = DateUtils.getDay3LettersName(date)
                 super.whenSelectionChanged(isSelected, position, date)
             }
@@ -581,6 +624,15 @@ class TrackerFragment : Fragment() {
             circleFillBackText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
             circleFillForeText.setCounterValue(fa, gap, CIRCLE_FILL_DURATION)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getAge(birthDate: Date): Int {
+        val c = Calendar.getInstance().apply { time = birthDate }
+        return java.time.Period.between(
+            LocalDate.of(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)),
+            LocalDate.now()
+        ).years
     }
 
     private fun getDatesOfNextMonth(): List<Date> {

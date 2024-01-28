@@ -59,6 +59,8 @@ class LibraryFragment : Fragment() {
     }
 
     companion object {
+
+
         fun isChild(symptoms: Map<String, Subject>, symptom: String, filter: String, filterContains: Boolean = false): Boolean {
             var parent = findParentOf(symptom, symptoms)
 

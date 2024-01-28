@@ -15,7 +15,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.streamside.periodtracker.FIRST_TIME
 import com.streamside.periodtracker.LOG_PERIOD
-import com.streamside.periodtracker.MainActivity.Companion.clearObservers
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
@@ -72,11 +71,6 @@ class SymptomsFragment : SetupFragment() {
             setSubmitOnClick(view, fa)
         }
         return view
-    }
-
-    override fun onStop() {
-        super.onStop()
-        clearObservers(requireActivity(), viewLifecycleOwner)
     }
 
     private fun setSubmitOnClick(root: View, fa: FragmentActivity, logOnly: Boolean = false) {

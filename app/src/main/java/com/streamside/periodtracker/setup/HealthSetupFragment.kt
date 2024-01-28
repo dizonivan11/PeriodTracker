@@ -12,17 +12,14 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import com.streamside.periodtracker.FIRST_PERIOD_START_MIN
 import com.streamside.periodtracker.FIRST_TIME
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
-import com.streamside.periodtracker.MainActivity.Companion.isNotEmptyPeriod
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.health.Health
 import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.PeriodViewModel
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 
@@ -116,45 +113,12 @@ class HealthSetupFragment : SetupFragment() {
                     healthViewModel.update(existingProfile)
                 }
 
-                if (birthDate != null) {
-                    Log.i("Age", "${getAge(birthDate)}")
-                    if (getAge(birthDate) >= FIRST_PERIOD_START_MIN) {
-                        periodViewModel.currentPeriod.observe(viewLifecycleOwner) { referencePeriod ->
-                            if (referencePeriod == null) {
-                                // Initialize reference period
-                                periodViewModel.init(-1, 0, 0, 0).observe(viewLifecycleOwner) {
-                                    goTo(R.id.navigation_period_date)
-                                }
-                            } else {
-                                if (isNotEmptyPeriod(referencePeriod)) {
-                                    goTo(R.id.navigation_home)
-                                    finalizeSetup(fa)
-                                } else {
-                                    goTo(R.id.navigation_period_date)
-                                }
-                            }
-                        }
-                    } else {
-                        goTo(R.id.navigation_home)
-                        finalizeSetup(fa)
-                    }
-                } else {
-                    goTo(R.id.navigation_home)
-                    finalizeSetup(fa)
-                }
+                goTo(R.id.navigation_home)
+                finalizeSetup(fa)
             }
         }
 
         return view
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun getAge(birthDate: Date): Int {
-        val c = Calendar.getInstance().apply { time = birthDate }
-        return java.time.Period.between(
-            LocalDate.of(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)),
-            LocalDate.now()
-        ).years
     }
 
     private fun getInches(feet: Int, inches: Int): Int {

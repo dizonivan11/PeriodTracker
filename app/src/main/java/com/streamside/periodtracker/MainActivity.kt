@@ -30,7 +30,7 @@ private var NAVIGATED_FROM_GOTO = false
 var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
 var LOG_PERIOD : Boolean = false
-const val FIRST_PERIOD_START_MIN = 12
+const val FIRST_PERIOD_START_MIN = 11
 const val FIRST_PERIOD_START_MAX = 15
 const val SAFE_PERIOD_MIN = 2
 const val SAFE_PERIOD_MAX = 7
@@ -115,6 +115,12 @@ class MainActivity : AppCompatActivity() {
             FA.findNavController(R.id.nav_host_fragment_activity_main).navigate(selectedPage)
         }
 
+        fun goTo(fa: FragmentActivity, owner: LifecycleOwner, selectedPage: Int) {
+            clearObservers(fa, owner)
+            NAVIGATED_FROM_GOTO = true
+            FA.findNavController(R.id.nav_host_fragment_activity_main).navigate(selectedPage)
+        }
+
         fun isNotEmptyPeriod(period: Period): Boolean {
             return period.periodYear > 0 && period.periodDay > 0 && period.menstrualCycle.isNotEmpty()
         }
@@ -141,11 +147,13 @@ class MainActivity : AppCompatActivity() {
             return abs(TimeUnit.MILLISECONDS.toDays(cal1.time.time - cal2.time.time).toInt())
         }
 
-        fun clearObservers(fa: FragmentActivity, owner: LifecycleOwner) {
+        private fun clearObservers(fa: FragmentActivity, owner: LifecycleOwner) {
             val pvm = getPeriodViewModel(fa)
+            val hvm = getHealthViewModel(fa)
             pvm.all.removeObservers(owner)
             pvm.lastPeriod.removeObservers(owner)
             pvm.currentPeriod.removeObservers(owner)
+            hvm.all.removeObservers(owner)
         }
 
         fun isSameYearAndMonth(date1: Calendar, date2: Calendar): Boolean {
