@@ -46,6 +46,7 @@
     <!-- Preference Keys -->
     <string name="dark_mode_key">dark_mode_pref</string>
     <string name="first_time_key">first_time_pref</string>
+    <string name="tracker_redirect_key">tracker_redirect_pref</string>
     <string name="log_period_key">log_period_key</string>
     <string name="simulation_key">simulation_pref</string>
 

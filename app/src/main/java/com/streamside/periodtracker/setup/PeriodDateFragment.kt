@@ -32,10 +32,6 @@ class PeriodDateFragment : SetupFragment() {
                 goTo(R.id.navigation_menstrual_cycle)
             }
         }
-
-        view.findViewById<Button>(R.id.back_period_date).setOnClickListener {
-            goTo(R.id.navigation_health_setup)
-        }
         return view
     }
 }

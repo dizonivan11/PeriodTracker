@@ -9,6 +9,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.streamside.periodtracker.FA
+import com.streamside.periodtracker.FIRST_TIME_TRACKER
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.library.Library
@@ -114,6 +115,7 @@ class DataViewModel(app: Application): AndroidViewModel(app) {
                     "https://images.pexels.com/photos/6942026/pexels-photo-6942026.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
                     false, listOf(), R.layout.insight_symptoms_item
                 ) {
+                    FIRST_TIME_TRACKER = false
                     goTo(R.id.navigation_period_symptoms)
                 },
             )

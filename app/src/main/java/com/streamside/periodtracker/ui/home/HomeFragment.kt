@@ -186,37 +186,59 @@ class HomeFragment : Fragment() {
                 randomArticle.callback.invoke(it)
             }
 
+            cv2Step.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_step) }
+
+            cv2Tips.setOnClickListener {
+                FILTER.clear()
+                goTo(fa, viewLifecycleOwner, R.id.navigation_library)
+            }
+
+            btnUpdateProfile.setOnClickListener {
+                goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
+            }
+
+            btnCreateProfile.setOnClickListener {
+                goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
+            }
+
             cv2Menstruation.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Menstruation")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Hair.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Hair")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Skin.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Skin")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Eyes.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Eyes")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2DentalOral.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Dental and Oral")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Upper.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Upper Body")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
 
             cv2Lower.setOnClickListener {
+                FILTER.clear()
                 FILTER.add("Lower Body")
                 goTo(fa, viewLifecycleOwner, R.id.navigation_library)
             }
@@ -254,18 +276,6 @@ class HomeFragment : Fragment() {
                 }
             }
         })
-
-        cv2Step.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_step) }
-
-        cv2Tips.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_library) }
-
-        btnUpdateProfile.setOnClickListener {
-            goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
-        }
-
-        btnCreateProfile.setOnClickListener {
-            goTo(fa, viewLifecycleOwner, R.id.navigation_health_setup)
-        }
 
         return root
     }

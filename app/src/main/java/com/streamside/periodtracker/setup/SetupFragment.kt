@@ -10,11 +10,11 @@ open class SetupFragment : Fragment() {
     fun finalizeSetup(fa: FragmentActivity) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
 
-        // Set First Time settings to false
-        preferences.edit().putBoolean(getString(R.string.first_time_key), false).apply()
-
         // Set Log Period settings to false
         preferences.edit().putBoolean(getString(R.string.log_period_key), false).apply()
+
+        // Set Tracker Redirect settings to true
+        preferences.edit().putBoolean(getString(R.string.tracker_redirect_key), true).apply()
 
         // Restart activity
         restart(fa, viewLifecycleOwner)

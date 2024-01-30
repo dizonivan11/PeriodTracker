@@ -48,7 +48,6 @@ class LibraryFragment : Fragment() {
                         }
                         filterResult
                     }
-                    FILTER.clear()
                 }
 
                 rvLibrary.adapter = LibraryAdapter(this, filteredLibraryData)

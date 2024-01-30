@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.streamside.periodtracker.FIRST_TIME
+import com.streamside.periodtracker.FIRST_TIME_TRACKER
 import com.streamside.periodtracker.LOG_PERIOD
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
@@ -41,35 +41,37 @@ class SymptomsFragment : SetupFragment() {
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { currentPeriod ->
             periodViewModel.lastPeriod.observe(viewLifecycleOwner) { lastPeriod ->
                 selectedPeriod = if (lastPeriod != null) symptomsPeriod(currentPeriod, lastPeriod) else currentPeriod
+
                 dataViewModel.newSymptomsData().observe(viewLifecycleOwner) {
                     symptomList = it
                     populateSymptomChips(view, fa)
                 }
-            }
-        }
 
-        if (!FIRST_TIME) {
-            if (LOG_PERIOD) {
-                // Hide back button if this isn't a first time setup
-                view.findViewById<Button>(R.id.back_symptoms).visibility = View.INVISIBLE
+                if (!FIRST_TIME_TRACKER) {
+                    if (LOG_PERIOD) {
+                        // Hide back button if this isn't a first time setup
+                        view.findViewById<Button>(R.id.back_symptoms).visibility = View.INVISIBLE
 
-                // Make save button click
-                setSubmitOnClick(view, fa)
-            } else {
-                // Make back button click navigate to Home
-                view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
-                    goTo(R.id.navigation_tracker)
+                        // Make save button click
+                        setSubmitOnClick(view, fa)
+                    } else {
+                        // Make back button click navigate to Home
+                        view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
+                            goTo(R.id.navigation_tracker)
+                        }
+                        // Make save button click navigate to Home
+                        setSubmitOnClick(view, fa, true)
+                    }
+                } else {
+                    view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
+                        goTo(R.id.navigation_menstrual_cycle)
+                    }
+                    // Make save button click
+                    setSubmitOnClick(view, fa)
                 }
-                // Make save button click navigate to Home
-                setSubmitOnClick(view, fa, true)
             }
-        } else {
-            view.findViewById<Button>(R.id.back_symptoms).setOnClickListener {
-                goTo(R.id.navigation_menstrual_cycle)
-            }
-            // Make save button click
-            setSubmitOnClick(view, fa)
         }
+
         return view
     }
 
@@ -101,7 +103,7 @@ class SymptomsFragment : SetupFragment() {
         tvSymptomsTitle.textSize = 24F
         tvSymptomsTitle.isAllCaps = true
         tvSymptomsTitle.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        if (FIRST_TIME) tvSymptomsTitle.text = "Select symptoms you remembered from your last cycle"
+        if (FIRST_TIME_TRACKER) tvSymptomsTitle.text = "Select symptoms you remembered from your last cycle"
         else if (LOG_PERIOD) tvSymptomsTitle.text = "Review your symptoms"
         else tvSymptomsTitle.text = "Log your symptoms"
         llSymptoms.addView(tvSymptomsTitle)

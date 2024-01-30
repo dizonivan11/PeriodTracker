@@ -2,7 +2,6 @@ package com.streamside.periodtracker.ui.tracker
 
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
 import android.graphics.Typeface
 import android.os.Build
@@ -31,6 +30,7 @@ import com.patrykandpatrick.vico.core.entry.entriesOf
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
 import com.streamside.periodtracker.FIRST_PERIOD_START_MIN
+import com.streamside.periodtracker.FIRST_TIME_TRACKER
 import com.streamside.periodtracker.MainActivity
 import com.streamside.periodtracker.MainActivity.Companion.dayDistance
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
@@ -44,6 +44,7 @@ import com.streamside.periodtracker.SAFE_MAX
 import com.streamside.periodtracker.SAFE_MIN
 import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
+import com.streamside.periodtracker.TRACKER_REDIRECT
 import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.InsightsAdapter
@@ -59,7 +60,7 @@ import java.util.Calendar
 import java.util.Date
 
 const val CIRCLE_FILL_DURATION = 1000L
-const val MAX_HISTORY = 3
+const val MAX_HISTORY = 1
 const val MAX_TREND = 9
 
 class TrackerFragment : Fragment() {
@@ -100,6 +101,12 @@ class TrackerFragment : Fragment() {
         healthViewModel = getHealthViewModel(fa)
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
         val prefEditor = preferences.edit()
+
+        // Update redirect to false
+        prefEditor.putBoolean(getString(R.string.tracker_redirect_key), false).apply()
+        TRACKER_REDIRECT = false
+
+        // Get simulated settings
         simulated = preferences.getBoolean(getString(R.string.simulation_key), false)
 
         smallCalendar = root.findViewById(R.id.main_single_row_calendar)
@@ -132,13 +139,14 @@ class TrackerFragment : Fragment() {
                             if (referencePeriod == null) {
                                 // Initialize reference period
                                 periodViewModel.init(-1, 0, 0, 0).observe(viewLifecycleOwner) {
+                                    FIRST_TIME_TRACKER = true
                                     MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_period_date)
                                 }
-                            } else if (!MainActivity.isNotEmptyPeriod(referencePeriod)) {
+                            } else if (!MainActivity.isNotEmptyPeriod(referencePeriod) && referencePeriod.lastPeriodId == (-1).toLong()) {
+                                FIRST_TIME_TRACKER = true
                                 MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_period_date)
-                            }
-                             else {
-                                 initTracker(fa, prefEditor, root)
+                            } else {
+                                initTracker(fa, prefEditor, root)
                             }
                         }
                     } else {
@@ -246,7 +254,7 @@ class TrackerFragment : Fragment() {
                         }
 
                         // Make the button for logging period
-                        addLogEvent(fa)
+                        addLogEvent(fa, prefEditor)
                     }
 
                     // Display last cycle statistics
@@ -256,7 +264,7 @@ class TrackerFragment : Fragment() {
                     else tvLastCycleLength.text = "$lastCycleLength day"
                 } else {
                     // Make the button for logging period
-                    addLogEvent(fa)
+                    addLogEvent(fa, prefEditor)
                 }
             }
 
@@ -406,7 +414,7 @@ class TrackerFragment : Fragment() {
         }
     }
 
-    private fun addLogEvent(fa: FragmentActivity) {
+    private fun addLogEvent(fa: FragmentActivity, prefEditor: Editor) {
         btnLog.setOnClickListener {
             // Log period and initialize new cycle while tracking period length
             val builder : AlertDialog.Builder = AlertDialog.Builder(fa)
@@ -445,7 +453,9 @@ class TrackerFragment : Fragment() {
                                     // Update menstrual cycle condition
                                     periodViewModel.update(newPeriod)
 
-                                    // Restart app
+                                    // Restart app and redirect to tracker
+                                    prefEditor.putBoolean(getString(R.string.tracker_redirect_key), true)
+                                    prefEditor.apply()
                                     MainActivity.restart(fa, viewLifecycleOwner)
                                 }
                             }
@@ -460,7 +470,7 @@ class TrackerFragment : Fragment() {
         }
     }
 
-    private fun addEndEvent(fa: FragmentActivity, prefEditor: SharedPreferences.Editor) {
+    private fun addEndEvent(fa: FragmentActivity, prefEditor: Editor) {
         // Update button text to period phase
         btnLog.text = "End Period"
 
@@ -483,8 +493,9 @@ class TrackerFragment : Fragment() {
                                 periodViewModel.update(lastPeriod)
                             }
 
-                            // Set log period flag to true then restart app
+                            // Set log period flag to true then restart app and redirect to tracker
                             prefEditor.putBoolean(getString(R.string.log_period_key), true)
+                            prefEditor.putBoolean(getString(R.string.tracker_redirect_key), true)
                             prefEditor.apply()
                             MainActivity.restart(fa, viewLifecycleOwner)
                         }
@@ -530,7 +541,7 @@ class TrackerFragment : Fragment() {
 
         val smallCalendarChangesObserver = object : CalendarChangesObserver {
             override fun whenSelectionChanged(isSelected: Boolean, position: Int, date: Date) {
-                tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthNumber(date), DateUtils.getDayNumber(date), DateUtils.getYear(date))
+                tvDate.text = getString(R.string.text_month_day, DateUtils.getMonthName(date), DateUtils.getDayNumber(date), DateUtils.getYear(date))
                 tvDay.text = DateUtils.getDay3LettersName(date)
                 super.whenSelectionChanged(isSelected, position, date)
             }

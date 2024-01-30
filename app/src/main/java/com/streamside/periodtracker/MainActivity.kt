@@ -29,6 +29,8 @@ lateinit var NAVVIEW: BottomNavigationView
 private var NAVIGATED_FROM_GOTO = false
 var DARK_MODE : Boolean = false
 var FIRST_TIME : Boolean = false
+var FIRST_TIME_TRACKER : Boolean = false
+var TRACKER_REDIRECT : Boolean = false
 var LOG_PERIOD : Boolean = false
 const val FIRST_PERIOD_START_MIN = 11
 const val FIRST_PERIOD_START_MAX = 15
@@ -48,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
         DARK_MODE = preferences.getBoolean(getString(R.string.dark_mode_key), false)
         FIRST_TIME = preferences.getBoolean(getString(R.string.first_time_key), true)
+        TRACKER_REDIRECT = preferences.getBoolean(getString(R.string.tracker_redirect_key), false)
         LOG_PERIOD = preferences.getBoolean(getString(R.string.log_period_key), false)
 
         if (DARK_MODE) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -74,6 +77,9 @@ class MainActivity : AppCompatActivity() {
 
         else if (LOG_PERIOD)
             goTo(R.id.navigation_period_symptoms)
+
+        else if (TRACKER_REDIRECT)
+            goTo(R.id.navigation_tracker)
 
         else
             goTo(R.id.navigation_home)
