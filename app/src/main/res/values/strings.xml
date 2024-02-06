@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Health Care Tips</string>
     <string name="web_client_id">195974683249-iganka5q9fjpsjl32aq367nmeq94s8vv.apps.googleusercontent.com</string>
+    <string name="notification_channel">health_care_tips</string>
     <string name="title_intro">Intro</string>
     <string name="title_health_setup">Health Setup</string>
     <string name="title_period_date">Period Date Setup</string>
     <string name="title_menstrual_cycle">Menstrual Cycle Setup</string>
     <string name="title_home">Home</string>
+    <string name="title_checkup">Check Up</string>
     <string name="title_step">Step Tracker</string>
     <string name="title_tracker">Period Tracker</string>
     <string name="title_period_symptoms">Period Symptoms</string>
@@ -40,11 +42,20 @@
 
     <!-- Preference Titles -->
     <string name="general_title">General</string>
-    <string name="setup_title">Setup</string>
+    <string name="notification_title">Notification</string>
+    <string name="setup_title">Account</string>
     <string name="debug_title">Test</string>
 
     <!-- Preference Keys -->
     <string name="dark_mode_key">dark_mode_pref</string>
+    <string name="random_tip_key">random_tip_pref</string>
+    <string name="random_tip_title_key">random_tip_title_pref</string>
+    <string name="random_tip_trigger_key">random_tip_trigger_pref</string>
+    <string name="random_tip_trigger_test_key">random_tip_trigger_test_pref</string>
+    <string name="period_status_key">period_status_pref</string>
+    <string name="period_status_last_period_key">period_status_last_period_pref</string>
+    <string name="period_status_trigger_key">period_status_trigger_pref</string>
+    <string name="period_status_trigger_test_key">period_status_trigger_test_pref</string>
     <string name="first_time_key">first_time_pref</string>
     <string name="tracker_redirect_key">tracker_redirect_pref</string>
     <string name="log_period_key">log_period_key</string>

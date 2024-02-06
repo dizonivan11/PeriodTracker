@@ -1,4 +1,4 @@
-package com.streamside.periodtracker.data.period
+package com.streamside.periodtracker.data
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -12,7 +12,14 @@ import com.streamside.periodtracker.FA
 import com.streamside.periodtracker.FIRST_TIME_TRACKER
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.checkup.CheckUp
+import com.streamside.periodtracker.data.checkup.CheckUpList
+import com.streamside.periodtracker.data.checkup.Choices
 import com.streamside.periodtracker.data.library.Library
+import com.streamside.periodtracker.data.period.Category
+import com.streamside.periodtracker.data.period.Subject
+import com.streamside.periodtracker.data.period.Symptom
+import com.streamside.periodtracker.data.period.SymptomList
 import com.streamside.periodtracker.ui.library.WEB_URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,6 +29,7 @@ const val SPREADSHEET_URL = "https://sheets.googleapis.com/v4/spreadsheets/%s/va
 const val SHEET_ID = "1LznrVMSxYMLfVgCM4Jguv8axvP3LBdPWGOrW-b7YT08"
 const val LIBRARY_TAB_NAME = "List"
 const val SYMPTOMS_TAB_NAME = "Symptoms"
+const val CHECKUP_TAB_NAME = "Checkup"
 const val API_KEY = "AIzaSyBU5VZ7bb1L6Z9rJnO91CYzJVeTahkx3xQ"
 
 class DataViewModel(app: Application): AndroidViewModel(app) {
@@ -42,7 +50,7 @@ class DataViewModel(app: Application): AndroidViewModel(app) {
                             val symptom = root.getJSONArray(i)
                             val id = symptom.getString(0)
                             val type = symptom.getString(1)
-                            val visible = if (symptom.length() > 2) symptom.getBoolean(2) else true
+                            val visible = if (symptom.length() > 2 && symptom.getString(2).isNotEmpty()) symptom.getBoolean(2) else true
                             if (type == "Category") {
                                 val newCategory = Category(symptom.getString(0), mutableListOf(), visible)
                                 list.categories.add(newCategory)
@@ -137,6 +145,48 @@ class DataViewModel(app: Application): AndroidViewModel(app) {
                                 WEB_URL = url
                                 goTo(R.id.navigation_web)
                             })
+                        }
+                        result.postValue(list)
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+                }, {
+                    throw it
+                }
+            )
+            queue.add(jsonObjectRequest)
+        }
+        return result
+    }
+
+    fun getCheckUpData(): LiveData<CheckUpList> {
+        val result = MutableLiveData<CheckUpList>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val list = CheckUpList()
+            val parentReferences: MutableMap<Int, CheckUp> = mutableMapOf()
+            val queue = Volley.newRequestQueue(FA)
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.GET,
+                String.format(SPREADSHEET_URL, SHEET_ID, CHECKUP_TAB_NAME, API_KEY),
+                null,
+                { response ->
+                    try {
+                        val root = response.getJSONArray("values")
+                        for (i in 0 until root.length()) {
+                            val checkup = root.getJSONArray(i)
+                            val parentIndex = if (checkup.length() > 0 && checkup.getString(0).isNotEmpty()) checkup.getInt(0) - 1 else -1
+                            val parentCondition = if (checkup.length() > 1) checkup.getString(1) else ""
+                            val question = if (checkup.length() > 2) checkup.getString(2) else ""
+
+                            val choices = Choices()
+                            if (checkup.length() > 3)
+                                for (c in 3..<checkup.length())
+                                    choices.list.add(checkup.getString(c))
+
+                            val item = CheckUp(question, choices, parentIndex, parentCondition)
+                            parentReferences[i] = item
+                            if (parentIndex > -1) parentReferences[parentIndex]?.children?.list?.add(item)
+                            else list.list.add(item)
                         }
                         result.postValue(list)
                     } catch (e: JSONException) {

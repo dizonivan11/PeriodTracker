@@ -17,6 +17,7 @@ import com.streamside.periodtracker.FIRST_TIME
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
+import com.streamside.periodtracker.NAVVIEW
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.health.Health
 import com.streamside.periodtracker.data.health.HealthViewModel
@@ -135,7 +136,7 @@ class HealthSetupFragment : SetupFragment() {
                     val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
                     preferences.edit().putBoolean(getString(R.string.first_time_key), false).apply()
                     FIRST_TIME = false
-
+                    NAVVIEW.visibility = View.VISIBLE
                     goTo(R.id.navigation_home)
                 }
             }

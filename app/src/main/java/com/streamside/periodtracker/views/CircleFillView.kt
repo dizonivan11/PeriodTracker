@@ -138,7 +138,7 @@ class CircleFillView @JvmOverloads constructor(context: Context, attrs: Attribut
         val h2 = height - (strokeWidth.toInt() * 2)
         if (!periodMode) {
             ovulationY = (((100.0 - ((OVULATION.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
-            regularY = (((100.0 - ((SAFE_MIN.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + strokeWidth
+            regularY = (((100.0 - ((SAFE_MIN.toDouble() / SAFE_MAX.toDouble()) * 100.0)) / 100.0) * h2) + (strokeWidth * 2)
         } else {
             safePeriodY = (0.45 * h2) + strokeWidth
         }

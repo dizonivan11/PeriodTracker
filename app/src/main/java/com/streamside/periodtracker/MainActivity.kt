@@ -1,7 +1,9 @@
 package com.streamside.periodtracker
 
+import android.app.ActivityManager
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.FragmentActivity
@@ -13,15 +15,20 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.streamside.periodtracker.data.DataViewModel
+import com.streamside.periodtracker.data.checkup.CheckUpResultViewModel
 import com.streamside.periodtracker.data.health.Health
 import com.streamside.periodtracker.data.health.HealthViewModel
-import com.streamside.periodtracker.data.period.DataViewModel
 import com.streamside.periodtracker.data.period.Period
 import com.streamside.periodtracker.data.period.PeriodViewModel
+import com.streamside.periodtracker.data.step.StepViewModel
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+
 
 lateinit var START: Intent
 lateinit var FA: FragmentActivity
@@ -72,8 +79,10 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        if (FIRST_TIME)
+        if (FIRST_TIME) {
+            NAVVIEW.visibility = View.GONE
             goTo(R.id.navigation_intro)
+        }
 
         else if (LOG_PERIOD)
             goTo(R.id.navigation_period_symptoms)
@@ -85,6 +94,20 @@ class MainActivity : AppCompatActivity() {
             goTo(R.id.navigation_home)
 
         supportActionBar?.hide()
+
+        // Start Notification Service
+        if (!isServiceRunning(NotificationService::class.java))
+            startForegroundService(Intent(this, NotificationService::class.java))
+    }
+
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
     companion object {
@@ -96,17 +119,11 @@ class MainActivity : AppCompatActivity() {
             fa.startActivity(START)
         }
 
-        fun getHealthViewModel(fa: FragmentActivity): HealthViewModel {
-            return ViewModelProvider(fa)[HealthViewModel::class.java]
-        }
-
-        fun getPeriodViewModel(fa: FragmentActivity): PeriodViewModel {
-            return ViewModelProvider(fa)[PeriodViewModel::class.java]
-        }
-
-        fun getDataViewModel(fa: FragmentActivity): DataViewModel {
-            return ViewModelProvider(fa)[DataViewModel::class.java]
-        }
+        fun getHealthViewModel(fa: FragmentActivity) = ViewModelProvider(fa)[HealthViewModel::class.java]
+        fun getPeriodViewModel(fa: FragmentActivity) = ViewModelProvider(fa)[PeriodViewModel::class.java]
+        fun getDataViewModel(fa: FragmentActivity) = ViewModelProvider(fa)[DataViewModel::class.java]
+        fun getStepViewModel(fa: FragmentActivity) = ViewModelProvider(fa)[StepViewModel::class.java]
+        fun getCheckUpResultViewModel(fa: FragmentActivity) = ViewModelProvider(fa)[CheckUpResultViewModel::class.java]
 
         fun toCalendar(year: Int, month: Int, day: Int): Calendar {
             return Calendar.getInstance().apply {
@@ -181,5 +198,8 @@ class MainActivity : AppCompatActivity() {
                     today.get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
                     today.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH)
         }
+
+        fun toDateString(date: Date): String = SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss", Locale.getDefault()).format(date)
+        fun fromDateString(date: String): Date? = SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss", Locale.getDefault()).parse(date)
     }
 }

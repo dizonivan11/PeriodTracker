@@ -1,6 +1,7 @@
 package com.streamside.periodtracker.ui.home
 
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,9 +12,11 @@ import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,8 +24,10 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.streamside.periodtracker.MainActivity.Companion.getCheckUpResultViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
+import com.streamside.periodtracker.MainActivity.Companion.getStepViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.MainActivity.Companion.isNotEmptyHealthProfile
 import com.streamside.periodtracker.R
@@ -31,15 +36,17 @@ import com.streamside.periodtracker.data.health.HealthViewModel
 import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.library.SearchAdapter
 import com.streamside.periodtracker.data.period.Category
-import com.streamside.periodtracker.data.period.DataViewModel
-import com.streamside.periodtracker.data.period.InsightsAdapter
+import com.streamside.periodtracker.data.DataViewModel
+import com.streamside.periodtracker.data.checkup.CheckUpResultViewModel
 import com.streamside.periodtracker.data.period.Subject
 import com.streamside.periodtracker.data.period.Symptom
+import com.streamside.periodtracker.data.step.StepViewModel
 import com.streamside.periodtracker.ui.library.FILTER
 import com.streamside.periodtracker.ui.library.LibraryFragment.Companion.isChild
 import com.streamside.periodtracker.views.CardView2
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.Calendar
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -48,16 +55,24 @@ private var CREATE_PROFILE_INITIAL_VISIBILITY = View.INVISIBLE
 class HomeFragment : Fragment() {
     private lateinit var dataViewModel: DataViewModel
     private lateinit var healthViewModel: HealthViewModel
+    private lateinit var stepViewModel: StepViewModel
+    private lateinit var checkUpResultViewModel: CheckUpResultViewModel
     private lateinit var symptoms: Map<String, Subject>
     private var libraryList: List<Library> = listOf()
     private lateinit var rvSearch: RecyclerView
     private lateinit var searchAdapter: SearchAdapter
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
+        val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
+        val prefEditor = preferences.edit()
+        val today = Calendar.getInstance()
         dataViewModel = getDataViewModel(fa)
         healthViewModel = getHealthViewModel(fa)
+        stepViewModel = getStepViewModel(fa)
+        checkUpResultViewModel = getCheckUpResultViewModel(fa)
 
         val cv2Header = root.findViewById<CardView2>(R.id.cv2Header)
         val btnUpdateProfile = root.findViewById<Button>(R.id.btnUpdateProfile)
@@ -78,6 +93,7 @@ class HomeFragment : Fragment() {
         val tvBMIStatus = root.findViewById<TextView>(R.id.tvBMIStatus)
         val tvBMIRange = root.findViewById<TextView>(R.id.tvBMIRange)
         val tvBMITips = root.findViewById<TextView>(R.id.tvBMITips)
+        val btnCheckUp = root.findViewById<Button>(R.id.btnCheckUp)
         val cv2Step = root.findViewById<CardView2>(R.id.cv2Step)
         val tvRecommendedTip = root.findViewById<TextView>(R.id.tvRecommendedTip)
         val rvRecommendedTips = root.findViewById<RecyclerView>(R.id.rvRecommendedTips)
@@ -131,27 +147,16 @@ class HomeFragment : Fragment() {
                         updateBMIInfo(bmi, llBMI, tvBMIStatus, tvBMIRange, tvBMITips)
 
                         // Recommended tips section
-                        rvRecommendedTips.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
-                        val recommendedTips: MutableList<Library> = mutableListOf()
-                        for (library in libraryList) {
-                            var include = false
-                            for (c in gatherRecommendedTips(healthProfile)) {
-                                if (!include) {
-                                    for (s in c.symptoms) {
-                                        // Check for individual symptom check value
-                                        for (symptom in library.symptoms) {
-                                            if (s.id == symptom) {
-                                                include = s.value
-                                                break
-                                            }
-                                        }
-                                        if (include) break
-                                    }
+                        // Get all necessary data before executing
+                        dataViewModel.newSymptomsData().observe(viewLifecycleOwner) { newSymptomList ->
+                            val firstDayOfMonth = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1) }
+                            stepViewModel.getFromDateBetween(firstDayOfMonth.time, today.time).observe(viewLifecycleOwner) { firstToCurrentSteps ->
+                                checkUpResultViewModel.get(today.time).observe(viewLifecycleOwner) { todayCheckUp ->
+                                    val ai = AutoRecommendAI(healthProfile, libraryList, newSymptomList, firstToCurrentSteps, todayCheckUp)
+                                    ai.execute(this, rvRecommendedTips)
                                 }
                             }
-                            if (include) recommendedTips.add(library)
                         }
-                        rvRecommendedTips.adapter = InsightsAdapter(this, recommendedTips)
                     } else {
                         btnUpdateProfile.visibility = View.GONE
                         CREATE_PROFILE_INITIAL_VISIBILITY = View.VISIBLE
@@ -168,24 +173,41 @@ class HomeFragment : Fragment() {
             }
 
             // Random tips of the day section
-            val randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
-            Glide.with(fa).load(randomArticle.image).centerCrop().listener(object :
-                RequestListener<Drawable> {
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                    cv2RandomTip.setCardImage(ResourcesCompat.getDrawable(fa.resources, R.drawable.default_library_image, fa.theme))
-                    return false
+            val tipOfTheDay = preferences.getString(getString(R.string.random_tip_title_key), "")
+            var randomArticle: Library? = null
+            try {
+                if (tipOfTheDay.isNullOrEmpty()) {
+                    randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
+                    prefEditor.putString(getString(R.string.random_tip_title_key), randomArticle.title).apply()
+                } else {
+                    for (a in filteredArticles) {
+                        if (tipOfTheDay == a.title) {
+                            randomArticle = a
+                            break
+                        }
+                    }
+                    if (randomArticle == null)
+                        randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
                 }
+                Glide.with(fa).load(randomArticle.image).centerCrop().listener(object :
+                    RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                        cv2RandomTip.setCardImage(ResourcesCompat.getDrawable(fa.resources, R.drawable.default_library_image, fa.theme))
+                        return false
+                    }
 
-                override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
-                    cv2RandomTip.setCardImage(resource)
-                    return false
+                    override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                        cv2RandomTip.setCardImage(resource)
+                        return false
+                    }
+                }).preload()
+                cv2RandomTip.setCardText(randomArticle.title)
+                cv2RandomTip.setOnClickListener {
+                    randomArticle.callback.invoke(it)
                 }
-            }).preload()
-            cv2RandomTip.setCardText(randomArticle.title)
-            cv2RandomTip.setOnClickListener {
-                randomArticle.callback.invoke(it)
-            }
+            } catch (_: Exception) { }
 
+            btnCheckUp.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_checkup) }
             cv2Step.setOnClickListener { goTo(fa, viewLifecycleOwner, R.id.navigation_step) }
 
             cv2Tips.setOnClickListener {

@@ -21,27 +21,49 @@
     <PreferenceCategory
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="@string/setup_title">
-
-        <SwitchPreference
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:defaultValue="true"
-            android:title="Reset data"
-            app:icon="@drawable/baseline_restart_alt_24"
-            app:key="@string/first_time_key"
-            app:persistent="true"
-            app:summaryOff="Setup wizard will be disabled upon app launch"
-            app:summaryOn="Setup wizard will run upon app launch" />
+        android:title="@string/notification_title">
 
         <SwitchPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:defaultValue="false"
-            android:title="Log period"
-            app:isPreferenceVisible="false"
-            app:key="@string/log_period_key"
-            app:persistent="false" />
+            android:title="Tip of the day"
+            app:icon="@drawable/baseline_brightness_high_24"
+            app:key="@string/random_tip_key"
+            app:persistent="true" />
+
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="0"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Set tip of the day timer"
+            app:icon="@drawable/baseline_access_time_24"
+            app:key="@string/random_tip_trigger_key"
+            app:persistent="true" />
+
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="Period status"
+            app:icon="@drawable/baseline_water_drop_24"
+            app:key="@string/period_status_key"
+            app:persistent="true" />
+
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="0"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Set period status timer"
+            app:icon="@drawable/baseline_access_time_24"
+            app:key="@string/period_status_trigger_key"
+            app:persistent="true" />
+
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -54,11 +76,59 @@
             android:layout_height="wrap_content"
             android:defaultValue="false"
             android:title="Simulate date and time"
-            app:icon="@drawable/baseline_access_time_24"
+            app:icon="@drawable/baseline_calendar_month_24"
             app:key="@string/simulation_key"
             app:persistent="true"
             app:summaryOff="Currently using real world date and time"
             app:summaryOn="Currently simulating date and time" />
+
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Test tip of the day notification"
+            app:icon="@drawable/baseline_circle_notifications_24"
+            app:key="@string/random_tip_trigger_test_key"
+            app:persistent="true" />
+
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Test period status notification"
+            app:icon="@drawable/baseline_circle_notifications_24"
+            app:key="@string/period_status_trigger_test_key"
+            app:persistent="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="@string/setup_title">
+
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="Log out"
+            app:icon="@drawable/baseline_restart_alt_24"
+            app:key="@string/first_time_key"
+            app:summary="Reset all data"
+            app:persistent="true" />
+
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:title="Log period"
+            app:key="@string/log_period_key"
+            app:isPreferenceVisible="false"
+            app:persistent="false" />
 
     </PreferenceCategory>
 

@@ -36,17 +36,6 @@
                 android:layout_marginStart="8dp"
                 android:textSize="10sp" />
 
-            <Button
-                android:id="@+id/btnNotification"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                app:backgroundTint="@color/white"
-                android:textColor="@android:color/black"
-                android:background="@drawable/ic_notifications_black_24dp"
-                android:layout_gravity="end"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp" />
-
         </com.streamside.periodtracker.views.CardView2>
 
         <androidx.cardview.widget.CardView
@@ -227,6 +216,7 @@
                 android:layout_columnWeight="1"
                 android:layout_columnSpan="2"
                 app:cardCornerRadius="10dp"
+                android:layout_marginBottom="20dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -300,6 +290,62 @@
                             android:textSize="13sp" />
 
                     </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvDailyCheck"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_columnSpan="2"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingStart="12dp"
+                        android:paddingTop="24dp"
+                        android:paddingBottom="24dp"
+                        android:paddingEnd="12dp"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvDailyCheck"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Daily Check-up"
+                            android:gravity="center"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/btnCheckUp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textSize="12sp"
+                            android:text="Take A Test" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/pexels_karolina_grabowska_4226769" />
 
                 </LinearLayout>
 

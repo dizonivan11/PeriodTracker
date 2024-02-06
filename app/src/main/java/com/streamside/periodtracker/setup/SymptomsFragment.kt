@@ -20,7 +20,7 @@ import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.period.Category
-import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.DataViewModel
 import com.streamside.periodtracker.data.period.Period
 import com.streamside.periodtracker.data.period.PeriodViewModel
 import com.streamside.periodtracker.data.period.Symptom

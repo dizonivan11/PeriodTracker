@@ -36,6 +36,12 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/navigation_checkup"
+        android:name="com.streamside.periodtracker.ui.home.CheckUpFragment"
+        android:label="@string/title_checkup"
+        tools:layout="@layout/fragment_check_up" />
+
+    <fragment
         android:id="@+id/navigation_step"
         android:name="com.streamside.periodtracker.ui.step.StepFragment"
         android:label="@string/title_step"

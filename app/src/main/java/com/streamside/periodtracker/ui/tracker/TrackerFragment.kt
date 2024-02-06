@@ -2,6 +2,7 @@ package com.streamside.periodtracker.ui.tracker
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
 import android.graphics.Typeface
 import android.os.Build
@@ -37,6 +38,7 @@ import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.toCalendar
+import com.streamside.periodtracker.MainActivity.Companion.toDateString
 import com.streamside.periodtracker.OVULATION
 import com.streamside.periodtracker.PREGNANCY_WINDOW
 import com.streamside.periodtracker.R
@@ -46,7 +48,7 @@ import com.streamside.periodtracker.SAFE_PERIOD_MAX
 import com.streamside.periodtracker.SAFE_PERIOD_MIN
 import com.streamside.periodtracker.TRACKER_REDIRECT
 import com.streamside.periodtracker.data.health.HealthViewModel
-import com.streamside.periodtracker.data.period.DataViewModel
+import com.streamside.periodtracker.data.DataViewModel
 import com.streamside.periodtracker.data.period.InsightsAdapter
 import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.period.Period
@@ -92,6 +94,9 @@ class TrackerFragment : Fragment() {
     private lateinit var linearCycleHistory : LinearLayout
     private lateinit var chartCycleTrend: ChartView
 
+    private lateinit var preferences: SharedPreferences
+    private lateinit var prefEditor: Editor
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_tracker, container, false)
@@ -99,8 +104,8 @@ class TrackerFragment : Fragment() {
         periodViewModel = getPeriodViewModel(fa)
         dataViewModel = getDataViewModel(fa)
         healthViewModel = getHealthViewModel(fa)
-        val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
-        val prefEditor = preferences.edit()
+        preferences = PreferenceManager.getDefaultSharedPreferences(fa)
+        prefEditor = preferences.edit()
 
         // Update redirect to false
         prefEditor.putBoolean(getString(R.string.tracker_redirect_key), false).apply()
@@ -146,7 +151,7 @@ class TrackerFragment : Fragment() {
                                 FIRST_TIME_TRACKER = true
                                 MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_period_date)
                             } else {
-                                initTracker(fa, prefEditor, root)
+                                initTracker(fa, root)
                             }
                         }
                     } else {
@@ -157,18 +162,24 @@ class TrackerFragment : Fragment() {
                     Toast.makeText(fa, "Please setup your health profile first", Toast.LENGTH_SHORT).show()
                     MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_home)
                 }
+            } else {
+                Toast.makeText(fa, "Please setup your health profile first", Toast.LENGTH_SHORT).show()
+                MainActivity.goTo(fa, viewLifecycleOwner, R.id.navigation_home)
             }
         }
 
         return root
     }
 
-    private fun initTracker(fa: FragmentActivity, prefEditor: Editor, root: View) {
+    private fun initTracker(fa: FragmentActivity, root: View) {
         periodViewModel.currentPeriod.observe(viewLifecycleOwner) { period ->
             currentPeriod = period
 
             val currentPeriodDate = toCalendar(currentPeriod.periodYear, currentPeriod.periodMonth, currentPeriod.periodDay)
             val currentPeriodDays = dayDistance(currentPeriodDate.time, Date())
+
+            // Update notification latest period date
+            prefEditor.putString(getString(R.string.period_status_last_period_key), toDateString(currentPeriodDate.time)).apply()
 
             if (!simulated) {
                 currentCalendar.time = Date()
@@ -189,10 +200,7 @@ class TrackerFragment : Fragment() {
                     // Insights section
                     rvInsights.layoutManager = LinearLayoutManager(fa, LinearLayoutManager.HORIZONTAL, false)
                     val insightsData: MutableList<Library> = mutableListOf()
-                    val selectedPeriodSymptoms = if (lastPeriod != null) SymptomsFragment.symptomsPeriod(
-                        currentPeriod,
-                        lastPeriod
-                    ) else currentPeriod
+                    val selectedPeriodSymptoms = if (lastPeriod != null) SymptomsFragment.symptomsPeriod(currentPeriod, lastPeriod) else currentPeriod
                     for (insight in libraryData) {
                         // Invisible library data will be displayed as Insight item
                         if (!insight.visible) {
@@ -201,24 +209,15 @@ class TrackerFragment : Fragment() {
                         }
                         var include = false
                         for (c in selectedPeriodSymptoms.symptoms.categories) {
-                            // Check if at least one was checked on this category
-                            for (symptom in insight.symptoms) {
-                                if (c.id == symptom) {
-                                    include = SymptomsFragment.hasSymptomsOn(c)
-                                    break
-                                }
-                            }
-                            if (!include) {
-                                for (s in c.symptoms) {
-                                    // Check for individual symptom check value
-                                    for (symptom in insight.symptoms) {
-                                        if (s.id == symptom) {
-                                            include = s.value
-                                            break
-                                        }
+                            for (s in c.symptoms) {
+                                // Check for individual symptom check value
+                                for (symptom in insight.symptoms) {
+                                    if (s.id == symptom) {
+                                        include = s.value
+                                        break
                                     }
-                                    if (include) break
                                 }
+                                if (include) break
                             }
                         }
                         if (include) insightsData.add(insight)
