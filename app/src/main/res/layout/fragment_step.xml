@@ -137,15 +137,36 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvWeekProgress"
+            android:id="@+id/tvRecommendedTip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Recommended Tips"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="40dp"
             android:layout_marginEnd="20dp"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@+id/stepProgress" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecommendedTips"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvRecommendedTip" />
+
+        <TextView
+            android:id="@+id/tvWeekProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@+id/rvRecommendedTips" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvWeekProgress"

@@ -154,8 +154,11 @@ class HomeFragment : Fragment() {
                             val firstDayOfMonth = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1) }
                             stepViewModel.getFromDateBetween(firstDayOfMonth.time, today.time).observe(viewLifecycleOwner) { firstToCurrentSteps ->
                                 checkUpResultViewModel.get(today.time).observe(viewLifecycleOwner) { todayCheckUp ->
-                                    val ai = AutoRecommendAI(healthProfile, libraryList, newSymptomList, firstToCurrentSteps, todayCheckUp)
-                                    ai.execute(this, rvRecommendedTips)
+                                    val ai = AutoRecommendAI(libraryList, newSymptomList)
+                                    ai.healthProfile = healthProfile
+                                    ai.firstToCurrentSteps = firstToCurrentSteps
+                                    ai.todayCheckUp = todayCheckUp
+                                    ai.execute(this, rvRecommendedTips, ai::bmi, ai::step, ai::checkup)
                                 }
                             }
                         }

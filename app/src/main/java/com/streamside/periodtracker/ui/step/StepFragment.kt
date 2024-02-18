@@ -26,11 +26,15 @@ import com.michalsvec.singlerowcalendar.utils.DateUtils
 import com.patrykandpatrick.vico.core.entry.FloatEntry
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.views.chart.ChartView
+import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getStepViewModel
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.data.DataViewModel
+import com.streamside.periodtracker.data.library.Library
 import com.streamside.periodtracker.data.step.Step
 import com.streamside.periodtracker.data.step.StepViewModel
 import com.streamside.periodtracker.data.step.WeeklyStepAdapter
+import com.streamside.periodtracker.ui.home.AutoRecommendAI
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -43,6 +47,7 @@ const val DAILY_GOAL = 10000
 private const val MAX_HISTORY = 7
 
 class StepFragment : Fragment(), SensorEventListener {
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var stepViewModel: StepViewModel
     private lateinit var sensorManager: SensorManager
     private var stepSensor: Sensor? = null
@@ -56,6 +61,7 @@ class StepFragment : Fragment(), SensorEventListener {
     private lateinit var tvStepProgressInStep: TextView
     private lateinit var btnStepToggle: Button
     private var stepToggle: Boolean = false
+    private lateinit var rvRecommendedTips: RecyclerView
     private lateinit var tvWeekProgress: TextView
     private lateinit var rvWeekProgress: RecyclerView
     private val weekSteps: MutableList<Step> = mutableListOf()
@@ -71,6 +77,7 @@ class StepFragment : Fragment(), SensorEventListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_step, container, false)
         val fa = requireActivity()
+        dataViewModel = getDataViewModel(fa)
         stepViewModel = getStepViewModel(fa)
         sensorManager = fa.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -80,13 +87,14 @@ class StepFragment : Fragment(), SensorEventListener {
         tvStepProgress = view.findViewById(R.id.tvStepProgress)
         tvStepProgressInStep = view.findViewById(R.id.tvStepProgressInStep)
         btnStepToggle = view.findViewById(R.id.btnStepToggle)
+        rvRecommendedTips = view.findViewById(R.id.rvRecommendedTips)
         tvWeekProgress = view.findViewById(R.id.tvWeekProgress)
         rvWeekProgress = view.findViewById(R.id.rvWeekProgress)
         tvStepTrend = view.findViewById(R.id.tvStepTrend)
         chartStepTrend = view.findViewById(R.id.chartStepTrend)
         val todayDate = Calendar.getInstance()
 
-        stepViewModel.all.observe(viewLifecycleOwner) { steps ->
+        stepViewModel.all.observe(viewLifecycleOwner) {
             stepViewModel.getFromDate(todayDate.time).observe(viewLifecycleOwner) { stepToday ->
                 if (!isInitialized) {
                     if (stepToday != null) {
@@ -108,6 +116,20 @@ class StepFragment : Fragment(), SensorEventListener {
                             }
                             initialStepProgressValue = currentStep.progress
                             updateDataToday()
+                        }
+                    }
+
+                    dataViewModel.getLibraryData().observe(viewLifecycleOwner) { articles ->
+                        val filteredArticles: MutableList<Library> = articles.filter { it.visible }.toMutableList()
+                        filteredArticles.removeAt(0)
+
+                        dataViewModel.newSymptomsData().observe(viewLifecycleOwner) { newSymptomList ->
+                            val firstDayOfMonth = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1) }
+                            stepViewModel.getFromDateBetween(firstDayOfMonth.time, todayDate.time).observe(viewLifecycleOwner) { firstToCurrentSteps ->
+                                val ai = AutoRecommendAI(filteredArticles, newSymptomList)
+                                ai.firstToCurrentSteps = firstToCurrentSteps
+                                ai.execute(this, rvRecommendedTips, ai::step, ai::stepFocused)
+                            }
                         }
                     }
 

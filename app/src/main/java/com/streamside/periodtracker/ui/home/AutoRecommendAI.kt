@@ -15,18 +15,13 @@ import com.streamside.periodtracker.ui.step.DAILY_GOAL
 import kotlin.math.pow
 
 class AutoRecommendAI(
-    private var healthProfile: Health,
     private var library: List<Library>,
-    private var symptoms: SymptomList,
-    private var firstToCurrentSteps: List<Step>,
-    private var todayCheckUp: CheckUpResult?) {
+    private var symptoms: SymptomList) {
     private var selects: MutableList<String> = mutableListOf()
 
-    fun execute(f: Fragment, rv: RecyclerView) {
+    fun execute(f: Fragment, rv: RecyclerView, vararg modules: () -> Unit) {
         // Build result from sub-modules
-        bmi()
-        step()
-        checkup()
+        for (subModule in modules) subModule()
 
         // Display result to RecyclerView
         rv.layoutManager = LinearLayoutManager(f.requireActivity(), LinearLayoutManager.HORIZONTAL, false)
@@ -61,7 +56,8 @@ class AutoRecommendAI(
     }
 
     // SUB-MODULES
-    private fun bmi() {
+    lateinit var healthProfile: Health
+    fun bmi() {
         val heightInCM = toCM(healthProfile.height)
         val bmi = getBMI(healthProfile.weight, heightInCM)
         if (bmi < 18.5) {
@@ -74,7 +70,8 @@ class AutoRecommendAI(
             include("Obesity")
         }
     }
-    private fun step() {
+    lateinit var firstToCurrentSteps: List<Step>
+    fun step() {
         var average = 0.00
         for (step in firstToCurrentSteps) { average += step.progress }
         average /= firstToCurrentSteps.size
@@ -87,12 +84,16 @@ class AutoRecommendAI(
             else -> include("Regular Running")
         }
     }
-    private fun checkup() {
-        if (todayCheckUp != null) {
-            ask(todayCheckUp?.list!!)
-        }
+    fun stepFocused()  {
+        include("Biking")
+        include("Hiking")
+        select("5 Health Tips for Women to Follow This Year for Better Health")
+        select("Women's Health Tips for Heart, Mind, and Body")
     }
-
+    var todayCheckUp: CheckUpResult? = null
+    fun checkup() {
+        todayCheckUp?.let { ask(it.list) }
+    }
     private fun ask(list: CheckUpList) {
         for (checkUp in list.list) {
             when (checkUp.question) {
