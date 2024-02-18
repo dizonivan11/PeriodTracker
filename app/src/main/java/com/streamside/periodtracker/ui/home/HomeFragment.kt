@@ -1,5 +1,6 @@
 package com.streamside.periodtracker.ui.home
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -15,15 +16,15 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.streamside.periodtracker.MainActivity.Companion.getCheckUpResultViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getHealthViewModel
@@ -41,6 +42,8 @@ import com.streamside.periodtracker.data.checkup.CheckUpResultViewModel
 import com.streamside.periodtracker.data.period.Subject
 import com.streamside.periodtracker.data.period.Symptom
 import com.streamside.periodtracker.data.step.StepViewModel
+import com.streamside.periodtracker.notification.NotificationItem
+import com.streamside.periodtracker.notification.NotificationScheduler
 import com.streamside.periodtracker.ui.library.FILTER
 import com.streamside.periodtracker.ui.library.LibraryFragment.Companion.isChild
 import com.streamside.periodtracker.views.CardView2
@@ -67,7 +70,6 @@ class HomeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val fa = requireActivity()
         val preferences = PreferenceManager.getDefaultSharedPreferences(fa)
-        val prefEditor = preferences.edit()
         val today = Calendar.getInstance()
         dataViewModel = getDataViewModel(fa)
         healthViewModel = getHealthViewModel(fa)
@@ -173,12 +175,15 @@ class HomeFragment : Fragment() {
             }
 
             // Random tips of the day section
-            val tipOfTheDay = preferences.getString(getString(R.string.random_tip_title_key), "")
+            val tipOfTheDay = preferences.getString(getString(R.string.random_tip_store_key), "")
             var randomArticle: Library? = null
             try {
                 if (tipOfTheDay.isNullOrEmpty()) {
                     randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
-                    prefEditor.putString(getString(R.string.random_tip_title_key), randomArticle.title).apply()
+                    NotificationScheduler(fa).schedule(NotificationItem(
+                        getString(R.string.random_tip_key),
+                        getString(R.string.random_tip_trigger_key),
+                        getString(R.string.random_tip_store_key)))
                 } else {
                     for (a in filteredArticles) {
                         if (tipOfTheDay == a.title) {
@@ -189,18 +194,22 @@ class HomeFragment : Fragment() {
                     if (randomArticle == null)
                         randomArticle = filteredArticles[Random.nextInt(0, filteredArticles.size)]
                 }
-                Glide.with(fa).load(randomArticle.image).centerCrop().listener(object :
-                    RequestListener<Drawable> {
-                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                        cv2RandomTip.setCardImage(ResourcesCompat.getDrawable(fa.resources, R.drawable.default_library_image, fa.theme))
-                        return false
-                    }
 
-                    override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
-                        cv2RandomTip.setCardImage(resource)
-                        return false
-                    }
-                }).preload()
+                Glide.with(cv2RandomTip.context)
+                    .asBitmap()
+                    .load(randomArticle.image)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(ResourcesCompat.getDrawable(fa.resources, R.drawable.default_library_image, fa.theme))
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            cv2RandomTip.setCardImage(resource.toDrawable(fa.resources))
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            cv2RandomTip.setCardImage(placeholder)
+                        }
+                    })
+
                 cv2RandomTip.setCardText(randomArticle.title)
                 cv2RandomTip.setOnClickListener {
                     randomArticle.callback.invoke(it)

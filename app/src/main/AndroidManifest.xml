@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
@@ -26,16 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name=".NotificationService"
-            android:label="@string/app_name"
-            android:exported="false"
-            android:permission="android.permission.POST_NOTIFICATIONS">
-            <intent-filter>
-                <action android:name="com.streamside.periodtracker.NotificationService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
+        <receiver android:name=".notification.NotificationReceiver" />
     </application>
 
 </manifest>

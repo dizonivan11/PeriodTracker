@@ -49,13 +49,14 @@
     <!-- Preference Keys -->
     <string name="dark_mode_key">dark_mode_pref</string>
     <string name="random_tip_key">random_tip_pref</string>
-    <string name="random_tip_title_key">random_tip_title_pref</string>
     <string name="random_tip_trigger_key">random_tip_trigger_pref</string>
     <string name="random_tip_trigger_test_key">random_tip_trigger_test_pref</string>
+    <string name="random_tip_store_key">random_tip_store_pref</string>
     <string name="period_status_key">period_status_pref</string>
-    <string name="period_status_last_period_key">period_status_last_period_pref</string>
     <string name="period_status_trigger_key">period_status_trigger_pref</string>
     <string name="period_status_trigger_test_key">period_status_trigger_test_pref</string>
+    <string name="period_status_last_period_key">period_status_last_period_pref</string>
+    <string name="period_status_store_key">period_status_store_pref</string>
     <string name="first_time_key">first_time_pref</string>
     <string name="tracker_redirect_key">tracker_redirect_pref</string>
     <string name="log_period_key">log_period_key</string>

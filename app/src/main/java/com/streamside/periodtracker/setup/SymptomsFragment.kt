@@ -1,6 +1,7 @@
 package com.streamside.periodtracker.setup
 
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,9 @@ import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
+import androidx.preference.PreferenceManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.streamside.periodtracker.FIRST_TIME_TRACKER
@@ -18,6 +21,7 @@ import com.streamside.periodtracker.LOG_PERIOD
 import com.streamside.periodtracker.MainActivity.Companion.getDataViewModel
 import com.streamside.periodtracker.MainActivity.Companion.getPeriodViewModel
 import com.streamside.periodtracker.MainActivity.Companion.goTo
+import com.streamside.periodtracker.MainActivity.Companion.toDateString
 import com.streamside.periodtracker.R
 import com.streamside.periodtracker.data.period.Category
 import com.streamside.periodtracker.data.DataViewModel
@@ -25,6 +29,9 @@ import com.streamside.periodtracker.data.period.Period
 import com.streamside.periodtracker.data.period.PeriodViewModel
 import com.streamside.periodtracker.data.period.Symptom
 import com.streamside.periodtracker.data.period.SymptomList
+import com.streamside.periodtracker.notification.NotificationItem
+import com.streamside.periodtracker.notification.NotificationScheduler
+import java.util.Calendar
 
 class SymptomsFragment : SetupFragment() {
     private lateinit var periodViewModel: PeriodViewModel
@@ -32,6 +39,7 @@ class SymptomsFragment : SetupFragment() {
     private lateinit var selectedPeriod: Period
     private lateinit var symptomList: SymptomList
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_symptoms, container, false)
         val fa =  requireActivity()
@@ -75,6 +83,7 @@ class SymptomsFragment : SetupFragment() {
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun setSubmitOnClick(root: View, fa: FragmentActivity, logOnly: Boolean = false) {
         root.findViewById<Button>(R.id.submit_symptoms).setOnClickListener {
             val submittedList = SymptomList(mutableListOf())
@@ -88,7 +97,21 @@ class SymptomsFragment : SetupFragment() {
             selectedPeriod.symptoms = submittedList
             periodViewModel.update(selectedPeriod)
             if (logOnly) goTo(R.id.navigation_tracker)
-            else finalizeSetup(fa)
+            else {
+                val periodDate = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, selectedPeriod.periodYear)
+                    set(Calendar.MONTH, selectedPeriod.periodMonth - 1)
+                    set(Calendar.DAY_OF_MONTH, selectedPeriod.periodDay)
+                }
+                val pref = PreferenceManager.getDefaultSharedPreferences(fa)
+                pref.edit().putString(getString(R.string.period_status_last_period_key), toDateString(periodDate.time)).apply()
+                NotificationScheduler(fa).schedule(NotificationItem(
+                        getString(R.string.period_status_key),
+                        getString(R.string.period_status_trigger_key),
+                        getString(R.string.period_status_store_key))
+                )
+                finalizeSetup(fa)
+            }
         }
     }
 

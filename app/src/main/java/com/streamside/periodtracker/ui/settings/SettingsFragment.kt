@@ -8,8 +8,10 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.graphics.PorterDuff
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -26,9 +28,12 @@ import com.streamside.periodtracker.MainActivity.Companion.getStepViewModel
 import com.streamside.periodtracker.MainActivity.Companion.restart
 import com.streamside.periodtracker.MainActivity.Companion.toDateString
 import com.streamside.periodtracker.R
+import com.streamside.periodtracker.notification.NotificationItem
+import com.streamside.periodtracker.notification.NotificationScheduler
 import java.util.Calendar
 
 class SettingsFragment : PreferenceFragmentCompat() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
@@ -36,6 +41,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val fa = requireActivity()
         val pref = PreferenceManager.getDefaultSharedPreferences(fa)
         val editor = pref.edit()
+        val scheduler = NotificationScheduler(fa)
 
         // Set icon colors
         val typedValue = TypedValue()
@@ -80,9 +86,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 val timePickerListener = OnTimeSetListener { _, h, m ->
                     time.set(Calendar.HOUR_OF_DAY, h)
                     time.set(Calendar.MINUTE, m)
-                    time.set(Calendar.SECOND, m)
-                    time.set(Calendar.MILLISECOND, m)
+                    time.set(Calendar.SECOND, 0)
+                    time.set(Calendar.MILLISECOND, 0)
+
                     editor.putString(getString(R.string.random_tip_trigger_key), toDateString(time.time)).apply()
+                    scheduler.schedule(NotificationItem(
+                        getString(R.string.random_tip_key),
+                        getString(R.string.random_tip_trigger_key),
+                        getString(R.string.random_tip_store_key)))
                 }
                 TimePickerDialog(fa, timePickerListener, time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), true).show()
             }
@@ -94,9 +105,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 val timePickerListener = OnTimeSetListener { _, h, m ->
                     time.set(Calendar.HOUR_OF_DAY, h)
                     time.set(Calendar.MINUTE, m)
-                    time.set(Calendar.SECOND, m)
-                    time.set(Calendar.MILLISECOND, m)
+                    time.set(Calendar.SECOND, 0)
+                    time.set(Calendar.MILLISECOND, 0)
+
                     editor.putString(getString(R.string.period_status_trigger_key), toDateString(time.time)).apply()
+                    scheduler.schedule(NotificationItem(
+                        getString(R.string.period_status_key),
+                        getString(R.string.period_status_trigger_key),
+                        getString(R.string.period_status_store_key)))
                 }
                 TimePickerDialog(fa, timePickerListener, time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), true).show()
             }
@@ -109,13 +125,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
         randomTipTriggerTestPref?.setOnPreferenceClickListener {
             confirmNotificationPermissionFirst(fa) {
-                editor.putBoolean(getString(R.string.random_tip_trigger_test_key), true).apply()
+                val trigger = Calendar.getInstance().apply { add(Calendar.SECOND, 10) }
+                editor.putString(getString(R.string.random_tip_trigger_key), toDateString(trigger.time)).apply()
+                scheduler.schedule(NotificationItem(
+                    getString(R.string.random_tip_key),
+                    getString(R.string.random_tip_trigger_key),
+                    getString(R.string.random_tip_store_key)))
             }
             true
         }
         periodStatusTriggerTestPref?.setOnPreferenceClickListener {
             confirmNotificationPermissionFirst(fa) {
-                editor.putBoolean(getString(R.string.period_status_trigger_test_key), true).apply()
+                val trigger = Calendar.getInstance().apply { add(Calendar.SECOND, 10) }
+                editor.putString(getString(R.string.period_status_trigger_key), toDateString(trigger.time)).apply()
+                scheduler.schedule(NotificationItem(
+                    getString(R.string.period_status_key),
+                    getString(R.string.period_status_trigger_key),
+                    getString(R.string.period_status_store_key)))
             }
             true
         }
@@ -136,18 +162,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     healthViewModel.deleteAll()
                     stepViewModel.deleteAll()
                     checkUpResultViewModel.deleteAll()
-
-                    editor.putBoolean(getString(R.string.random_tip_key), false).apply()
-                    editor.putString(getString(R.string.random_tip_title_key), "").apply()
-                    editor.putString(getString(R.string.random_tip_trigger_key), "").apply()
-                    editor.putBoolean(getString(R.string.random_tip_trigger_test_key), false).apply()
-
-                    editor.putBoolean(getString(R.string.period_status_key), false).apply()
-                    editor.putString(getString(R.string.period_status_last_period_key), "").apply()
-                    editor.putString(getString(R.string.period_status_trigger_key), "").apply()
-                    editor.putBoolean(getString(R.string.period_status_trigger_test_key), false).apply()
-
-                    editor.putBoolean(getString(R.string.first_time_key), true).apply()
+                    editor.clear().commit()
 
                     // Restart app
                     restart(fa, viewLifecycleOwner)

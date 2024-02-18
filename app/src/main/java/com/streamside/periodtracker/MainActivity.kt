@@ -1,9 +1,13 @@
 package com.streamside.periodtracker
 
-import android.app.ActivityManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.FragmentActivity
@@ -29,7 +33,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-
 lateinit var START: Intent
 lateinit var FA: FragmentActivity
 lateinit var NAVVIEW: BottomNavigationView
@@ -49,6 +52,7 @@ const val OVULATION = 14
 const val PREGNANCY_WINDOW = 9 // Possible days to get pregnant; before and up to Ovulation
 
 class MainActivity : AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         START = intent
@@ -94,20 +98,16 @@ class MainActivity : AppCompatActivity() {
             goTo(R.id.navigation_home)
 
         supportActionBar?.hide()
-
-        // Start Notification Service
-        if (!isServiceRunning(NotificationService::class.java))
-            startForegroundService(Intent(this, NotificationService::class.java))
+        createNotificationChannel(this)
     }
 
-    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(context: Context) {
+        val channelId = context.getString(R.string.notification_channel)
+        val channelName = context.getString(R.string.notification_channel)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+        notificationManager.createNotificationChannel(channel)
     }
 
     companion object {
@@ -201,5 +201,8 @@ class MainActivity : AppCompatActivity() {
 
         fun toDateString(date: Date): String = SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss", Locale.getDefault()).format(date)
         fun fromDateString(date: String): Date? = SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss", Locale.getDefault()).parse(date)
+        fun timeDifference(d1: Date, d2: Date): Long {
+            return TimeUnit.MILLISECONDS.toMillis(d1.time - d2.time)
+        }
     }
 }
